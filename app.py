@@ -1,5 +1,6 @@
 import streamlit as st
 from functions import detect_string_variables
+from Elevenlabs import generate_audio
 
 
 ELEVENLABS_API_KEY = st.secrets["ELEVENLABS_API_KEY"]
@@ -44,9 +45,21 @@ with voice_settings:
     voice_similarity = st.slider("Voice similarity", 0.0, 1.0, 0.5)
     voice_stability = st.slider("Voice stability", 0.0, 1.0, 0.5)
     voice_style = st.slider("Voice style", 0.0, 1.0, 0.0)
+    speaker_boost = st.checkbox("Use speaker boost")
 
+generate_audio_btn = st.button("Generate")
 
-generate_audio = st.button("Generate")
+if generate_audio_btn:
+    generate_audio(
+        ELEVENLABS_API_KEY,
+        voice_stability,
+        voice_id,
+        script,  # Ensure this is the text to be spoken
+        select_model,
+        voice_similarity,
+        voice_style,
+        "output.mp3",
+    )
 
 
 ####### Sidebar #######
