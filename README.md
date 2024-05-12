@@ -3,17 +3,15 @@ Eleventools is my personal toolbox for Elevenlabs. It has all of the bells and w
 
 Voice selection:
 - Copy paste the voice ID fromthe Voice library
-Model selection:
-Allows for text variables for personalization
-Random and fixed seed for reproducibility
-Voice settings
+- Model selection:
+- Allows for text variables for personalization
+- Random and fixed seed for reproducibility
+- Voice settings
 
-#TODO:
+## TODO:
 - [ ] OPENAI INTEGRATION
 - [ ] OLLAMA INTEGRATION
 - [ ] Batch processing
 - [ ] Voice to Voice
 - [ ] Import user voices
 - [ ] Error handling
-
-
