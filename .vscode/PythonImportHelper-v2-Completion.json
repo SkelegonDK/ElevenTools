@@ -9,11 +9,28 @@
         "documentation": {}
     },
     {
+        "label": "detect_string_variables",
+        "importPath": "functions",
+        "description": "functions",
+        "isExtraImport": true,
+        "detail": "functions",
+        "documentation": {}
+    },
+    {
+        "label": "re",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "re",
+        "description": "re",
+        "detail": "re",
+        "documentation": {}
+    },
+    {
         "label": "ELEVENLABS_API_KEY",
         "kind": 5,
         "importPath": "app",
         "description": "app",
-        "peekOfCode": "ELEVENLABS_API_KEY = st.secrets[\"ELEVENLABS_API_KEY\"]\nOPENAI_API = st.secrets[\"OPENAI_API_KEY\"]\nif \"voice_id\" not in st.session_state:\n    st.session_state[\"voice_id\"] = []\nst.title(\"Eleven Tools\")\nst.subheader(\"A better interface for Elevenlabs\")\nst.text_area(\"Text to speech\", height=100)\nselect_model = st.selectbox(\n    \"Select model\", [\"Multilingual v1\", \"Multilingual v2\", \"Turbo v2\"]\n)",
+        "peekOfCode": "ELEVENLABS_API_KEY = st.secrets[\"ELEVENLABS_API_KEY\"]\nOPENAI_API = st.secrets[\"OPENAI_API_KEY\"]\nif \"voice_id\" not in st.session_state:\n    st.session_state[\"voice_id\"] = []\nst.title(\"Elevenlabs Tools\")\nst.subheader(\"A better interface for Elevenlabs\")\nst.selectbox(\"Select voice\", st.session_state[\"voice_id\"])\nselect_model = st.selectbox(\n    \"Select model\", [\"Multilingual v1\", \"Multilingual v2\", \"Turbo v2\"]\n)",
         "detail": "app",
         "documentation": {}
     },
@@ -22,7 +39,7 @@
         "kind": 5,
         "importPath": "app",
         "description": "app",
-        "peekOfCode": "OPENAI_API = st.secrets[\"OPENAI_API_KEY\"]\nif \"voice_id\" not in st.session_state:\n    st.session_state[\"voice_id\"] = []\nst.title(\"Eleven Tools\")\nst.subheader(\"A better interface for Elevenlabs\")\nst.text_area(\"Text to speech\", height=100)\nselect_model = st.selectbox(\n    \"Select model\", [\"Multilingual v1\", \"Multilingual v2\", \"Turbo v2\"]\n)\nst.selectbox(\"Select voice\", st.session_state[\"voice_id\"])",
+        "peekOfCode": "OPENAI_API = st.secrets[\"OPENAI_API_KEY\"]\nif \"voice_id\" not in st.session_state:\n    st.session_state[\"voice_id\"] = []\nst.title(\"Elevenlabs Tools\")\nst.subheader(\"A better interface for Elevenlabs\")\nst.selectbox(\"Select voice\", st.session_state[\"voice_id\"])\nselect_model = st.selectbox(\n    \"Select model\", [\"Multilingual v1\", \"Multilingual v2\", \"Turbo v2\"]\n)\nscript = st.text_area(\"Text to speech\", height=100)",
         "detail": "app",
         "documentation": {}
     },
@@ -31,7 +48,25 @@
         "kind": 5,
         "importPath": "app",
         "description": "app",
-        "peekOfCode": "select_model = st.selectbox(\n    \"Select model\", [\"Multilingual v1\", \"Multilingual v2\", \"Turbo v2\"]\n)\nst.selectbox(\"Select voice\", st.session_state[\"voice_id\"])\ngenerate_audio = st.button(\"Generate\")\n####### Sidebar #######\nsidebar = st.sidebar\nadd_voice_ID = sidebar.text_input(\"Add voice ID\")\nadd_voice_btn = sidebar.button(\"Add voice\", key=\"add_voice\")\nif add_voice_btn:",
+        "peekOfCode": "select_model = st.selectbox(\n    \"Select model\", [\"Multilingual v1\", \"Multilingual v2\", \"Turbo v2\"]\n)\nscript = st.text_area(\"Text to speech\", height=100)\nif script:\n    detected_variables = detect_string_variables(script)\n    if detected_variables is not None:\n        st.info(\"Detected variables\")\n        variables_exp = st.expander(\"Text variables\", expanded=True)\n        with variables_exp:",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "script",
+        "kind": 5,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "script = st.text_area(\"Text to speech\", height=100)\nif script:\n    detected_variables = detect_string_variables(script)\n    if detected_variables is not None:\n        st.info(\"Detected variables\")\n        variables_exp = st.expander(\"Text variables\", expanded=True)\n        with variables_exp:\n            for variable in detected_variables:\n                value = st.text_input(f\"Edit: {variable}\", key=variable)\n                if value:",
+        "detail": "app",
+        "documentation": {}
+    },
+    {
+        "label": "voice_settings",
+        "kind": 5,
+        "importPath": "app",
+        "description": "app",
+        "peekOfCode": "voice_settings = st.expander(\"Advanced voice settings\", expanded=True)\nwith voice_settings:\n    voice_similarity = st.slider(\"Voice similarity\", 0.0, 1.0, 0.5)\n    voice_stability = st.slider(\"Voice stability\", 0.0, 1.0, 0.5)\n    voice_style = st.slider(\"Voice style\", 0.0, 1.0, 0.0)\ngenerate_audio = st.button(\"Generate\")\n####### Sidebar #######\nsidebar = st.sidebar\nwith sidebar:\n    add_voice_ID = sidebar.text_input(\"Add voice ID\")",
         "detail": "app",
         "documentation": {}
     },
@@ -40,7 +75,7 @@
         "kind": 5,
         "importPath": "app",
         "description": "app",
-        "peekOfCode": "generate_audio = st.button(\"Generate\")\n####### Sidebar #######\nsidebar = st.sidebar\nadd_voice_ID = sidebar.text_input(\"Add voice ID\")\nadd_voice_btn = sidebar.button(\"Add voice\", key=\"add_voice\")\nif add_voice_btn:\n    st.session_state[\"voice_id\"].append(add_voice_ID)\n    st.write(st.session_state[\"voice_id\"])\nif st.secrets[\"ELEVENLABS_API_KEY\"] is None or \"YOUR_API\":\n    eleven_api_text = sidebar.text_input(\"Elevenlabs API key\")",
+        "peekOfCode": "generate_audio = st.button(\"Generate\")\n####### Sidebar #######\nsidebar = st.sidebar\nwith sidebar:\n    add_voice_ID = sidebar.text_input(\"Add voice ID\")\n    add_voice_btn = sidebar.button(\"Add voice\")\n    settings = sidebar.expander(\"Settings\", expanded=True)\n    if add_voice_btn:\n        st.session_state[\"voice_id\"].append(add_voice_ID)\n        st.write(st.session_state[\"voice_id\"])",
         "detail": "app",
         "documentation": {}
     },
@@ -49,26 +84,17 @@
         "kind": 5,
         "importPath": "app",
         "description": "app",
-        "peekOfCode": "sidebar = st.sidebar\nadd_voice_ID = sidebar.text_input(\"Add voice ID\")\nadd_voice_btn = sidebar.button(\"Add voice\", key=\"add_voice\")\nif add_voice_btn:\n    st.session_state[\"voice_id\"].append(add_voice_ID)\n    st.write(st.session_state[\"voice_id\"])\nif st.secrets[\"ELEVENLABS_API_KEY\"] is None or \"YOUR_API\":\n    eleven_api_text = sidebar.text_input(\"Elevenlabs API key\")\n    eleven_api_btn = sidebar.button(\"Save\", key=\"save_eleven_api_key\")\n    if eleven_api_btn:",
+        "peekOfCode": "sidebar = st.sidebar\nwith sidebar:\n    add_voice_ID = sidebar.text_input(\"Add voice ID\")\n    add_voice_btn = sidebar.button(\"Add voice\")\n    settings = sidebar.expander(\"Settings\", expanded=True)\n    if add_voice_btn:\n        st.session_state[\"voice_id\"].append(add_voice_ID)\n        st.write(st.session_state[\"voice_id\"])\n        st.toast(\"Press R the update the list\", icon=\"♻️\")\n    if st.secrets[\"ELEVENLABS_API_KEY\"] is None or \"YOUR_API\":",
         "detail": "app",
         "documentation": {}
     },
     {
-        "label": "add_voice_ID",
-        "kind": 5,
-        "importPath": "app",
-        "description": "app",
-        "peekOfCode": "add_voice_ID = sidebar.text_input(\"Add voice ID\")\nadd_voice_btn = sidebar.button(\"Add voice\", key=\"add_voice\")\nif add_voice_btn:\n    st.session_state[\"voice_id\"].append(add_voice_ID)\n    st.write(st.session_state[\"voice_id\"])\nif st.secrets[\"ELEVENLABS_API_KEY\"] is None or \"YOUR_API\":\n    eleven_api_text = sidebar.text_input(\"Elevenlabs API key\")\n    eleven_api_btn = sidebar.button(\"Save\", key=\"save_eleven_api_key\")\n    if eleven_api_btn:\n        st.info(\"API key saved\")",
-        "detail": "app",
-        "documentation": {}
-    },
-    {
-        "label": "add_voice_btn",
-        "kind": 5,
-        "importPath": "app",
-        "description": "app",
-        "peekOfCode": "add_voice_btn = sidebar.button(\"Add voice\", key=\"add_voice\")\nif add_voice_btn:\n    st.session_state[\"voice_id\"].append(add_voice_ID)\n    st.write(st.session_state[\"voice_id\"])\nif st.secrets[\"ELEVENLABS_API_KEY\"] is None or \"YOUR_API\":\n    eleven_api_text = sidebar.text_input(\"Elevenlabs API key\")\n    eleven_api_btn = sidebar.button(\"Save\", key=\"save_eleven_api_key\")\n    if eleven_api_btn:\n        st.info(\"API key saved\")\nif st.secrets[\"OPENAI_API_KEY\"] is None or \"YOUR_API\":",
-        "detail": "app",
+        "label": "detect_string_variables",
+        "kind": 2,
+        "importPath": "functions",
+        "description": "functions",
+        "peekOfCode": "def detect_string_variables(text: str):\n    \"\"\"\n    Detects string variables in a given text\n    \"\"\"\n    return re.findall(r\"\\{([^}]+)\\}\", text)",
+        "detail": "functions",
         "documentation": {}
     }
 ]
