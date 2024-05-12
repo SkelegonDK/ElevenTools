@@ -1,13 +1,14 @@
 import streamlit as st
 from functions import detect_string_variables
 
+
 ELEVENLABS_API_KEY = st.secrets["ELEVENLABS_API_KEY"]
 OPENAI_API = st.secrets["OPENAI_API_KEY"]
 
 if "voice_id" not in st.session_state:
     st.session_state["voice_id"] = []
 
-st.title("Elevenlabs Tools")
+st.title("Eleven Tools")
 st.subheader("A better interface for Elevenlabs")
 
 st.selectbox("Select voice", st.session_state["voice_id"])
