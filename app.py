@@ -12,10 +12,8 @@ if "voice_id" not in st.session_state:
 st.title("Eleven Tools")
 st.subheader("A better interface for Elevenlabs")
 
-st.selectbox("Select voice", st.session_state["voice_id"])
-select_model = st.selectbox(
-    "Select model", ["Multilingual v1", "Multilingual v2", "Turbo v2"]
-)
+selected_voice = st.selectbox("Select voice", st.session_state["voice_id"])
+select_model = st.selectbox("Select model", ["eleven_multilingual_v2"])
 
 script = st.text_area("Text to speech", height=100)
 
@@ -53,11 +51,13 @@ if generate_audio_btn:
     generate_audio(
         ELEVENLABS_API_KEY,
         voice_stability,
-        voice_id,
-        script,  # Ensure this is the text to be spoken
         select_model,
         voice_similarity,
         voice_style,
+        speaker_boost,
+        selected_voice,
+        # Ensure this is the text to be spoken
+        script,
         "output.mp3",
     )
 
