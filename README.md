@@ -15,3 +15,4 @@ Voice selection:
 - [ ] Voice to Voice
 - [ ] Import user voices
 - [ ] Error handling
+- [ ] Locked or random seed
