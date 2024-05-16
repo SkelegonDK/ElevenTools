@@ -2,6 +2,7 @@
 import streamlit as st  # Used for building the web app
 import requests  # Used for making HTTP requests
 import json  # Used for working with JSON data
+from pprint import pprint  # Used for pretty-printing JSON data
 
 
 def generate_audio(
@@ -16,6 +17,7 @@ def generate_audio(
     output_path="output.mp3",
     seed=None,
 ):
+
     CHUNK_SIZE = 1024  # Size of chunks to read/write at a time
 
     # Construct the URL for the Text-to-Speech API request
@@ -34,14 +36,15 @@ def generate_audio(
             "style": style,
             "use_speaker_boost": use_speaker_boost,
         },
-        seed: None,
+        "seed": None,
     }
-
+    st.write(data)
     # Make the POST request to the TTS API with headers and data, enabling streaming response
     response = requests.post(tts_url, headers=headers, json=data, stream=True)
 
     # Check if the request was successful
     if response.ok:
+
         # Open the output file in write-binary mode
         with open(output_path, "wb") as f:
             # Read the response in chunks and write to the file
@@ -52,4 +55,4 @@ def generate_audio(
         st.toast("Audio generated successfully.")
     else:
         # Print the error message if the request was not successful
-        print(response.text)
+        pprint(response.text)
