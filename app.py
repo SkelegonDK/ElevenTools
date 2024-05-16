@@ -20,7 +20,7 @@ script = st.text_area("Text to speech", height=100)
 if script:
     detected_variables = detect_string_variables(script)
 
-    if detected_variables is not None:
+    if detected_variables and len(detected_variables) > 0:
         st.info("Detected variables")
         variables_exp = st.expander("Text variables", expanded=True)
         with variables_exp:
