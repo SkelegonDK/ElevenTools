@@ -9,3 +9,11 @@ def detect_string_variables(text: str):
     """
 
     return re.findall(r"\{([^}]+)\}", text)
+
+
+@st.experimental_fragment()
+def detect_phonetic_variables(text: str):
+    """
+    detect string variables in double square brackets.
+    """
+    return re.findall(r"\[\[([^]]+)\]\]", text)
