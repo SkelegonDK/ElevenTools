@@ -15,7 +15,7 @@ def generate_audio(
     voice_id,
     text_to_speak,
     output_path="output.mp3",
-    seed=None,
+    seed="None",
 ):
 
     CHUNK_SIZE = 1024  # Size of chunks to read/write at a time
