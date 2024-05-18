@@ -8,7 +8,7 @@ from Elevenlabs import generate_audio
 import uuid
 import random
 
-
+# TODO: Implement elevenlabs Library
 ELEVENLABS_API_KEY = st.secrets["ELEVENLABS_API_KEY"]
 OPENAI_API = st.secrets["OPENAI_API_KEY"]
 
@@ -23,7 +23,11 @@ select_model = st.selectbox(
     ["eleven_monolingual_v1", "eleven_multilingual_v2", "eleven_turbo_v2"],
 )
 
-script = st.text_area("Text to speech", height=100)
+script = st.text_area(
+    "Text to speech",
+    height=100,
+    help="Use curly braces to add variables. Example: {name} is a {job_title}.",
+)
 
 if script:
     detected_variables = detect_string_variables(script)
