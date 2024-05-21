@@ -1,9 +1,6 @@
 import streamlit as st
-from functions import (
-    detect_string_variables,
-    detect_phonetic_conversion,
-    convert_word_to_phonetic,
-)
+from functions import detect_string_variables, detect_phonetic_conversion
+from Openai_functions import convert_word_to_phonetic
 from Elevenlabs import generate_audio
 import uuid
 import random
@@ -14,6 +11,7 @@ OPENAI_API = st.secrets["OPENAI_API_KEY"]
 
 if "voice_id" not in st.session_state:
     st.session_state["voice_id"] = []
+    st.warning("Please add voice ID")
 if "seed" not in st.session_state:
     st.session_state["seed"] = "None"
 
@@ -26,7 +24,11 @@ select_model = st.selectbox(
 script = st.text_area(
     "Text to speech",
     height=100,
-    help="Use curly braces to add variables. Example: {name} is a {job_title}.",
+    help="""Use curly braces to add variables.
+    `Example: {name} is a {job_title}.`
+    Use double square brackets to add phonetic conversion.
+    `Example: [[language:word]]`
+    """,
 )
 
 if script:
@@ -42,27 +44,27 @@ if script:
                 if value:
                     script = script.replace(f"{{{variable}}}", value)
             st.toast("Updated script", icon="🔄")
-            updated_script = st.markdown(
-                f"""
-#### Updated script
-{script}
-"""
-            )
+            updated_script = st.markdown(f"""#### Updated script {script}""")
     if detect_phonetic and len(detect_phonetic) > 0:
-        st.info("Detected phonetic variables")
-        phonetic_exp = st.expander("Phonetic variables", expanded=True)
+        st.info("Detected phonetic conversion")
+        phonetic_exp = st.expander("Phonetic conversion", expanded=True)
         with phonetic_exp:
             for phonetic in detect_phonetic:
+                print(phonetic)
                 language = phonetic[0]
                 word = phonetic[1]
-                phonetic_value = convert_word_to_phonetic(word, language)
-                st.write(phonetic_value)
-                if phonetic_value:
-                    st.write(phonetic_value)
-                    script = script.replace(
-                        f"[[{language}:{word}]]", phonetic_value[0]["phonetic"]
-                    )
 
+                script = script.replace(
+                    f"[[{language}:{word}]]",
+                    convert_word_to_phonetic(word=word, language=language),
+                )
+            st.toast("Updated script", icon="🔄")
+            updated_script = st.markdown(
+                f"""
+                                         #### Updated script:
+                                         {script}
+                """
+            )
 
 voice_settings = st.expander("Advanced voice settings", expanded=True)
 
@@ -72,7 +74,8 @@ with voice_settings:
     voice_style = st.slider("Voice style", 0.0, 1.0, 0.0)
     speaker_boost = st.checkbox("Use speaker boost")
 
-random_seed = random.randint(100000, 999999)
+random_seed = random.randint(1000000000, 9999999999)
+
 # locked_seed = st.selectbox("Select seed", [random_seed, "Custom seed"])
 
 
@@ -101,12 +104,14 @@ with col1_generate:
             temp_filename,
             seed=random_seed,
         )
+# TODO: Implement fixed seed error
 with col2_generate:
     generate_seed_btn = col2_generate.button(
         "Generate with fixed seed", key="generate_audio_seed"
     )
     if generate_seed_btn:
-        if st.session_state["seed"] == "None":
+        if st.session_state["seed"] is "None":
+            st.write(st.session_state["seed"])
             st.error("Please set a fixed seed")
         else:
             temp_filename = f"VID_{selected_voice}_SEED_{st.session_state['seed']}_UID_{uuid.uuid1()}.mp3"
@@ -134,8 +139,11 @@ with sidebar:
     st.write("A professional interface for Elevenlabs")
     add_voice_ID = sidebar.text_input("Add voice ID")
     add_voice_btn = sidebar.button("Add voice")
+    convert_to_phonetic_btn = sidebar.button(
+        "Convert to phonetic", key="convert_phonetic"
+    )
 
-    fixed_seed = sidebar.text_input("fixed seed")
+    fixed_seed = sidebar.text_input("Seed")
     st.session_state["seed"] = fixed_seed
 
     settings = sidebar.expander("Settings", expanded=True)
