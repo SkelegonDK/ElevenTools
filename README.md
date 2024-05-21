@@ -9,7 +9,7 @@ Voice selection:
 - Voice settings
 
 ## TODO:
-- [ ] OPENAI INTEGRATION
+- [x] OPENAI INTEGRATION
 - [ ] OLLAMA INTEGRATION
 - [ ] Batch processing
 - [ ] Voice to Voice
