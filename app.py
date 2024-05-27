@@ -105,6 +105,7 @@ with col1_generate:
             seed=random_seed,
         )
 # TODO: Implement fixed seed error
+
 with col2_generate:
     generate_seed_btn = col2_generate.button(
         "Generate with fixed seed", key="generate_audio_seed"
