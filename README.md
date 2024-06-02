@@ -1,6 +1,6 @@
 # ElevenTools
 
-Eleventools is my personal toolbox for Elevenlabs. 
+Eleventools is my personal toolbox for Elevenlabs.
 It has all of the bells and whistles I need to get started on a new project.
 
 ## Installation
@@ -24,6 +24,7 @@ Create a /.streamlit/config.toml file in the root directory to set the page sett
 - Allows for text variables for personalization
 - Random and fixed seed for reproducibility
 - Voice settings
+- review generation data and play audio
 
 ## TODO:
 
@@ -34,3 +35,4 @@ Create a /.streamlit/config.toml file in the root directory to set the page sett
 - [x] Import user voices automatically
 - [ ] Error handling
 - [x] Locked or random seed
+- [ ] Save generated audio data

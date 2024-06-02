@@ -10,6 +10,13 @@ from pprint import pprint
 ELEVENLABS_API_KEY = st.secrets["ELEVENLABS_API_KEY"]
 OPENAI_API = st.secrets["OPENAI_API_KEY"]
 
+if ELEVENLABS_API_KEY is None:
+    ELEVENLABS_API_KEY = "sk-dummy"
+    st.warning("Elevenlabs API key not found. Using dummy key")
+
+if OPENAI_API is None:
+    OPENAI_API = "sk-dummy"
+    st.warning("OpenAI API key not found. Using dummy key")
 
 if "voice_id" not in st.session_state:
     st.session_state["voice_id"] = []
@@ -74,12 +81,8 @@ if script:
                     ),
                 )
             st.toast("Updated script", icon="🔄")
-            updated_script = st.markdown(
-                f"""
-                                         #### Updated script:
-                                         {script}
-                """
-            )
+            st.subheader("Updated script")
+            updated_script = st.markdown(f"""{script}""")
 
 voice_settings = st.expander("Advanced voice settings", expanded=True)
 
