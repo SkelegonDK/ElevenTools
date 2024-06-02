@@ -1,7 +1,7 @@
 import streamlit as st
 from functions import detect_string_variables, detect_phonetic_conversion
 from Openai_functions import convert_word_to_phonetic
-from Elevenlabs import generate_audio
+from Elevenlabs_functions import generate_audio
 import uuid
 import random
 
@@ -56,7 +56,9 @@ if script:
 
                 script = script.replace(
                     f"[[{language}:{word}]]",
-                    convert_word_to_phonetic(word=word, language=language),
+                    convert_word_to_phonetic(
+                        word=word, language=language, model=select_model
+                    ),
                 )
             st.toast("Updated script", icon="🔄")
             updated_script = st.markdown(
@@ -69,9 +71,32 @@ if script:
 voice_settings = st.expander("Advanced voice settings", expanded=True)
 
 with voice_settings:
-    voice_similarity = st.slider("Voice similarity", 0.0, 1.0, 0.5)
-    voice_stability = st.slider("Voice stability", 0.0, 1.0, 0.5)
-    voice_style = st.slider("Voice style", 0.0, 1.0, 0.0)
+    voice_similarity = st.slider(
+        "Voice similarity",
+        0.0,
+        1.0,
+        0.5,
+        help="""**Definition:** Voice similarity refers to how closely a synthetic voice matches a target voice. It’s about making the generated voice sound like a specific person.
+        **Example:** If you’re trying to create a synthetic version of Morgan Freeman’s voice, voice similarity measures how much the generated voice sounds like Morgan Freeman.
+                """,
+    )
+    voice_stability = st.slider(
+        "Voice stability",
+        0.0,
+        1.0,
+        0.5,
+        help="""**Definition:** Voice stability refers to how consistent the synthetic voice sounds over time. It’s about maintaining the same voice characteristics without unintended variations.
+        **Example:** If a synthetic voice starts with a deep, calm tone, voice stability ensures it doesn’t suddenly become high-pitched or erratic during a long speech.""",
+    )
+    voice_style = st.slider(
+        "Voice style",
+        0.0,
+        1.0,
+        0.0,
+        help="""**Definition:** Style exaggeration refers to the enhancement or amplification of certain vocal characteristics to make the synthetic voice more expressive or distinctive. It involves intentionally modifying elements like pitch, tone, and cadence to create a more dramatic or emphasized vocal style.
+        **Example:** If you want the synthetic voice to sound more theatrical or emotional, style exaggeration can make a calm sentence sound more excited or a neutral statement sound more authoritative.
+""",
+    )
     speaker_boost = st.checkbox("Use speaker boost")
 
 random_seed = random.randint(1000000000, 9999999999)
@@ -140,9 +165,6 @@ with sidebar:
     st.write("A professional interface for Elevenlabs")
     add_voice_ID = sidebar.text_input("Add voice ID")
     add_voice_btn = sidebar.button("Add voice")
-    convert_to_phonetic_btn = sidebar.button(
-        "Convert to phonetic", key="convert_phonetic"
-    )
 
     fixed_seed = sidebar.text_input("Seed")
     st.session_state["seed"] = fixed_seed
