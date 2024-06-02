@@ -146,6 +146,7 @@ with col1_generate:
             temp_filename,
             seed=random_seed,
         )
+        print(f"RANDOM:{random_seed}")
         st.session_state["generated_audio"].append(
             {
                 "filename": temp_filename,
@@ -172,7 +173,7 @@ with col2_generate:
             st.error("Please set a fixed seed")
         else:
             temp_filename = f"VID_{selected_voice}_SEED_{st.session_state['seed']}_UID_{uuid.uuid1()}.mp3"
-            temp_seed = int(st.session_state["seed"])
+            temp_seed: int = st.session_state["seed"]
             generate_audio(
                 ELEVENLABS_API_KEY,
                 voice_stability,
@@ -186,6 +187,7 @@ with col2_generate:
                 temp_filename,
                 seed=temp_seed,
             )
+            print(f"FIXED:{temp_seed}")
             st.session_state["generated_audio"].append(
                 {
                     "filename": temp_filename,

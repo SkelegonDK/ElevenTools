@@ -69,7 +69,7 @@ def generate_audio(
             "style": style,
             "use_speaker_boost": use_speaker_boost,
         },
-        "seed": int(seed),
+        "seed": int(seed) if seed else None,
     }
     st.write(data)
     # Make the POST request to the TTS API with headers and data, enabling streaming response
@@ -79,7 +79,7 @@ def generate_audio(
 
     # Check if the request was successful
     if response.ok:
-
+        pprint(response.raw)
         # Open the output file in write-binary mode
         with open(output_path, "wb") as f:
             # Read the response in chunks and write to the file
@@ -88,6 +88,7 @@ def generate_audio(
                 f.write(chunk)
         # Inform the user of success
         st.toast("Audio generated successfully.")
+
     else:
         # Print the error message if the request was not successful
         pprint(response.text)

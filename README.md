@@ -22,12 +22,12 @@ Create a /.streamlit/config.toml file in the root directory to set the page sett
 - Voice selection search through the Elevenlabs library
 - Model selection
 - Allows for text variables for personalization
-- Random and fixed seed for reproducibility
+- Random and fixed seed for reproducibility (bugged)
 - Voice settings
 - review generation data and play audio
 
 ## TODO:
-
+- [ ] FIXED SEED
 - [x] OPENAI INTEGRATION
 - [ ] OLLAMA INTEGRATION
 - [ ] Batch processing
