@@ -12,16 +12,15 @@ pip install streamlit, openai
 streamlit run app.py
 ```
 
-## Global secrets
+## Global secrets and API keys
 
 Create a /.streamlit/secrets.toml file in the root directory with your elevenlabs and openai keys.
 Create a /.streamlit/config.toml file in the root directory to set the page settings and colors.
 
 ## Features
 
-- Voice selection ( copy paste the voice ID from the Voice library)
-- Copy paste the voice ID fromthe Voice library
-- Model selection:
+- Voice selection search through the Elevenlabs library
+- Model selection
 - Allows for text variables for personalization
 - Random and fixed seed for reproducibility
 - Voice settings
@@ -32,6 +31,6 @@ Create a /.streamlit/config.toml file in the root directory to set the page sett
 - [ ] OLLAMA INTEGRATION
 - [ ] Batch processing
 - [ ] Voice to Voice
-- [ ] Import user voices
+- [x] Import user voices automatically
 - [ ] Error handling
 - [x] Locked or random seed
