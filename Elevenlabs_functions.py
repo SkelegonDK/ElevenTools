@@ -46,7 +46,7 @@ def generate_audio(
     voice_id,
     text_to_speak,
     output_path="output.mp3",
-    seed="None",
+    seed=0,
 ):
     """
     Generate audio using the Elevenlabs Text-to-Speech API.
@@ -69,7 +69,7 @@ def generate_audio(
             "style": style,
             "use_speaker_boost": use_speaker_boost,
         },
-        "seed": None,
+        "seed": int(seed),
     }
     st.write(data)
     # Make the POST request to the TTS API with headers and data, enabling streaming response

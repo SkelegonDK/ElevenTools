@@ -20,7 +20,7 @@ if OPENAI_API is None:
 
 if "voice_id" not in st.session_state:
     st.session_state["voice_id"] = []
-    st.warning("Please add voice ID")
+    st.warning("Please Select a voice.")
 if "seed" not in st.session_state:
     st.session_state["seed"] = "None"
 if "voice_library" not in st.session_state:
@@ -115,7 +115,8 @@ with voice_settings:
     )
     speaker_boost = st.checkbox("Use speaker boost")
 
-random_seed = random.randint(1000000000, 9999999999)
+random_seed: int = random.randint(0000000000, 9999999999)
+
 
 # locked_seed = st.selectbox("Select seed", [random_seed, "Custom seed"])
 
@@ -167,12 +168,11 @@ with col2_generate:
     )
     st.caption(st.session_state["seed"])
     if generate_seed_btn:
-        if st.session_state["seed"] == "None":
-            st.write(st.session_state["seed"])
+        if st.session_state["seed"] == 0:
             st.error("Please set a fixed seed")
         else:
             temp_filename = f"VID_{selected_voice}_SEED_{st.session_state['seed']}_UID_{uuid.uuid1()}.mp3"
-            temp_seed = st.session_state["seed"]
+            temp_seed = int(st.session_state["seed"])
             generate_audio(
                 ELEVENLABS_API_KEY,
                 voice_stability,
