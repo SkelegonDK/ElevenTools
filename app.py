@@ -186,11 +186,26 @@ with col2_generate:
                 temp_filename,
                 seed=temp_seed,
             )
+            st.session_state["generated_audio"].append(
+                {
+                    "filename": temp_filename,
+                    "seed": random_seed,
+                    "voice": selected_voice,
+                    "model": select_model,
+                    "voice_similarity": voice_similarity,
+                    "voice_stability": voice_stability,
+                    "voice_style": voice_style,
+                    "speaker_boost": speaker_boost,
+                    "script": script,
+                }
+            )
 
 Generated_audio = st.expander("Generated audio", expanded=True)
 with Generated_audio:
     for audio in st.session_state["generated_audio"]:
-        st.write(audio)
+        st.write(
+            audio,
+        )
         st.audio(audio["filename"], format="audio/mp3")
 
 ####### Sidebar #######
