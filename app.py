@@ -1,21 +1,31 @@
 import streamlit as st
 from functions import detect_string_variables, detect_phonetic_conversion
 from Openai_functions import convert_word_to_phonetic
-from Elevenlabs_functions import generate_audio
+from Elevenlabs_functions import generate_audio, get_voice_id, fetch_voices
 import uuid
 import random
+from pprint import pprint
 
 # TODO: Implement elevenlabs Library
 ELEVENLABS_API_KEY = st.secrets["ELEVENLABS_API_KEY"]
 OPENAI_API = st.secrets["OPENAI_API_KEY"]
+
 
 if "voice_id" not in st.session_state:
     st.session_state["voice_id"] = []
     st.warning("Please add voice ID")
 if "seed" not in st.session_state:
     st.session_state["seed"] = "None"
+if "voice_library" not in st.session_state:
+    st.session_state["voice_library"] = fetch_voices(ELEVENLABS_API_KEY)
+if "generated_audio" not in st.session_state:
+    st.session_state["generated_audio"] = []
 
-selected_voice = st.selectbox("Select voice", st.session_state["voice_id"])
+# st.write(st.session_state["voice_library"])
+voice_names = [voice["name"] for voice in st.session_state["voice_library"]]
+
+selected_voice = st.selectbox("Select voice", voice_names)
+
 select_model = st.selectbox(
     "Select model",
     ["eleven_monolingual_v1", "eleven_multilingual_v2", "eleven_turbo_v2"],
@@ -44,7 +54,10 @@ if script:
                 if value:
                     script = script.replace(f"{{{variable}}}", value)
             st.toast("Updated script", icon="🔄")
-            updated_script = st.markdown(f"""#### Updated script {script}""")
+            updated_script = st.markdown(
+                f"""#### Updated script:
+                                         {script}"""
+            )
     if detect_phonetic and len(detect_phonetic) > 0:
         st.info("Detected phonetic conversion")
         phonetic_exp = st.expander("Phonetic conversion", expanded=True)
@@ -105,7 +118,7 @@ random_seed = random.randint(1000000000, 9999999999)
 
 
 col1_generate, col2_generate, empty = st.columns(3, gap="small")
-
+voice_id = get_voice_id(st.session_state["voice_library"], selected_voice)
 with col1_generate:
 
     generate_random_btn = col1_generate.button(
@@ -123,20 +136,35 @@ with col1_generate:
             voice_similarity,
             voice_style,
             speaker_boost,
-            selected_voice,
+            voice_id,
             # Ensure this is the text to be spoken
             script,
             temp_filename,
             seed=random_seed,
         )
+        st.session_state["generated_audio"].append(
+            {
+                "filename": temp_filename,
+                "seed": random_seed,
+                "voice": selected_voice,
+                "model": select_model,
+                "voice_similarity": voice_similarity,
+                "voice_stability": voice_stability,
+                "voice_style": voice_style,
+                "speaker_boost": speaker_boost,
+                "script": script,
+            }
+        )
 # TODO: Implement fixed seed error
+
 
 with col2_generate:
     generate_seed_btn = col2_generate.button(
         "Generate with fixed seed", key="generate_audio_seed"
     )
+    st.caption(st.session_state["seed"])
     if generate_seed_btn:
-        if st.session_state["seed"] is "None":
+        if st.session_state["seed"] == "None":
             st.write(st.session_state["seed"])
             st.error("Please set a fixed seed")
         else:
@@ -149,13 +177,18 @@ with col2_generate:
                 voice_similarity,
                 voice_style,
                 speaker_boost,
-                selected_voice,
+                voice_id,
                 # Ensure this is the text to be spoken
                 script,
                 temp_filename,
                 seed=temp_seed,
             )
 
+Generated_audio = st.expander("Generated audio", expanded=True)
+with Generated_audio:
+    for audio in st.session_state["generated_audio"]:
+        st.write(audio)
+        st.audio(audio["filename"], format="audio/mp3")
 
 ####### Sidebar #######
 sidebar = st.sidebar
@@ -163,15 +196,14 @@ sidebar = st.sidebar
 with sidebar:
     st.title("Pro Labs")
     st.write("A professional interface for Elevenlabs")
-    add_voice_ID = sidebar.text_input("Add voice ID")
-    add_voice_btn = sidebar.button("Add voice")
 
-    fixed_seed = sidebar.text_input("Seed")
+    fixed_seed = sidebar.text_input(
+        "Fixed Seed", help="Set a fixed seed to improve reproducibility."
+    )
+    st.caption(
+        """Setting a fixed seed will ensure that the audio generated is consistent across runs."
+        For example when using variables in the script."""
+    )
     st.session_state["seed"] = fixed_seed
 
     settings = sidebar.expander("Settings", expanded=True)
-
-    if add_voice_btn:
-        st.session_state["voice_id"].append(add_voice_ID)
-        st.write(st.session_state["voice_id"])
-        st.toast("Press R the update the list", icon="♻️")
