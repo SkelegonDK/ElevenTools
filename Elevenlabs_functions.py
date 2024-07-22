@@ -6,36 +6,50 @@ from pprint import pprint  # Used for pretty-printing JSON data
 import logging
 
 
-@st.cache_data(ttl=300)
-def get_voice_id(voice_library, selected_voice):
+@st.cache_data(ttl=3600)  # Cache the data for 1 hour
+def fetch_models(api_key):
     """
-    Get the voice ID for the selected voice from the voice library.
+    Fetches the list of available models from the ElevenLabs API.
     """
-    for voice in voice_library:
-        if voice["name"] == selected_voice:
-            # Check if 'voice_id' key exists in the dictionary
-            if "voice_id" in voice:
-                return voice["voice_id"]
-            else:
-                raise KeyError(
-                    f"The dictionary does not contain the key 'voice_id': {voice}"
-                )
-    return None
+    url = "https://api.elevenlabs.io/v1/models"
+    headers = {"xi-api-key": api_key}
+
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()  # Raises an HTTPError for bad responses
+        models = response.json()
+        return [(model["model_id"], model["name"]) for model in models]
+    except requests.exceptions.RequestException as e:
+        st.error(f"Failed to fetch models: {str(e)}")
+        return []
 
 
-@st.cache_data(ttl=300)  # Cache the data for 1 hour (3600 seconds)
+@st.cache_data(ttl=3600)  # Cache the data for 1 hour
 def fetch_voices(api_key):
     """
-    Fetches the list of available voices from the Elevenlabs API.
+    Fetches the list of available voices from the ElevenLabs API.
     """
     url = "https://api.elevenlabs.io/v1/voices"
     headers = {"xi-api-key": api_key}
-    response = requests.get(url, headers=headers, timeout=10)
-    if response.status_code == 200:
-        return response.json()["voices"]
-    else:
-        st.error("Failed to fetch voices from Elevenlabs API.")
+
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()  # Raises an HTTPError for bad responses
+        voices = response.json()["voices"]
+        return [(voice["voice_id"], voice["name"]) for voice in voices]
+    except requests.exceptions.RequestException as e:
+        st.error(f"Failed to fetch voices: {str(e)}")
         return []
+
+
+def get_voice_id(voices, selected_voice_name):
+    """
+    Get the voice ID for the selected voice name.
+    """
+    for voice_id, name in voices:
+        if name == selected_voice_name:
+            return voice_id
+    return None  # Return None if no matching voice is found
 
 
 def generate_audio(

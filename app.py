@@ -1,13 +1,20 @@
 import streamlit as st
 from functions import detect_string_variables, detect_phonetic_conversion
 from Openai_functions import convert_word_to_phonetic
-from Elevenlabs_functions import generate_audio, get_voice_id, fetch_voices
+from Elevenlabs_functions import (
+    generate_audio,
+    fetch_models,
+    fetch_voices,
+    get_voice_id,
+)
 import uuid
 import random
-from pprint import pprint
 import logging
 
-# TODO: Implement elevenlabs Library
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+
+# Initialize API keys
 ELEVENLABS_API_KEY = st.secrets["ELEVENLABS_API_KEY"]
 OPENAI_API = st.secrets["OPENAI_API_KEY"]
 
@@ -19,26 +26,34 @@ if OPENAI_API is None:
     OPENAI_API = "sk-dummy"
     st.warning("OpenAI API key not found. Using dummy key")
 
-if "voice_id" not in st.session_state:
-    st.session_state["voice_id"] = []
-    st.warning("Please Select a voice.")
+# Initialize session state
+if "models" not in st.session_state:
+    st.session_state["models"] = fetch_models(ELEVENLABS_API_KEY)
+if "voices" not in st.session_state:
+    st.session_state["voices"] = fetch_voices(ELEVENLABS_API_KEY)
 if "seed" not in st.session_state:
     st.session_state["seed"] = "None"
-if "voice_library" not in st.session_state:
-    st.session_state["voice_library"] = fetch_voices(ELEVENLABS_API_KEY)
 if "generated_audio" not in st.session_state:
     st.session_state["generated_audio"] = []
 
-# st.write(st.session_state["voice_library"])
-voice_names = [voice["name"] for voice in st.session_state["voice_library"]]
-
-selected_voice = st.selectbox("Select voice", voice_names)
-
-select_model = st.selectbox(
+# Create selectboxes for model and voice selection
+selected_model_name = st.selectbox(
     "Select model",
-    ["eleven_monolingual_v1", "eleven_multilingual_v2", "eleven_turbo_v2"],
+    options=[model[1] for model in st.session_state["models"]],
+    format_func=lambda x: x,
+)
+selected_model_id = next(
+    model[0] for model in st.session_state["models"] if model[1] == selected_model_name
 )
 
+selected_voice_name = st.selectbox(
+    "Select voice",
+    options=[voice[1] for voice in st.session_state["voices"]],
+    format_func=lambda x: x,
+)
+selected_voice_id = get_voice_id(st.session_state["voices"], selected_voice_name)
+
+# Text input
 script = st.text_area(
     "Text to speech",
     height=100,
@@ -62,107 +77,72 @@ if script:
                 if value:
                     script = script.replace(f"{{{variable}}}", value)
             st.toast("Updated script", icon="🔄")
-            updated_script = st.markdown(
-                f"""#### Updated script:
-                                         {script}"""
-            )
+            updated_script = st.markdown(f"#### Updated script:\n{script}")
+
     if detect_phonetic and len(detect_phonetic) > 0:
         st.info("Detected phonetic conversion")
         phonetic_exp = st.expander("Phonetic conversion", expanded=True)
         with phonetic_exp:
             for phonetic in detect_phonetic:
-                print(phonetic)
                 language = phonetic[0]
                 word = phonetic[1]
-
                 script = script.replace(
                     f"[[{language}:{word}]]",
                     convert_word_to_phonetic(
-                        word=word, language=language, model=select_model
+                        word=word, language=language, model=selected_model_id
                     ),
                 )
             st.toast("Updated script", icon="🔄")
             st.subheader("Updated script")
-            updated_script = st.markdown(f"""{script}""")
+            updated_script = st.markdown(script)
 
+# Voice settings
 voice_settings = st.expander("Advanced voice settings", expanded=True)
-
 with voice_settings:
-    voice_similarity = st.slider(
-        "Voice similarity",
-        0.0,
-        1.0,
-        0.5,
-        help="""**Definition:** Voice similarity refers to how closely a synthetic voice matches a target voice. It’s about making the generated voice sound like a specific person.
-        **Example:** If you’re trying to create a synthetic version of Morgan Freeman’s voice, voice similarity measures how much the generated voice sounds like Morgan Freeman.
-                """,
-    )
-    voice_stability = st.slider(
-        "Voice stability",
-        0.0,
-        1.0,
-        0.5,
-        help="""**Definition:** Voice stability refers to how consistent the synthetic voice sounds over time. It’s about maintaining the same voice characteristics without unintended variations.
-        **Example:** If a synthetic voice starts with a deep, calm tone, voice stability ensures it doesn’t suddenly become high-pitched or erratic during a long speech.""",
-    )
-    voice_style = st.slider(
-        "Voice style",
-        0.0,
-        1.0,
-        0.0,
-        help="""**Definition:** Style exaggeration refers to the enhancement or amplification of certain vocal characteristics to make the synthetic voice more expressive or distinctive. It involves intentionally modifying elements like pitch, tone, and cadence to create a more dramatic or emphasized vocal style.
-        **Example:** If you want the synthetic voice to sound more theatrical or emotional, style exaggeration can make a calm sentence sound more excited or a neutral statement sound more authoritative.
-""",
-    )
+    voice_stability = st.slider("Voice stability", 0.0, 1.0, 0.5)
+    voice_similarity = st.slider("Voice similarity", 0.0, 1.0, 0.5)
+    voice_style = st.slider("Voice style", 0.0, 1.0, 0.0)
     speaker_boost = st.checkbox("Use speaker boost")
 
-random_seed: int = random.randint(0000000000, 9999999999)
-
-
-# locked_seed = st.selectbox("Select seed", [random_seed, "Custom seed"])
-
-
+# Generate audio buttons
 col1_generate, col2_generate, empty = st.columns(3, gap="small")
-voice_id = get_voice_id(st.session_state["voice_library"], selected_voice)
-with col1_generate:
 
+with col1_generate:
     generate_random_btn = col1_generate.button(
         "Generate with random seed", key="generate_audio_random"
     )
 
     if generate_random_btn:
+        random_seed = random.randint(0, 9999999999)
         temp_filename = (
-            f"VID_{selected_voice}_SEED_{random_seed}_UID_{uuid.uuid1()}.mp3"
+            f"VID_{selected_voice_name}_SEED_{random_seed}_UID_{uuid.uuid1()}.mp3"
         )
-        generate_audio(
+        success, response_seed = generate_audio(
             ELEVENLABS_API_KEY,
             voice_stability,
-            select_model,
+            selected_model_id,
             voice_similarity,
             voice_style,
             speaker_boost,
-            voice_id,
-            # Ensure this is the text to be spoken
+            selected_voice_id,
             script,
             temp_filename,
             seed=random_seed,
         )
-        print(f"RANDOM:{random_seed}")
-        st.session_state["generated_audio"].append(
-            {
-                "filename": temp_filename,
-                "seed": random_seed,
-                "voice": selected_voice,
-                "model": select_model,
-                "voice_similarity": voice_similarity,
-                "voice_stability": voice_stability,
-                "voice_style": voice_style,
-                "speaker_boost": speaker_boost,
-                "script": script,
-            }
-        )
-# TODO: Implement fixed seed error
-
+        if success:
+            st.session_state["generated_audio"].append(
+                {
+                    "filename": temp_filename,
+                    "seed": response_seed if response_seed else random_seed,
+                    "voice": selected_voice_name,
+                    "model": selected_model_name,
+                    "voice_similarity": voice_similarity,
+                    "voice_stability": voice_stability,
+                    "voice_style": voice_style,
+                    "speaker_boost": speaker_boost,
+                    "script": script,
+                }
+            )
 
 with col2_generate:
     generate_seed_btn = col2_generate.button(
@@ -175,54 +155,54 @@ with col2_generate:
             if temp_seed <= 0:
                 raise ValueError("Seed must be a positive integer")
 
-            logging.info(f"Generating audio with fixed seed: {temp_seed}")
             temp_filename = (
-                f"VID_{selected_voice}_SEED_{temp_seed}_UID_{uuid.uuid1()}.mp3"
+                f"VID_{selected_voice_name}_SEED_{temp_seed}_UID_{uuid.uuid1()}.mp3"
             )
-            generate_audio(
+            success, response_seed = generate_audio(
                 ELEVENLABS_API_KEY,
                 voice_stability,
-                select_model,
+                selected_model_id,
                 voice_similarity,
                 voice_style,
                 speaker_boost,
-                voice_id,
+                selected_voice_id,
                 script,
                 temp_filename,
                 seed=temp_seed,
             )
-            st.success(f"Audio generated successfully with seed {temp_seed}")
-            st.session_state["seed"] = temp_seed
-            st.session_state["generated_audio"].append(
-                {
-                    "filename": temp_filename,
-                    "seed": temp_seed,
-                    "voice": selected_voice,
-                    "model": select_model,
-                    "voice_similarity": voice_similarity,
-                    "voice_stability": voice_stability,
-                    "voice_style": voice_style,
-                    "speaker_boost": speaker_boost,
-                    "script": script,
-                }
-            )
+            if success:
+                st.success(
+                    f"Audio generated successfully with seed {response_seed if response_seed else temp_seed}"
+                )
+                st.session_state["seed"] = response_seed if response_seed else temp_seed
+                st.session_state["generated_audio"].append(
+                    {
+                        "filename": temp_filename,
+                        "seed": response_seed if response_seed else temp_seed,
+                        "voice": selected_voice_name,
+                        "model": selected_model_name,
+                        "voice_similarity": voice_similarity,
+                        "voice_stability": voice_stability,
+                        "voice_style": voice_style,
+                        "speaker_boost": speaker_boost,
+                        "script": script,
+                    }
+                )
         except ValueError as e:
             st.error(f"Invalid seed value: {e}")
         except Exception as e:
             logging.error(f"Error generating audio: {str(e)}")
             st.error(f"An error occurred while generating audio: {str(e)}")
 
+# Display generated audio
 Generated_audio = st.expander("Generated audio", expanded=True)
 with Generated_audio:
     for audio in st.session_state["generated_audio"]:
-        st.write(
-            audio,
-        )
+        st.write(audio)
         st.audio(audio["filename"], format="audio/mp3")
 
-####### Sidebar #######
+# Sidebar
 sidebar = st.sidebar
-
 with sidebar:
     st.title("Pro Labs")
     st.write("A professional interface for Elevenlabs")
@@ -231,7 +211,7 @@ with sidebar:
         "Fixed Seed", help="Set a fixed seed to improve reproducibility."
     )
     st.caption(
-        """Setting a fixed seed will ensure that the audio generated is consistent across runs."
+        """Setting a fixed seed will ensure that the audio generated is consistent across runs.
         For example when using variables in the script."""
     )
     st.session_state["seed"] = fixed_seed
