@@ -5,6 +5,7 @@ from Elevenlabs_functions import generate_audio, get_voice_id, fetch_voices
 import uuid
 import random
 from pprint import pprint
+import logging
 
 # TODO: Implement elevenlabs Library
 ELEVENLABS_API_KEY = st.secrets["ELEVENLABS_API_KEY"]
@@ -169,11 +170,15 @@ with col2_generate:
     )
     st.caption(st.session_state["seed"])
     if generate_seed_btn:
-        if st.session_state["seed"] == 0:
-            st.error("Please set a fixed seed")
-        else:
-            temp_filename = f"VID_{selected_voice}_SEED_{st.session_state['seed']}_UID_{uuid.uuid1()}.mp3"
-            temp_seed: int = st.session_state["seed"]
+        try:
+            temp_seed = int(st.session_state["seed"])
+            if temp_seed <= 0:
+                raise ValueError("Seed must be a positive integer")
+
+            logging.info(f"Generating audio with fixed seed: {temp_seed}")
+            temp_filename = (
+                f"VID_{selected_voice}_SEED_{temp_seed}_UID_{uuid.uuid1()}.mp3"
+            )
             generate_audio(
                 ELEVENLABS_API_KEY,
                 voice_stability,
@@ -182,16 +187,16 @@ with col2_generate:
                 voice_style,
                 speaker_boost,
                 voice_id,
-                # Ensure this is the text to be spoken
                 script,
                 temp_filename,
                 seed=temp_seed,
             )
-            print(f"FIXED:{temp_seed}")
+            st.success(f"Audio generated successfully with seed {temp_seed}")
+            st.session_state["seed"] = temp_seed
             st.session_state["generated_audio"].append(
                 {
                     "filename": temp_filename,
-                    "seed": random_seed,
+                    "seed": temp_seed,
                     "voice": selected_voice,
                     "model": select_model,
                     "voice_similarity": voice_similarity,
@@ -201,6 +206,11 @@ with col2_generate:
                     "script": script,
                 }
             )
+        except ValueError as e:
+            st.error(f"Invalid seed value: {e}")
+        except Exception as e:
+            logging.error(f"Error generating audio: {str(e)}")
+            st.error(f"An error occurred while generating audio: {str(e)}")
 
 Generated_audio = st.expander("Generated audio", expanded=True)
 with Generated_audio:

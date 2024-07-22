@@ -3,6 +3,7 @@ import streamlit as st  # Used for building the web app
 import requests  # Used for making HTTP requests
 import json  # Used for working with JSON data
 from pprint import pprint  # Used for pretty-printing JSON data
+import logging
 
 
 def get_voice_id(voice_library, selected_voice):
@@ -71,15 +72,26 @@ def generate_audio(
         },
         "seed": int(seed) if seed else None,
     }
-    st.write(data)
+
+    # Log the payload being sent to the API
+    logging.info(
+        f"Sending request to ElevenLabs API with payload: {json.dumps(data, indent=2)}"
+    )
+
     # Make the POST request to the TTS API with headers and data, enabling streaming response
     response = requests.post(
         tts_url, headers=headers, json=data, stream=True, timeout=10
     )
 
+    # Log the full response details
+    logging.info(f"API Response Status Code: {response.status_code}")
+    logging.info(
+        f"API Response Headers: {json.dumps(dict(response.headers), indent=2)}"
+    )
+
     # Check if the request was successful
     if response.ok:
-        pprint(response.raw)
+        logging.info("Request to ElevenLabs API was successful")
         # Open the output file in write-binary mode
         with open(output_path, "wb") as f:
             # Read the response in chunks and write to the file
@@ -88,7 +100,16 @@ def generate_audio(
                 f.write(chunk)
         # Inform the user of success
         st.toast("Audio generated successfully.")
-
+        return True  # Indicate success
     else:
-        # Print the error message if the request was not successful
-        pprint(response.text)
+        # Log the error message if the request was not successful
+        logging.error(f"Error response from ElevenLabs API: {response.text}")
+        try:
+            error_json = response.json()
+            logging.error(
+                f"Detailed error information: {json.dumps(error_json, indent=2)}"
+            )
+        except json.JSONDecodeError:
+            logging.error("Could not parse error response as JSON")
+        st.error(f"Failed to generate audio. API response: {response.text}")
+        return False  # Indicate failure
