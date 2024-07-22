@@ -6,6 +6,7 @@ from pprint import pprint  # Used for pretty-printing JSON data
 import logging
 
 
+@st.cache_data(ttl=300)
 def get_voice_id(voice_library, selected_voice):
     """
     Get the voice ID for the selected voice from the voice library.
@@ -47,21 +48,20 @@ def generate_audio(
     voice_id,
     text_to_speak,
     output_path="output.mp3",
-    seed=0,
+    seed=None,
+    language_code=None,
 ):
     """
     Generate audio using the Elevenlabs Text-to-Speech API.
     """
-    CHUNK_SIZE = 1024  # Size of chunks to read/write at a time
-
     # Construct the URL for the Text-to-Speech API request
-    tts_url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}/stream"
+    tts_url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
 
-    # Set up headers for the API request, including the API key for authentication
-    headers = {"Accept": "application/json", "xi-api-key": xi_api_key}
+    # Set up headers for the API request
+    headers = {"xi-api-key": xi_api_key, "Content-Type": "application/json"}
 
-    # Set up the data payload for the API request, including the text and voice settings
-    data = {
+    # Set up the data payload for the API request
+    payload = {
         "text": text_to_speak,
         "model_id": model_id,
         "voice_settings": {
@@ -70,18 +70,21 @@ def generate_audio(
             "style": style,
             "use_speaker_boost": use_speaker_boost,
         },
-        "seed": int(seed) if seed else None,
     }
+
+    # Add optional parameters if provided
+    if seed is not None:
+        payload["seed"] = int(seed)
+    if language_code:
+        payload["language_code"] = language_code
 
     # Log the payload being sent to the API
     logging.info(
-        f"Sending request to ElevenLabs API with payload: {json.dumps(data, indent=2)}"
+        f"Sending request to ElevenLabs API with payload: {json.dumps(payload, indent=2)}"
     )
 
-    # Make the POST request to the TTS API with headers and data, enabling streaming response
-    response = requests.post(
-        tts_url, headers=headers, json=data, stream=True, timeout=10
-    )
+    # Make the POST request to the TTS API
+    response = requests.post(tts_url, headers=headers, json=payload, timeout=30)
 
     # Log the full response details
     logging.info(f"API Response Status Code: {response.status_code}")
@@ -92,24 +95,31 @@ def generate_audio(
     # Check if the request was successful
     if response.ok:
         logging.info("Request to ElevenLabs API was successful")
-        # Open the output file in write-binary mode
+
+        # Write the audio content to file
         with open(output_path, "wb") as f:
-            # Read the response in chunks and write to the file
-            st.spinner("Generating audio...")
-            for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
-                f.write(chunk)
-        # Inform the user of success
+            f.write(response.content)
+
+        # Check for seed information in the response headers (just in case)
+        response_seed = response.headers.get("x-seed")
+
+        if response_seed:
+            logging.info(f"Seed found in response headers: {response_seed}")
+        else:
+            logging.info("No seed found in response headers.")
+
+        # Log the entire response content for debugging
+        logging.info(
+            f"Full response content: {response.content[:1000]}..."
+        )  # Log first 1000 bytes
+
         st.toast("Audio generated successfully.")
-        return True  # Indicate success
+        return (
+            True,
+            response_seed,
+        )  # Indicate success and return the seed from the response (if any)
     else:
         # Log the error message if the request was not successful
         logging.error(f"Error response from ElevenLabs API: {response.text}")
-        try:
-            error_json = response.json()
-            logging.error(
-                f"Detailed error information: {json.dumps(error_json, indent=2)}"
-            )
-        except json.JSONDecodeError:
-            logging.error("Could not parse error response as JSON")
         st.error(f"Failed to generate audio. API response: {response.text}")
-        return False  # Indicate failure
+        return False, None  # Indicate failure and return None for the seed
