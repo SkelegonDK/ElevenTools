@@ -10,6 +10,7 @@ from Elevenlabs_functions import (
 import uuid
 import random
 import logging
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -25,6 +26,12 @@ if ELEVENLABS_API_KEY is None:
 if OPENAI_API is None:
     OPENAI_API = "sk-dummy"
     st.warning("OpenAI API key not found. Using dummy key")
+
+# Ensure necessary variables are in session state for use across pages
+if "ELEVENLABS_API_KEY" not in st.session_state:
+    st.session_state["ELEVENLABS_API_KEY"] = ELEVENLABS_API_KEY
+if "OPENAI_API" not in st.session_state:
+    st.session_state["OPENAI_API"] = OPENAI_API
 
 # Initialize session state
 if "models" not in st.session_state:
@@ -52,6 +59,10 @@ selected_voice_name = st.selectbox(
     format_func=lambda x: x,
 )
 selected_voice_id = get_voice_id(st.session_state["voices"], selected_voice_name)
+
+# Store selected model and voice IDs in session state
+st.session_state["selected_model_id"] = selected_model_id
+st.session_state["selected_voice_id"] = selected_voice_id
 
 # Text input
 script = st.text_area(
@@ -103,6 +114,14 @@ with voice_settings:
     voice_similarity = st.slider("Voice similarity", 0.0, 1.0, 0.5)
     voice_style = st.slider("Voice style", 0.0, 1.0, 0.0)
     speaker_boost = st.checkbox("Use speaker boost")
+
+# Store voice settings in session state for use in bulk generation page
+st.session_state["voice_settings"] = {
+    "stability": voice_stability,
+    "similarity_boost": voice_similarity,
+    "style": voice_style,
+    "speaker_boost": speaker_boost,
+}
 
 # Generate audio buttons
 col1_generate, col2_generate, empty = st.columns(3, gap="small")
