@@ -8,7 +8,7 @@ It has all of the bells and whistles I need to get started on a new project.
 Install Python 3.10 or latest and pipenv if you want
 
 ```bash
-pip install streamlit, openai
+pip install streamlit openai
 streamlit run app.py
 ```
 
@@ -27,14 +27,19 @@ Create a /.streamlit/config.toml file in the root directory to set the page sett
 - review generation data and play audio
 
 ## TODO:
-- [x] FIXED SEED
-- [x] OPENAI INTEGRATION
+
 - [ ] OLLAMA INTEGRATION
 - [ ] CLAUDE INTEGRATION
-- [ ] Batch processing
+- [ ] Batch processing with CSV
 - [ ] Voice to Voice
-- [x] Import user voices automatically
 - [ ] Error handling
-- [x] Locked or random seed
 - [ ] Save generated audio data
 - [ ] Page routing
+- [ ] search by voice ID
+
+## DONE:
+
+- [x] FIXED SEED
+- [x] OPENAI INTEGRATION
+- [x] Import user voices automatically
+- [x] Locked or random seed
