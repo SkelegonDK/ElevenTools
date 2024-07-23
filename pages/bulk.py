@@ -9,7 +9,7 @@ from Elevenlabs_functions import (
 )
 import random
 
-st.set_page_config(page_title="Bulk Generation", page_icon="📚", layout="wide")
+st.set_page_config(page_title="Bulk Generation", page_icon="📚", layout="centered")
 
 st.title("Bulk Generation")
 
