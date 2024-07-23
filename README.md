@@ -1,6 +1,6 @@
 # ElevenTools Alpha v0.0.1
 
-Eleventools is my personal toolbox for Elevenlabs.
+Eleventools is my personal GUI for Elevenlabs.
 It has all of the bells and whistles I need to get started on a new project.
 
 ## Installation
