@@ -15,6 +15,8 @@ import os
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
+st.set_page_config(page_title="Pro Labs", page_icon="🔊", layout="centered")
+
 # Initialize API keys
 ELEVENLABS_API_KEY = st.secrets["ELEVENLABS_API_KEY"]
 OPENAI_API = st.secrets["OPENAI_API_KEY"]
