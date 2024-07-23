@@ -32,7 +32,7 @@ Create a /.streamlit/config.toml file in the root directory to set the page sett
 - [ ] CLAUDE INTEGRATION
 - [ ] Batch processing with CSV
 - [ ] Voice to Voice
-- [ ] Error handling
+- [ ] Error handling ( mostly done)
 - [ ] Save generated audio data
 - [ ] Page routing
 - [ ] search by voice ID
