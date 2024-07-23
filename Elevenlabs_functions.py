@@ -7,6 +7,7 @@ import logging
 import pandas as pd
 import os
 import re
+import random
 
 
 @st.cache_data(ttl=3600)  # Cache the data for 1 hour
@@ -158,24 +159,51 @@ def process_text(text):
 
 
 def bulk_generate_audio(
-    api_key, model_id, voice_id, csv_file, output_dir, voice_settings
+    api_key,
+    model_id,
+    voice_id,
+    csv_file,
+    output_dir,
+    voice_settings,
+    seed_type,
+    seed=None,
 ):
     try:
-        df = pd.read_csv(csv_file, keep_default_na=False)
+        csv_file.seek(0)
+        logging.info(f"First 100 bytes of CSV file: {csv_file.read(100)}")
+        csv_file.seek(0)
+
+        df = pd.read_csv(csv_file)
+        logging.info(f"DataFrame info:\n{df.info()}")
+        logging.info(f"DataFrame head:\n{df.head()}")
+
+        if df.empty:
+            raise ValueError("The CSV file is empty.")
+
         results = []
 
         for index, row in df.iterrows():
             text, variables = process_text(row["text"])
 
-            # Replace variables with their values if provided in the CSV
+            # Replace variables in text and filename
             for var in variables:
                 if var in row:
                     text = text.replace(f"{{{var}}}", str(row[var]))
+                    if "filename" in row:
+                        row["filename"] = row["filename"].replace(
+                            f"{{{var}}}", str(row[var])
+                        )
 
             filename = (
                 f"{row['filename']}.mp3" if "filename" in row else f"audio_{index}.mp3"
             )
             output_path = os.path.join(output_dir, filename)
+
+            # Determine seed for this generation
+            if seed_type == "Fixed":
+                current_seed = seed
+            else:
+                current_seed = random.randint(0, 9999999999)
 
             success, response_seed = generate_audio(
                 api_key,
@@ -187,6 +215,7 @@ def bulk_generate_audio(
                 voice_id,
                 text,
                 output_path,
+                seed=current_seed,
             )
 
             results.append(
@@ -194,11 +223,19 @@ def bulk_generate_audio(
                     "filename": filename,
                     "text": text,
                     "success": success,
-                    "seed": response_seed,
+                    "seed": response_seed if response_seed else current_seed,
                 }
             )
 
         return pd.DataFrame(results)
+
+    except pd.errors.EmptyDataError:
+        logging.error("The CSV file is empty or not formatted correctly.")
+        st.error(
+            "The CSV file is empty or not formatted correctly. Please check your file and try again."
+        )
+        return pd.DataFrame()
     except Exception as e:
+        logging.error(f"An error occurred during bulk generation: {str(e)}")
         st.error(f"An error occurred during bulk generation: {str(e)}")
         return pd.DataFrame()
