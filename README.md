@@ -44,3 +44,15 @@ Create a /.streamlit/config.toml file in the root directory to set the page sett
 - [ ] Save generated audio data
   - [ ] create CVS for generated data
   - [ ] Pronunciation memory
+
+## License
+
+ElevenTools is open-source software released under a custom license. 
+
+- Free for individual use and for companies with less than $10 million in annual revenue and fewer than 50 employees.
+- Commercial licensing required for larger companies.
+- Use for training AI models is prohibited without explicit permission.
+
+Please see the [full license](LICENSE) for all terms and conditions.
+
+For commercial licensing inquiries, please contact [your contact information].

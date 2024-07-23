@@ -4,6 +4,9 @@ import requests  # Used for making HTTP requests
 import json  # Used for working with JSON data
 from pprint import pprint  # Used for pretty-printing JSON data
 import logging
+import pandas as pd
+import os
+import re
 
 
 @st.cache_data(ttl=3600)  # Cache the data for 1 hour
@@ -137,3 +140,65 @@ def generate_audio(
         logging.error(f"Error response from ElevenLabs API: {response.text}")
         st.error(f"Failed to generate audio. API response: {response.text}")
         return False, None  # Indicate failure and return None for the seed
+
+
+### BULK GENERATION FUNCTIONS ###
+
+
+def process_text(text):
+    """
+    Process the text to handle variables and preserve formatting.
+    """
+    # Replace \n with actual newlines
+    text = text.replace("\\n", "\n")
+
+    # Handle variables (assuming format like {variable_name})
+    variables = re.findall(r"\{(\w+)\}", text)
+    return text, variables
+
+
+def bulk_generate_audio(
+    api_key, model_id, voice_id, csv_file, output_dir, voice_settings
+):
+    try:
+        df = pd.read_csv(csv_file, keep_default_na=False)
+        results = []
+
+        for index, row in df.iterrows():
+            text, variables = process_text(row["text"])
+
+            # Replace variables with their values if provided in the CSV
+            for var in variables:
+                if var in row:
+                    text = text.replace(f"{{{var}}}", str(row[var]))
+
+            filename = (
+                f"{row['filename']}.mp3" if "filename" in row else f"audio_{index}.mp3"
+            )
+            output_path = os.path.join(output_dir, filename)
+
+            success, response_seed = generate_audio(
+                api_key,
+                voice_settings["stability"],
+                model_id,
+                voice_settings["similarity_boost"],
+                voice_settings["style"],
+                voice_settings["speaker_boost"],
+                voice_id,
+                text,
+                output_path,
+            )
+
+            results.append(
+                {
+                    "filename": filename,
+                    "text": text,
+                    "success": success,
+                    "seed": response_seed,
+                }
+            )
+
+        return pd.DataFrame(results)
+    except Exception as e:
+        st.error(f"An error occurred during bulk generation: {str(e)}")
+        return pd.DataFrame()
