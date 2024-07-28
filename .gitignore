@@ -163,3 +163,4 @@ cython_debug/
 output.mp3
 *.mp3
 .DS_Store
+elevenlabs-tts-guide.md
