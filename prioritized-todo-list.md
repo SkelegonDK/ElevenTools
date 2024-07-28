@@ -1,4 +1,4 @@
-# TODO List for ElevenTools
+# TODO List for Eleven Tools
 
 ## High Priority
 1. Implement automated testing
