@@ -7,7 +7,6 @@ from Elevenlabs_functions import (
     fetch_voices,
     get_voice_id,
 )
-import random
 
 st.set_page_config(page_title="Bulk Generation", page_icon="📚", layout="centered")
 
