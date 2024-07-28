@@ -10,7 +10,6 @@ from Elevenlabs_functions import (
 import uuid
 import random
 import logging
-import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
