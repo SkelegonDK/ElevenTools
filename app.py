@@ -45,6 +45,26 @@ if "seed" not in st.session_state:
 if "generated_audio" not in st.session_state:
     st.session_state["generated_audio"] = []
 
+# Sidebar
+sidebar = st.sidebar
+with sidebar:
+    st.title("Seed Settings")
+    seed_type = st.radio("Seed Type", ["Random", "Fixed"])
+
+    if seed_type == "Fixed":
+        fixed_seed = sidebar.text_input(
+            "Fixed Seed", help="Set a fixed seed to improve reproducibility."
+        )
+        st.caption(
+            """Setting a fixed seed will ensure that the audio generated is consistent across runs.
+            For example when using variables in the script."""
+        )
+    else:
+        st.caption("A random seed will be generated for the audio file.")
+
+# Main content
+st.title("Pro Labs")
+
 # Create selectboxes for model and voice selection
 selected_model_name = st.selectbox(
     "Select model",
@@ -125,21 +145,22 @@ st.session_state["voice_settings"] = {
     "speaker_boost": speaker_boost,
 }
 
-# Generate audio buttons
-col1_generate, col2_generate, empty = st.columns(3, gap="small")
+# Generate audio button
+if st.button("Generate Audio"):
+    if script:
+        # Determine seed for this generation
+        if seed_type == "Fixed":
+            if fixed_seed and fixed_seed.isdigit():
+                seed = int(fixed_seed)
+            else:
+                st.error("Fixed seed must be a valid integer.")
+                st.stop()
+        else:
+            seed = random.randint(0, 9999999999)
 
-with col1_generate:
-    generate_random_btn = col1_generate.button(
-        "Generate with random seed", key="generate_audio_random"
-    )
-
-    if generate_random_btn:
-        random_seed = random.randint(0, 9999999999)
-        temp_filename = (
-            f"VID_{selected_voice_name}_SEED_{random_seed}_UID_{uuid.uuid1()}.mp3"
-        )
+        temp_filename = f"VID_{selected_voice_name}_SEED_{seed}_UID_{uuid.uuid1()}.mp3"
         success, response_seed = generate_audio(
-            ELEVENLABS_API_KEY,
+            st.session_state["ELEVENLABS_API_KEY"],
             voice_stability,
             selected_model_id,
             voice_similarity,
@@ -148,13 +169,16 @@ with col1_generate:
             selected_voice_id,
             script,
             temp_filename,
-            seed=random_seed,
+            seed=seed,
         )
         if success:
+            st.success(
+                f"Audio generated successfully with seed {response_seed if response_seed else seed}"
+            )
             st.session_state["generated_audio"].append(
                 {
                     "filename": temp_filename,
-                    "seed": response_seed if response_seed else random_seed,
+                    "seed": response_seed if response_seed else seed,
                     "voice": selected_voice_name,
                     "model": selected_model_name,
                     "voice_similarity": voice_similarity,
@@ -164,77 +188,17 @@ with col1_generate:
                     "script": script,
                 }
             )
-
-with col2_generate:
-    generate_seed_btn = col2_generate.button(
-        "Generate with fixed seed", key="generate_audio_seed"
-    )
-    st.caption(st.session_state["seed"])
-    if generate_seed_btn:
-        try:
-            temp_seed = int(st.session_state["seed"])
-            if temp_seed <= 0:
-                raise ValueError("Seed must be a positive integer")
-
-            temp_filename = (
-                f"VID_{selected_voice_name}_SEED_{temp_seed}_UID_{uuid.uuid1()}.mp3"
+            st.audio(temp_filename, format="audio/mp3")
+        else:
+            st.error(
+                "Failed to generate audio. Please check the logs for more information."
             )
-            success, response_seed = generate_audio(
-                ELEVENLABS_API_KEY,
-                voice_stability,
-                selected_model_id,
-                voice_similarity,
-                voice_style,
-                speaker_boost,
-                selected_voice_id,
-                script,
-                temp_filename,
-                seed=temp_seed,
-            )
-            if success:
-                st.success(
-                    f"Audio generated successfully with seed {response_seed if response_seed else temp_seed}"
-                )
-                st.session_state["seed"] = response_seed if response_seed else temp_seed
-                st.session_state["generated_audio"].append(
-                    {
-                        "filename": temp_filename,
-                        "seed": response_seed if response_seed else temp_seed,
-                        "voice": selected_voice_name,
-                        "model": selected_model_name,
-                        "voice_similarity": voice_similarity,
-                        "voice_stability": voice_stability,
-                        "voice_style": voice_style,
-                        "speaker_boost": speaker_boost,
-                        "script": script,
-                    }
-                )
-        except ValueError as e:
-            st.error(f"Invalid seed value: {e}")
-        except Exception as e:
-            logging.error(f"Error generating audio: {str(e)}")
-            st.error(f"An error occurred while generating audio: {str(e)}")
+    else:
+        st.warning("Please enter some text to generate audio.")
 
-# Display generated audio
-Generated_audio = st.expander("Generated audio", expanded=True)
+# Display generated audio history
+Generated_audio = st.expander("Generated audio history", expanded=True)
 with Generated_audio:
     for audio in st.session_state["generated_audio"]:
         st.write(audio)
         st.audio(audio["filename"], format="audio/mp3")
-
-# Sidebar
-sidebar = st.sidebar
-with sidebar:
-    st.title("Pro Labs")
-    st.write("A professional interface for Elevenlabs")
-
-    fixed_seed = sidebar.text_input(
-        "Fixed Seed", help="Set a fixed seed to improve reproducibility."
-    )
-    st.caption(
-        """Setting a fixed seed will ensure that the audio generated is consistent across runs.
-        For example when using variables in the script."""
-    )
-    st.session_state["seed"] = fixed_seed
-
-    settings = sidebar.expander("Settings", expanded=True)
