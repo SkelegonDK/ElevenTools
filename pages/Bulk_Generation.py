@@ -70,12 +70,12 @@ voice_settings_dict = {
 
 st.write(
     """
-Upload a CSV file with the following columns:
-- 'text': The text to be converted to speech. Use {variable_name} for variables.
-- 'filename' (optional): Custom filename for the generated audio.
+#### Upload a CSV file with the following columns:
+- **text:** The text to be converted to speech. Use {variable_name} for variables.
+- **filename** (optional): Custom filename for the generated audio.
 - Any additional columns will be treated as variables to replace in the text.
 
-Example CSV content:
+**Example CSV content:**
 ```
 text,filename,name,job
 Hello {name}!,greeting_{name},Alice,developer
