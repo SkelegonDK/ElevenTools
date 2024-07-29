@@ -1,13 +1,13 @@
 # Import necessary libraries
-import streamlit as st  # Used for building the web app
-import requests  # Used for making HTTP requests
-import json  # Used for working with JSON data
-from pprint import pprint  # Used for pretty-printing JSON data
-import logging
-import pandas as pd
 import os
-import re
-import random
+import json  # Used for working with JSON data
+import logging  # Used for logging messages
+import re  # Used for regular expressions
+import random  # Used for generating random numbers
+import pandas as pd  # Used for working with tabular data
+
+import requests  # Used for making HTTP requests
+import streamlit as st  # Used for building the web app
 
 
 @st.cache_data(ttl=3600)  # Cache the data for 1 hour
@@ -19,7 +19,7 @@ def fetch_models(api_key):
     headers = {"xi-api-key": api_key}
 
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=30)
         response.raise_for_status()  # Raises an HTTPError for bad responses
         models = response.json()
         return [(model["model_id"], model["name"]) for model in models]
@@ -37,7 +37,7 @@ def fetch_voices(api_key):
     headers = {"xi-api-key": api_key}
 
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=30)
         response.raise_for_status()  # Raises an HTTPError for bad responses
         voices = response.json()["voices"]
         return [(voice["voice_id"], voice["name"]) for voice in voices]
@@ -98,16 +98,17 @@ def generate_audio(
 
     # Log the payload being sent to the API
     logging.info(
-        f"Sending request to ElevenLabs API with payload: {json.dumps(payload, indent=2)}"
+        "Sending request to ElevenLabs API with payload: %s",
+        json.dumps(payload, indent=2),
     )
 
     # Make the POST request to the TTS API
     response = requests.post(tts_url, headers=headers, json=payload, timeout=30)
 
     # Log the full response details
-    logging.info(f"API Response Status Code: {response.status_code}")
+    logging.info("API Response Status Code: %s", response.status_code)
     logging.info(
-        f"API Response Headers: {json.dumps(dict(response.headers), indent=2)}"
+        "API Response Headers: %s", json.dumps(dict(response.headers), indent=2)
     )
 
     # Check if the request was successful
@@ -122,13 +123,13 @@ def generate_audio(
         response_seed = response.headers.get("x-seed")
 
         if response_seed:
-            logging.info(f"Seed found in response headers: {response_seed}")
+            logging.info("Seed found in response headers: %s", response_seed)
         else:
             logging.info("No seed found in response headers.")
 
         # Log the entire response content for debugging
         logging.info(
-            f"Full response content: {response.content[:1000]}..."
+            "Full response content: %s...", response.content[:1000]
         )  # Log first 1000 bytes
 
         st.toast("Audio generated successfully.")
@@ -138,7 +139,7 @@ def generate_audio(
         )  # Indicate success and return the seed from the response (if any)
     else:
         # Log the error message if the request was not successful
-        logging.error(f"Error response from ElevenLabs API: {response.text}")
+        logging.error("Error response from ElevenLabs API: %s", response.text)
         st.error(f"Failed to generate audio. API response: {response.text}")
         return False, None  # Indicate failure and return None for the seed
 
@@ -170,12 +171,12 @@ def bulk_generate_audio(
 ):
     try:
         csv_file.seek(0)
-        logging.info(f"First 100 bytes of CSV file: {csv_file.read(100)}")
+        logging.info("First 100 bytes of CSV file: %s", csv_file.read(100))
         csv_file.seek(0)
 
         df = pd.read_csv(csv_file)
-        logging.info(f"DataFrame info:\n{df.info()}")
-        logging.info(f"DataFrame head:\n{df.head()}")
+        logging.info("DataFrame info:\n%s", df.info())
+        logging.info("DataFrame head:\n%s", df.head())
 
         if df.empty:
             raise ValueError("The CSV file is empty.")
@@ -236,6 +237,6 @@ def bulk_generate_audio(
         )
         return pd.DataFrame()
     except Exception as e:
-        logging.error(f"An error occurred during bulk generation: {str(e)}")
+        logging.error("An error occurred during bulk generation: %s", str(e))
         st.error(f"An error occurred during bulk generation: {str(e)}")
         return pd.DataFrame()
