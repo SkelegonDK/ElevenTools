@@ -7,6 +7,7 @@ from Elevenlabs_functions import (
     fetch_voices,
     get_voice_id,
 )
+from ollama_functions import enhance_script_with_ollama
 import uuid
 import random
 import logging
@@ -43,6 +44,10 @@ if "seed" not in st.session_state:
     st.session_state["seed"] = "None"
 if "generated_audio" not in st.session_state:
     st.session_state["generated_audio"] = []
+if "original_script" not in st.session_state:
+    st.session_state["original_script"] = ""
+if "enhanced_script" not in st.session_state:
+    st.session_state["enhanced_script"] = ""
 
 # Sidebar
 sidebar = st.sidebar
@@ -96,9 +101,59 @@ script = st.text_area(
     """,
 )
 
-if script:
-    detected_variables = detect_string_variables(script)
-    detect_phonetic = detect_phonetic_conversion(script)
+# Store the original script
+if script != st.session_state["original_script"]:
+    st.session_state["original_script"] = script
+    st.session_state["enhanced_script"] = ""  # Clear enhanced script when original changes
+
+# New prompt input for script enhancement
+enhancement_prompt = st.text_input(
+    "Enhancement prompt (optional)",
+    "",
+    help="Provide a prompt to guide the script enhancement process.",
+)
+
+# New "Enhance script" button
+if st.button("Enhance script"):
+    if script:
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+
+        def update_progress(progress):
+            progress_bar.progress(progress)
+            status_text.text(f"Enhancing script... {progress:.0%}")
+
+        success, result = enhance_script_with_ollama(
+            script, enhancement_prompt, update_progress
+        )
+
+        progress_bar.empty()
+        status_text.empty()
+
+        if success:
+            st.session_state["enhanced_script"] = result
+            st.success("Script enhanced successfully!")
+            st.text_area("Enhanced script", value=st.session_state["enhanced_script"], height=150)
+        else:
+            st.error("Error enhancing script")
+            st.error(result)
+    else:
+        st.warning("Please enter some text to enhance.")
+
+# New "Remove enhancement" button
+if st.button("Remove enhancement"):
+    if st.session_state["enhanced_script"]:
+        st.session_state["enhanced_script"] = ""
+        st.success("Enhancement removed. Original script restored.")
+    else:
+        st.info("No enhancement to remove.")
+
+# Use enhanced script if available, otherwise use original script
+script_to_use = st.session_state["enhanced_script"] if st.session_state["enhanced_script"] else script
+
+if script_to_use:
+    detected_variables = detect_string_variables(script_to_use)
+    detect_phonetic = detect_phonetic_conversion(script_to_use)
 
     if detected_variables and len(detected_variables) > 0:
         st.info("Detected variables")
@@ -107,9 +162,9 @@ if script:
             for variable in detected_variables:
                 value = st.text_input(f"Edit: {variable}", key=variable)
                 if value:
-                    script = script.replace(f"{{{variable}}}", value)
+                    script_to_use = script_to_use.replace(f"{{{variable}}}", value)
             st.toast("Updated script", icon="🔄")
-            updated_script = st.markdown(f"#### Updated script:\n{script}")
+            updated_script = st.markdown(f"#### Updated script:\n{script_to_use}")
 
     if detect_phonetic and len(detect_phonetic) > 0:
         st.info("Detected phonetic conversion")
@@ -118,7 +173,7 @@ if script:
             for phonetic in detect_phonetic:
                 language = phonetic[0]
                 word = phonetic[1]
-                script = script.replace(
+                script_to_use = script_to_use.replace(
                     f"[[{language}:{word}]]",
                     convert_word_to_phonetic(
                         word=word, language=language, model=selected_model_id
@@ -126,7 +181,7 @@ if script:
                 )
             st.toast("Updated script", icon="🔄")
             st.subheader("Updated script")
-            updated_script = st.markdown(script)
+            updated_script = st.markdown(script_to_use)
 
 # Voice settings
 voice_settings = st.expander("Advanced voice settings", expanded=True)
@@ -146,7 +201,7 @@ st.session_state["voice_settings"] = {
 
 # Generate audio button
 if st.button("Generate Audio"):
-    if script:
+    if script_to_use:
         # Determine seed for this generation
         if seed_type == "Fixed":
             if fixed_seed and fixed_seed.isdigit():
@@ -158,40 +213,45 @@ if st.button("Generate Audio"):
             seed = random.randint(0, 9999999999)
 
         temp_filename = f"VID_{selected_voice_name}_SEED_{seed}_UID_{uuid.uuid1()}.mp3"
-        success, response_seed = generate_audio(
-            st.session_state["ELEVENLABS_API_KEY"],
-            voice_stability,
-            selected_model_id,
-            voice_similarity,
-            voice_style,
-            speaker_boost,
-            selected_voice_id,
-            script,
-            temp_filename,
-            seed=seed,
-        )
-        if success:
-            st.success(
-                f"Audio generated successfully with seed {response_seed if response_seed else seed}"
+        
+        try:
+            success, response_seed = generate_audio(
+                st.session_state["ELEVENLABS_API_KEY"],
+                voice_stability,
+                selected_model_id,
+                voice_similarity,
+                voice_style,
+                speaker_boost,
+                selected_voice_id,
+                script_to_use,  # Use the enhanced script if available
+                temp_filename,
+                seed=seed,
             )
-            st.session_state["generated_audio"].append(
-                {
-                    "filename": temp_filename,
-                    "seed": response_seed if response_seed else seed,
-                    "voice": selected_voice_name,
-                    "model": selected_model_name,
-                    "voice_similarity": voice_similarity,
-                    "voice_stability": voice_stability,
-                    "voice_style": voice_style,
-                    "speaker_boost": speaker_boost,
-                    "script": script,
-                }
-            )
-            st.audio(temp_filename, format="audio/mp3")
-        else:
-            st.error(
-                "Failed to generate audio. Please check the logs for more information."
-            )
+            
+            if success:
+                st.success(
+                    f"Audio generated successfully with seed {response_seed if response_seed else seed}"
+                )
+                st.session_state["generated_audio"].append(
+                    {
+                        "filename": temp_filename,
+                        "seed": response_seed if response_seed else seed,
+                        "voice": selected_voice_name,
+                        "model": selected_model_name,
+                        "voice_similarity": voice_similarity,
+                        "voice_stability": voice_stability,
+                        "voice_style": voice_style,
+                        "speaker_boost": speaker_boost,
+                        "script": script_to_use,
+                    }
+                )
+                st.audio(temp_filename, format="audio/mp3")
+            else:
+                st.error("Failed to generate audio. Please see details below.")
+                st.error(response_seed)  # In this case, response_seed contains the error message
+        except Exception as e:
+            st.error(f"An unexpected error occurred: {str(e)}")
+            logging.error(f"Unexpected error in audio generation: {str(e)}", exc_info=True)
     else:
         st.warning("Please enter some text to generate audio.")
 
