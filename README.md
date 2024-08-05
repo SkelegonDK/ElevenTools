@@ -49,7 +49,7 @@ ElevenTools integrates with Ollama for local language model processing. To use t
 2. Download the required model:
    After installing Ollama, open a terminal and run:
    ```bash
-   ollama pull mistral
+   ollama pull llama3.1:8b
    ```
    This will download the Mistral model, which is currently used by ElevenTools.
 
