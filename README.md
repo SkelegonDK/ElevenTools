@@ -11,7 +11,7 @@ ElevenTools is a comprehensive toolbox for ElevenLabs, providing a user-friendly
 - Single and bulk audio generation
 - CSV support for batch processing
 - Review and playback of generated audio
-- OpenAI integration for phonetic conversions
+- Ollama integration for local language model processing
 
 ## Installation
 
@@ -28,12 +28,37 @@ ElevenTools is a comprehensive toolbox for ElevenLabs, providing a user-friendly
 
 ## Configuration
 
-1. Create a `.streamlit/secrets.toml` file in the root directory with your API keys:
+1. Create a `.streamlit/secrets.toml` file in the root directory with your API key:
    ```toml
    ELEVENLABS_API_KEY = "your_elevenlabs_api_key"
-   OPENAI_API_KEY = "your_openai_api_key"
    ```
 2. (Optional) Create a `.streamlit/config.toml` file to customize Streamlit's appearance and behavior.
+
+## Ollama Setup
+
+ElevenTools integrates with Ollama for local language model processing. To use this feature, you need to install Ollama and download the appropriate model:
+
+1. Install Ollama:
+   - For macOS and Linux:
+     ```bash
+     curl https://ollama.ai/install.sh | sh
+     ```
+   - For Windows:
+     Download and install from [Ollama's official website](https://ollama.ai/download)
+
+2. Download the required model:
+   After installing Ollama, open a terminal and run:
+   ```bash
+   ollama pull mistral
+   ```
+   This will download the Mistral model, which is currently used by ElevenTools.
+
+3. Ensure Ollama is running:
+   Ollama should start automatically after installation. If it's not running, you can start it manually:
+   - On macOS/Linux: `ollama serve`
+   - On Windows: Run the Ollama application
+
+For more information on Ollama, visit [ollama.ai](https://ollama.ai).
 
 ## Usage
 
@@ -52,7 +77,7 @@ Navigate to the provided local URL to access the ElevenTools interface.
 
 ## TODO
 
-- [ ] Implement OLLAMA integration
+- [x] Implement Ollama integration
 - [ ] Enhance Voice-to-Voice functionality
   - [ ] Add voice cleanup features
 - [ ] Improve data persistence
