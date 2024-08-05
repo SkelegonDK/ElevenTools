@@ -51,7 +51,7 @@ ElevenTools integrates with Ollama for local language model processing. To use t
    ```bash
    ollama pull llama3.1:8b
    ```
-   This will download the Mistral model, which is currently used by ElevenTools.
+   This will download the small and efficient Llama 3.1:8b model, which is currently used by ElevenTools.
 
 3. Ensure Ollama is running:
    Ollama should start automatically after installation. If it's not running, you can start it manually:
@@ -86,6 +86,7 @@ Navigate to the provided local URL to access the ElevenTools interface.
 2. Integrate OLLAMA
    - [x] Implement OLLAMA integration in the codebase
    - [ ] Create tests for OLLAMA integration
+   - [ ] Test and improve enhancing process
 
 3. Enhance UI/UX
    - [ ] Implement progress bars for audio generation
