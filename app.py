@@ -6,7 +6,7 @@ from Elevenlabs_functions import (
     fetch_voices,
     get_voice_id,
 )
-from ollama_functions import enhance_script_with_ollama
+from ollama_functions import enhance_script_with_ollama, convert_word_to_phonetic
 import uuid
 import random
 import logging
