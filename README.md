@@ -2,6 +2,11 @@
 
 ElevenTools is a comprehensive toolbox for ElevenLabs, providing a user-friendly interface for text-to-speech generation with advanced features and bulk processing capabilities.
 
+## Recent Updates
+
+- **Phonetics processing moved to Ollama**: We've migrated the phonetics processing to use Ollama, a local language model, for improved performance and privacy.
+- **Bug fix**: Resolved an issue with the speaker boost parameter to ensure it functions correctly.
+
 ## Features
 
 - Dynamic voice and model selection from the ElevenLabs library
@@ -11,7 +16,7 @@ ElevenTools is a comprehensive toolbox for ElevenLabs, providing a user-friendly
 - Single and bulk audio generation
 - CSV support for batch processing
 - Review and playback of generated audio
-- Ollama integration for local language model processing
+- Ollama integration for local language model processing, including phonetics
 
 ## Installation
 
@@ -36,7 +41,7 @@ ElevenTools is a comprehensive toolbox for ElevenLabs, providing a user-friendly
 
 ## Ollama Setup
 
-ElevenTools integrates with Ollama for local language model processing. To use this feature, you need to install Ollama and download the appropriate model:
+ElevenTools integrates with Ollama for local language model processing, including phonetics. To use this feature, you need to install Ollama and download the appropriate model:
 
 1. Install Ollama:
    - For macOS and Linux:
