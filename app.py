@@ -14,7 +14,7 @@ import logging
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
-st.set_page_config(page_title="Pro Labs", page_icon="🔊", layout="centered")
+st.set_page_config(page_title="ElevenTools", page_icon="🔊", layout="centered")
 
 # Initialize API keys
 ELEVENLABS_API_KEY = st.secrets["ELEVENLABS_API_KEY"]
@@ -196,14 +196,14 @@ with voice_settings:
     voice_stability = st.slider("Voice stability", 0.0, 1.0, 0.5)
     voice_similarity = st.slider("Voice similarity", 0.0, 1.0, 0.5)
     voice_style = st.slider("Voice style", 0.0, 1.0, 0.0)
-    speaker_boost = st.checkbox("Use speaker boost")
+    use_speaker_boost = st.checkbox("Use speaker boost")
 
 # Store voice settings in session state for use in bulk generation page
 st.session_state["voice_settings"] = {
     "stability": voice_stability,
     "similarity_boost": voice_similarity,
     "style": voice_style,
-    "speaker_boost": speaker_boost,
+    "use_speaker_boost": use_speaker_boost,
 }
 
 # Generate audio button
@@ -228,7 +228,7 @@ if st.button("Generate Audio"):
                 selected_model_id,
                 voice_similarity,
                 voice_style,
-                speaker_boost,
+                use_speaker_boost,
                 selected_voice_id,
                 script_to_use,  # Use the enhanced script if available
                 temp_filename,
@@ -248,7 +248,7 @@ if st.button("Generate Audio"):
                         "voice_similarity": voice_similarity,
                         "voice_stability": voice_stability,
                         "voice_style": voice_style,
-                        "speaker_boost": speaker_boost,
+                        "use_speaker_boost": use_speaker_boost,
                         "script": script_to_use,
                     }
                 )
