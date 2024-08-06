@@ -1,6 +1,5 @@
 import streamlit as st
 from functions import detect_string_variables, detect_phonetic_conversion
-from Openai_functions import convert_word_to_phonetic
 from Elevenlabs_functions import (
     generate_audio,
     fetch_models,
@@ -104,7 +103,9 @@ script = st.text_area(
 # Store the original script
 if script != st.session_state["original_script"]:
     st.session_state["original_script"] = script
-    st.session_state["enhanced_script"] = ""  # Clear enhanced script when original changes
+    st.session_state["enhanced_script"] = (
+        ""  # Clear enhanced script when original changes
+    )
 
 # New prompt input for script enhancement
 enhancement_prompt = st.text_input(
@@ -133,7 +134,9 @@ if st.button("Enhance script"):
         if success:
             st.session_state["enhanced_script"] = result
             st.success("Script enhanced successfully!")
-            st.text_area("Enhanced script", value=st.session_state["enhanced_script"], height=150)
+            st.text_area(
+                "Enhanced script", value=st.session_state["enhanced_script"], height=150
+            )
         else:
             st.error("Error enhancing script")
             st.error(result)
@@ -149,7 +152,11 @@ if st.button("Remove enhancement"):
         st.info("No enhancement to remove.")
 
 # Use enhanced script if available, otherwise use original script
-script_to_use = st.session_state["enhanced_script"] if st.session_state["enhanced_script"] else script
+script_to_use = (
+    st.session_state["enhanced_script"]
+    if st.session_state["enhanced_script"]
+    else script
+)
 
 if script_to_use:
     detected_variables = detect_string_variables(script_to_use)
@@ -213,7 +220,7 @@ if st.button("Generate Audio"):
             seed = random.randint(0, 9999999999)
 
         temp_filename = f"VID_{selected_voice_name}_SEED_{seed}_UID_{uuid.uuid1()}.mp3"
-        
+
         try:
             success, response_seed = generate_audio(
                 st.session_state["ELEVENLABS_API_KEY"],
@@ -227,7 +234,7 @@ if st.button("Generate Audio"):
                 temp_filename,
                 seed=seed,
             )
-            
+
             if success:
                 st.success(
                     f"Audio generated successfully with seed {response_seed if response_seed else seed}"
@@ -248,10 +255,14 @@ if st.button("Generate Audio"):
                 st.audio(temp_filename, format="audio/mp3")
             else:
                 st.error("Failed to generate audio. Please see details below.")
-                st.error(response_seed)  # In this case, response_seed contains the error message
+                st.error(
+                    response_seed
+                )  # In this case, response_seed contains the error message
         except Exception as e:
             st.error(f"An unexpected error occurred: {str(e)}")
-            logging.error(f"Unexpected error in audio generation: {str(e)}", exc_info=True)
+            logging.error(
+                f"Unexpected error in audio generation: {str(e)}", exc_info=True
+            )
     else:
         st.warning("Please enter some text to generate audio.")
 
