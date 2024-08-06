@@ -15,6 +15,10 @@ from Elevenlabs_functions import (
     process_text,
     bulk_generate_audio,
 )
+from ollama_functions import (
+    enhance_script_with_ollama,
+    convert_word_to_phonetic,
+)
 
 # Existing tests
 def test_detect_string_variables():
@@ -222,3 +226,54 @@ def test_bulk_generate_audio_with_random_seed(mock_generate_audio):
     assert result_df['text'].tolist() == ['Hello {name}']
     assert all(result_df['success'])
     assert result_df['seed'].iloc[0] is not None  # Random seed should be generated
+
+# New tests for ollama_functions
+@patch('requests.post')
+def test_enhance_script_with_ollama(mock_post):
+    mock_response = MagicMock()
+    mock_response.json.return_value = {
+        "response": "I am so excited to share this incredible news with you! <break time=\"0.5s\"/> We have just made a groundbreaking discovery that will revolutionize the way we think about science and technology. <break time=\"0.3s\"/> This breakthrough has the potential to change lives and shape the future of our world. <break time=\"0.5s\"/> Stay tuned for more details as we unveil this amazing innovation!"
+    }
+    mock_post.return_value = mock_response
+
+    script = "Original script content"
+    enhancement_prompt = "Enhance this script"
+    progress_callback = MagicMock()
+
+    success, result = enhance_script_with_ollama(script, enhancement_prompt, progress_callback)
+
+    assert success is True
+    assert result.startswith("I am so excited to share this incredible news with you!")
+    assert "<break time=" in result
+    mock_post.assert_called_once()
+    progress_callback.assert_called()
+
+@patch('requests.post')
+def test_convert_word_to_phonetic(mock_post):
+    mock_response = MagicMock()
+    mock_response.json.return_value = {"response": "/foʊˈnɛtɪk/"}
+    mock_post.return_value = mock_response
+
+    word = "phonetic"
+    language = "english"
+    model = "llama2"
+
+    result = convert_word_to_phonetic(word, language, model)
+
+    assert result == "/foʊˈnɛtɪk/"
+    mock_post.assert_called_once()
+
+@patch('requests.post')
+def test_convert_word_to_phonetic_error(mock_post):
+    mock_response = MagicMock()
+    mock_response.json.return_value = {"response": "/ɪnˈvælɪd/"}
+    mock_post.return_value = mock_response
+
+    word = "invalidword"
+    language = "unknown"
+    model = "llama2"
+
+    result = convert_word_to_phonetic(word, language, model)
+
+    assert result == "/ɪnˈvælɪd/"
+    mock_post.assert_called_once()
