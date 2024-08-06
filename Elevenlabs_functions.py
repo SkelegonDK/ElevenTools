@@ -46,6 +46,7 @@ def fetch_voices(api_key):
         return []
 
 
+@st.cache_data(ttl=3600)  # Cache the data for 1 hour
 def get_voice_id(voices, selected_voice_name):
     """
     Get the voice ID for the selected voice name.
