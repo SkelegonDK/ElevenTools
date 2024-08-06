@@ -66,7 +66,7 @@ with sidebar:
         st.caption("A random seed will be generated for the audio file.")
 
 # Main content
-st.title("Pro Labs")
+st.title("ElevenTools")
 
 # Create selectboxes for model and voice selection
 selected_model_name = st.selectbox(
