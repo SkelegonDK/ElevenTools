@@ -8,7 +8,6 @@ from Elevenlabs_functions import (
     get_voice_id,
 )
 
-
 st.set_page_config(page_title="Bulk Generation", page_icon="📚", layout="centered")
 
 st.title("ElevenTools")
