@@ -75,6 +75,44 @@ Navigate to the provided local URL to access the ElevenTools interface.
 2. Use the Bulk Generation page to upload your CSV and generate multiple audio files.
 3. Choose between random or fixed seed generation for consistent results.
 
+## Testing
+
+ElevenTools uses pytest for testing. The test suite is organized into separate files for each main component of the application:
+
+- `test_functions.py`: Tests for utility functions in `functions.py`
+- `test_elevenlabs_functions.py`: Tests for ElevenLabs API interactions in `Elevenlabs_functions.py`
+- `test_ollama_functions.py`: Tests for Ollama integration in `ollama_functions.py`
+- `test_streamlit_pages.py`: Tests for Streamlit pages (Home.py and Bulk_Generation.py)
+
+To run the tests:
+
+1. Install pytest if you haven't already:
+   ```bash
+   pip install pytest
+   ```
+
+2. Run all tests:
+   ```bash
+   pytest
+   ```
+
+3. To run tests for a specific file:
+   ```bash
+   pytest test_functions.py
+   ```
+
+4. To run tests with more detailed output:
+   ```bash
+   pytest -v
+   ```
+
+5. To run tests and see print statements:
+   ```bash
+   pytest -s
+   ```
+
+When contributing new features or making changes, please add or update the relevant tests to ensure code quality and prevent regressions.
+
 # TODO List for Eleven Tools
 
 ## High Priority
@@ -85,7 +123,7 @@ Navigate to the provided local URL to access the ElevenTools interface.
 
 2. Integrate OLLAMA
    - [x] Implement OLLAMA integration in the codebase
-   - [ ] Create tests for OLLAMA integration
+   - [x] Create tests for OLLAMA integration
    - [ ] Test and improve enhancing process
 
 3. Enhance UI/UX
@@ -131,10 +169,11 @@ Navigate to the provided local URL to access the ElevenTools interface.
 
 ### OLLAMA Integration
 - Integrate OLLAMA
-  - [ ] Research OLLAMA API and integration requirements
-  - [ ] Design integration architecture
-  - [ ] Implement OLLAMA integration in the codebase
-  - [ ] Create tests for OLLAMA integration
+  - [x] Research OLLAMA API and integration requirements
+  - [x] Design integration architecture
+  - [x] Implement OLLAMA integration in the codebase
+  - [x] Create tests for OLLAMA integration
+  - [ ] Test and improve enhancing process
 
 ### User Interface and Experience
 - Enhance UI/UX
@@ -169,7 +208,6 @@ Navigate to the provided local URL to access the ElevenTools interface.
 - Documentation
   - [ ] Create comprehensive API documentation
   - [ ] Develop a user guide with examples and best practices
-
 
 ## License
 
