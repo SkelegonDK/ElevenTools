@@ -16,6 +16,9 @@ logging.basicConfig(level=logging.INFO)
 
 st.set_page_config(page_title="ElevenTools", page_icon="🔊", layout="centered")
 
+with open("custom_style.css", encoding="utf-8") as css:
+    st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
+
 # Initialize API keys
 ELEVENLABS_API_KEY = st.secrets["ELEVENLABS_API_KEY"]
 OPENAI_API = st.secrets["OPENAI_API_KEY"]
@@ -66,7 +69,8 @@ with sidebar:
         st.caption("A random seed will be generated for the audio file.")
 
 # Main content
-st.title("Pro Labs")
+st.title("ElevenTools")
+st.subheader("Advanced Text-to-Speech")
 
 # Create selectboxes for model and voice selection
 selected_model_name = st.selectbox(
