@@ -1,0 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap'); 
+
+h1, h2, h3 {
+    font-family: 'frick 0.3', sans-serif; 
+    
+}
+
+h4, h5, h6 {
+    font-family: 'Uncut Sans', sans-serif; 
+    font-weight: 800;
+    
+}
+
+p, a, li {
+    font-family: 'Uncut Sans', sans-serif; 
+    font-weight: 300;
+    
+}
+
+button p {
+    font-family: 'Uncut Sans', sans-serif; 
+    font-weight: 600;
+    
+}

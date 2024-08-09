@@ -11,7 +11,11 @@ from Elevenlabs_functions import (
 
 st.set_page_config(page_title="Bulk Generation", page_icon="📚", layout="centered")
 
-st.title("Bulk Generation")
+st.title("ElevenTools")
+st.subheader("Bulk Audio Generation")
+
+with open("custom_style.css", encoding="utf-8") as css:
+    st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
 
 # Sidebar for seed input
 sidebar = st.sidebar
