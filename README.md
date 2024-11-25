@@ -49,7 +49,7 @@ ElevenTools integrates with Ollama for local language model processing. To use t
 2. Download the required model:
    After installing Ollama, open a terminal and run:
    ```bash
-   ollama pull llama3.1:8b
+   ollama pull llama3.2:3b
    ```
    This will download the small and efficient Llama 3.1:8b model, which is currently used by ElevenTools.
 
