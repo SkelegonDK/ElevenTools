@@ -16,13 +16,19 @@ st.subheader("Bulk Audio Generation")
 with open("custom_style.css", encoding="utf-8") as css:
     st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
 
+# Initialize session state
+if "ELEVENLABS_API_KEY" not in st.session_state:
+    st.session_state["ELEVENLABS_API_KEY"] = st.secrets["ELEVENLABS_API_KEY"]
+if "seed_type" not in st.session_state:
+    st.session_state["seed_type"] = "Random"
+
 # Sidebar for seed input
 sidebar = st.sidebar
 with sidebar:
     st.title("Seed Settings")
-    seed_type = st.radio("Seed Type", ["Random", "Fixed"])
+    st.session_state["seed_type"] = st.radio("Seed Type", ["Random", "Fixed"])
 
-    if seed_type == "Fixed":
+    if st.session_state["seed_type"] == "Fixed":
         fixed_seed = sidebar.text_input(
             "Fixed Seed", help="Set a fixed seed to improve reproducibility."
         )
@@ -102,7 +108,7 @@ if uploaded_file is not None:
             os.makedirs(output_dir, exist_ok=True)
 
             # Prepare seed for bulk generation
-            if seed_type == "Fixed":
+            if st.session_state["seed_type"] == "Fixed":
                 seed = int(fixed_seed) if fixed_seed.isdigit() else None
             else:
                 seed = None  # Random seeds will be generated in the bulk_generate_audio function
@@ -114,7 +120,7 @@ if uploaded_file is not None:
                 uploaded_file,
                 output_dir,
                 voice_settings_dict,
-                seed_type,
+                st.session_state["seed_type"],
                 seed,
             )
 

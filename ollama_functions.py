@@ -5,7 +5,7 @@ import html
 
 def enhance_script_with_ollama(script, enhancement_prompt="", progress_callback=None):
     """
-    Enhance the given script using the Ollama llama3.1:8b model.
+    Enhance the given script using the Ollama llama3.2:3b model.
 
     :param script: The script to enhance
     :param enhancement_prompt: Optional prompt for enhancement guidance
@@ -15,7 +15,7 @@ def enhance_script_with_ollama(script, enhancement_prompt="", progress_callback=
     ollama_command = [
         "ollama",
         "run",
-        "llama3.1:8b",
+        "llama3.2:3b",
         f"""# Enhance the following script for text-to-speech purposes, focusing on creating a natural and expressive output.
         
         ## Apply the following techniques:
@@ -116,7 +116,7 @@ def convert_word_to_phonetic(word: str, language: str, model: str):
     ollama_command = [
         "ollama",
         "run",
-        "llama3.1:8b",
+        "llama3.2:3b",
         f"""You are an expert linguist and translator.
 
 {prompt}
@@ -147,3 +147,35 @@ Word to convert: {word}
             f"Error converting word to phonetic: {e}\nError output: {e.stderr}"
         )
         return None
+
+
+def get_ollama_response(prompt: str) -> str:
+    """
+    Get a response from Ollama using the llama3.2:3b model.
+    """
+    ollama_command = [
+        "ollama",
+        "run",
+        "llama3.2:3b",
+        prompt,
+    ]
+
+    try:
+        process = subprocess.Popen(
+            ollama_command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+        )
+
+        stdout, stderr = process.communicate()
+
+        if process.returncode != 0:
+            raise subprocess.CalledProcessError(
+                process.returncode, ollama_command, stderr
+            )
+
+        return stdout.strip()
+    except subprocess.CalledProcessError as e:
+        error_message = f"Error getting Ollama response: {e}\nError output: {e.stderr}"
+        return error_message

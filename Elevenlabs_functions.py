@@ -5,6 +5,7 @@ import logging  # Used for logging messages
 import re  # Used for regular expressions
 import random  # Used for generating random numbers
 import pandas as pd  # Used for working with tabular data
+import base64  # Used for decoding base64 audio data
 
 import requests  # Used for making HTTP requests
 import streamlit as st  # Used for building the web app
@@ -143,6 +144,75 @@ def generate_audio(
         logging.error("Error response from ElevenLabs API: %s", response.text)
         st.error(f"Failed to generate audio. API response: {response.text}")
         return False, None  # Indicate failure and return None for the seed
+
+
+def generate_voice_previews(api_key, voice_description):
+    """
+    Generate voice previews from a description using the ElevenLabs API.
+    """
+    url = "https://api.elevenlabs.io/v1/text-to-voice/create-previews"
+    headers = {"xi-api-key": api_key, "Content-Type": "application/json"}
+
+    # Sample text that meets the 100-1000 character requirement
+    sample_text = """Hello! I'm excited to demonstrate my voice capabilities. 
+    I can speak clearly and naturally, adapting my tone to different contexts. 
+    Whether it's casual conversation, professional presentations, or storytelling, 
+    I aim to deliver high-quality, engaging audio that meets your needs. 
+    How can I help bring your content to life today?"""
+
+    payload = {"text": sample_text, "voice_description": voice_description}
+
+    try:
+        response = requests.post(url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        result = response.json()
+
+        # Process previews and save audio files
+        processed_previews = []
+        for idx, preview in enumerate(result["previews"]):
+            # Decode base64 audio and save to file
+            audio_data = base64.b64decode(preview["audio_base_64"])
+            preview_path = f"preview_{idx}.mp3"
+            with open(preview_path, "wb") as f:
+                f.write(audio_data)
+
+            # Add processed preview info
+            processed_previews.append(
+                {"id": preview["generated_voice_id"], "path": preview_path}
+            )
+
+        return {
+            "generated_voice_id": result["previews"][0]["generated_voice_id"],
+            "audio": processed_previews,
+        }
+    except requests.exceptions.RequestException as e:
+        st.error(f"Failed to generate voice previews: {str(e)}")
+        return None
+
+
+def create_voice_from_preview(
+    api_key, voice_name, voice_description, generated_voice_id, played_ids=None
+):
+    """
+    Create a voice from a preview using the ElevenLabs API.
+    """
+    url = "https://api.elevenlabs.io/v1/text-to-voice/create-voice-from-preview"
+    headers = {"xi-api-key": api_key, "Content-Type": "application/json"}
+    payload = {
+        "voice_name": voice_name,
+        "voice_description": voice_description,
+        "generated_voice_id": generated_voice_id,
+        "labels": {"language": "en"},
+        "played_not_selected_voice_ids": played_ids if played_ids else [],
+    }
+
+    try:
+        response = requests.post(url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        st.error(f"Failed to create voice from preview: {str(e)}")
+        return None
 
 
 ### BULK GENERATION FUNCTIONS ###

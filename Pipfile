@@ -9,6 +9,7 @@ black = "*"
 openai = "*"
 urllib3 = "*"
 pytest = "*"
+pyperclip = "*"
 
 [dev-packages]
 
