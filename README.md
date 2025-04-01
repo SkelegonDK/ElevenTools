@@ -228,3 +228,23 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## Support
 
 If you encounter any problems or have any questions, please open an issue in this repository.
+
+## Voice Settings
+
+The following voice settings can be adjusted:
+
+- **Stability** (0.0-1.0): Controls the stability of the voice. Higher values make the voice more consistent.
+- **Similarity Boost** (0.0-1.0): Controls how closely the voice matches the reference audio.
+- **Style** (0.0-1.0): Controls the expressiveness of the voice.
+- **Speaker Boost**: Enhances the clarity and presence of the speaker's voice.
+- **Speed** (0.5-2.0): Controls the speaking speed (only available with multilingual v2 model)
+  - 0.5: Half speed
+  - 1.0: Normal speed (default)
+  - 2.0: Double speed
+
+## Models
+
+The following models are available:
+
+- **Monolingual v1**: English-only model optimized for speed
+- **Multilingual v2**: Advanced model supporting multiple languages and speed control
