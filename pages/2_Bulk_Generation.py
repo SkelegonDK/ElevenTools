@@ -71,12 +71,27 @@ with voice_settings:
     voice_style = st.slider("Voice style", 0.0, 1.0, 0.0)
     speaker_boost = st.checkbox("Use speaker boost")
 
+    # Add speed slider for multilingual v2 model
+    voice_speed = None
+    if selected_model_id == "eleven_multilingual_v2":
+        voice_speed = st.slider(
+            "Voice speed",
+            min_value=0.5,
+            max_value=2.0,
+            value=1.0,
+            step=0.1,
+            help="Adjust the speaking speed (only available for multilingual v2 model)",
+        )
+
 voice_settings_dict = {
     "stability": voice_stability,
     "similarity_boost": voice_similarity,
     "style": voice_style,
     "speaker_boost": speaker_boost,
 }
+
+if selected_model_id == "eleven_multilingual_v2":
+    voice_settings_dict["speed"] = voice_speed
 
 st.write(
     """
