@@ -1,87 +1,151 @@
-# Import necessary libraries
+"""ElevenLabs API integration functions."""
+
 import os
-import json  # Used for working with JSON data
-import logging  # Used for logging messages
-import re  # Used for regular expressions
-import random  # Used for generating random numbers
-import pandas as pd  # Used for working with tabular data
-import base64  # Used for decoding base64 audio data
+import json
+import logging
+import re
+import random
+from typing import Tuple, List, Dict, Optional, Any, Union, BinaryIO
 
-import requests  # Used for making HTTP requests
-import streamlit as st  # Used for building the web app
+try:
+    import pandas as pd  # type: ignore
+    import requests  # type: ignore
+except ImportError:
+    pass  # Handle missing dependencies gracefully
+
+import base64
+import streamlit as st
+
+from utils.error_handling import APIError, ValidationError, handle_error
+from utils.caching import st_cache
 
 
-@st.cache_data(ttl=3600)  # Cache the data for 1 hour
-def fetch_models(api_key):
-    """
-    Fetches the list of available models from the ElevenLabs API.
+@st_cache(ttl_minutes=60)
+def fetch_models(api_key: str) -> List[Tuple[str, str]]:
+    """Fetch available models from ElevenLabs API.
+
+    Args:
+        api_key: ElevenLabs API key
+
+    Returns:
+        List of tuples containing (model_id, model_name)
+
+    Raises:
+        APIError: If API request fails
     """
     url = "https://api.elevenlabs.io/v1/models"
     headers = {"xi-api-key": api_key}
 
     try:
         response = requests.get(url, headers=headers, timeout=30)
-        response.raise_for_status()  # Raises an HTTPError for bad responses
+        response.raise_for_status()
         models = response.json()
         return [(model["model_id"], model["name"]) for model in models]
     except requests.exceptions.RequestException as e:
-        st.error(f"Failed to fetch models: {str(e)}")
-        return []
+        raise APIError(f"Failed to fetch models", str(e))
 
 
-@st.cache_data(ttl=3600)  # Cache the data for 1 hour
-def fetch_voices(api_key):
-    """
-    Fetches the list of available voices from the ElevenLabs API.
+@st_cache(ttl_minutes=60)
+def fetch_voices(api_key: str) -> List[Tuple[str, str]]:
+    """Fetch available voices from ElevenLabs API.
+
+    Args:
+        api_key: ElevenLabs API key
+
+    Returns:
+        List of tuples containing (voice_id, voice_name)
+
+    Raises:
+        APIError: If API request fails
     """
     url = "https://api.elevenlabs.io/v1/voices"
     headers = {"xi-api-key": api_key}
 
     try:
         response = requests.get(url, headers=headers, timeout=30)
-        response.raise_for_status()  # Raises an HTTPError for bad responses
+        response.raise_for_status()
         voices = response.json()["voices"]
         return [(voice["voice_id"], voice["name"]) for voice in voices]
     except requests.exceptions.RequestException as e:
-        st.error(f"Failed to fetch voices: {str(e)}")
-        return []
+        raise APIError(f"Failed to fetch voices", str(e))
 
 
-@st.cache_data(ttl=3600)  # Cache the data for 1 hour
-def get_voice_id(voices, selected_voice_name):
-    """
-    Get the voice ID for the selected voice name.
+@st_cache(ttl_minutes=60)
+def get_voice_id(
+    voices: List[Tuple[str, str]], selected_voice_name: str
+) -> Optional[str]:
+    """Get voice ID for selected voice name.
+
+    Args:
+        voices: List of (voice_id, voice_name) tuples
+        selected_voice_name: Name of selected voice
+
+    Returns:
+        Voice ID or None if not found
     """
     for voice_id, name in voices:
         if name == selected_voice_name:
             return voice_id
-    return None  # Return None if no matching voice is found
+    return None
 
 
 def generate_audio(
-    xi_api_key,
-    stability,
-    model_id,
-    similarity_boost,
-    style,
-    use_speaker_boost,
-    voice_id,
-    text_to_speak,
-    output_path="output.mp3",
-    seed=None,
-    language_code=None,
-):
-    """
-    Generate audio using the Elevenlabs Text-to-Speech API.
-    """
-    # Construct the URL for the Text-to-Speech API request
-    tts_url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
+    xi_api_key: str,
+    stability: float,
+    model_id: str,
+    similarity_boost: float,
+    style: float,
+    use_speaker_boost: bool,
+    voice_id: str,
+    text_to_speak: str,
+    output_path: str = "output.mp3",
+    seed: Optional[int] = None,
+    language_code: Optional[str] = None,
+    speed: Optional[float] = None,
+) -> Tuple[bool, Optional[str]]:
+    """Generate audio using ElevenLabs Text-to-Speech API.
 
-    # Set up headers for the API request
+    Args:
+        xi_api_key: ElevenLabs API key
+        stability: Voice stability (0-1)
+        model_id: Model ID to use
+        similarity_boost: Voice similarity boost (0-1)
+        style: Voice style (0-1)
+        use_speaker_boost: Whether to use speaker boost
+        voice_id: Voice ID to use
+        text_to_speak: Text to convert to speech
+        output_path: Path to save audio file
+        seed: Optional seed for reproducibility
+        language_code: Optional language code
+        speed: Optional speed multiplier (0.5-2.0), only for multilingual v2 model
+
+    Returns:
+        Tuple of (success, seed)
+
+    Raises:
+        APIError: If API request fails
+        ValidationError: If parameters are invalid
+    """
+    # Validate parameters
+    if not (0 <= stability <= 1):
+        raise ValidationError("Stability must be between 0 and 1")
+    if not (0 <= similarity_boost <= 1):
+        raise ValidationError("Similarity boost must be between 0 and 1")
+    if not (0 <= style <= 1):
+        raise ValidationError("Style must be between 0 and 1")
+    if not text_to_speak:
+        raise ValidationError("Text to speak cannot be empty")
+    if speed is not None and model_id != "eleven_multilingual_v2":
+        raise ValidationError(
+            "Speed parameter is only supported for multilingual v2 model"
+        )
+    if speed is not None and not (0.5 <= speed <= 2.0):
+        raise ValidationError("Speed must be between 0.5 and 2.0")
+
+    tts_url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
     headers = {"xi-api-key": xi_api_key, "Content-Type": "application/json"}
 
-    # Set up the data payload for the API request
-    payload = {
+    payload: Dict[str, Union[str, int, Dict[str, Union[float, bool]]]] = {
         "text": text_to_speak,
         "model_id": model_id,
         "voice_settings": {
@@ -92,68 +156,56 @@ def generate_audio(
         },
     }
 
-    # Add optional parameters if provided
+    if speed is not None and model_id == "eleven_multilingual_v2":
+        payload["voice_settings"]["speed"] = speed
     if seed is not None:
-        payload["seed"] = int(seed)
+        payload["seed"] = seed
     if language_code:
         payload["language_code"] = language_code
 
-    # Log the payload being sent to the API
     logging.info(
         "Sending request to ElevenLabs API with payload: %s",
         json.dumps(payload, indent=2),
     )
 
-    # Make the POST request to the TTS API
-    response = requests.post(tts_url, headers=headers, json=payload, timeout=30)
+    try:
+        response = requests.post(tts_url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
 
-    # Log the full response details
-    logging.info("API Response Status Code: %s", response.status_code)
-    logging.info(
-        "API Response Headers: %s", json.dumps(dict(response.headers), indent=2)
-    )
-
-    # Check if the request was successful
-    if response.ok:
-        logging.info("Request to ElevenLabs API was successful")
-
-        # Write the audio content to file
         with open(output_path, "wb") as f:
             f.write(response.content)
 
-        # Check for seed information in the response headers (just in case)
         response_seed = response.headers.get("x-seed")
+        logging.info("Audio generated successfully with seed: %s", response_seed)
 
-        if response_seed:
-            logging.info("Seed found in response headers: %s", response_seed)
-        else:
-            logging.info("No seed found in response headers.")
+        return True, response_seed
 
-        # Log the entire response content for debugging
-        logging.info(
-            "Full response content: %s...", response.content[:1000]
-        )  # Log first 1000 bytes
-
-        st.toast("Audio generated successfully.")
-        return (
-            True,
-            response_seed,
-        )  # Indicate success and return the seed from the response (if any)
-    else:
-        # Log the error message if the request was not successful
-        logging.error("Error response from ElevenLabs API: %s", response.text)
-        st.error(f"Failed to generate audio. API response: {response.text}")
-        return False, None  # Indicate failure and return None for the seed
+    except requests.exceptions.RequestException as e:
+        raise APIError("Failed to generate audio", str(e))
 
 
-def generate_voice_previews(api_key, voice_description):
+def generate_voice_previews(
+    api_key: str, voice_description: str
+) -> Optional[Dict[str, Any]]:
+    """Generate voice previews from description.
+
+    Args:
+        api_key: ElevenLabs API key
+        voice_description: Description of desired voice
+
+    Returns:
+        Dictionary with preview info or None if failed
+
+    Raises:
+        APIError: If API request fails
+        ValidationError: If parameters are invalid
     """
-    Generate voice previews from a description using the ElevenLabs API.
-    """
+    if not voice_description:
+        raise ValidationError("Voice description cannot be empty")
+
     url = "https://api.elevenlabs.io/v1/text-to-voice/create-previews"
     headers = {"xi-api-key": api_key, "Content-Type": "application/json"}
 
-    # Sample text that meets the 100-1000 character requirement
     sample_text = """Hello! I'm excited to demonstrate my voice capabilities. 
     I can speak clearly and naturally, adapting my tone to different contexts. 
     Whether it's casual conversation, professional presentations, or storytelling, 
@@ -167,16 +219,12 @@ def generate_voice_previews(api_key, voice_description):
         response.raise_for_status()
         result = response.json()
 
-        # Process previews and save audio files
         processed_previews = []
         for idx, preview in enumerate(result["previews"]):
-            # Decode base64 audio and save to file
             audio_data = base64.b64decode(preview["audio_base_64"])
             preview_path = f"preview_{idx}.mp3"
             with open(preview_path, "wb") as f:
                 f.write(audio_data)
-
-            # Add processed preview info
             processed_previews.append(
                 {"id": preview["generated_voice_id"], "path": preview_path}
             )
@@ -186,16 +234,39 @@ def generate_voice_previews(api_key, voice_description):
             "audio": processed_previews,
         }
     except requests.exceptions.RequestException as e:
-        st.error(f"Failed to generate voice previews: {str(e)}")
-        return None
+        raise APIError("Failed to generate voice previews", str(e))
 
 
 def create_voice_from_preview(
-    api_key, voice_name, voice_description, generated_voice_id, played_ids=None
-):
+    api_key: str,
+    voice_name: str,
+    voice_description: str,
+    generated_voice_id: str,
+    played_ids: Optional[List[str]] = None,
+) -> Optional[Dict[str, Any]]:
+    """Create voice from preview.
+
+    Args:
+        api_key: ElevenLabs API key
+        voice_name: Name for the new voice
+        voice_description: Description of the voice
+        generated_voice_id: ID of generated preview voice
+        played_ids: Optional list of played preview IDs
+
+    Returns:
+        Response data or None if failed
+
+    Raises:
+        APIError: If API request fails
+        ValidationError: If parameters are invalid
     """
-    Create a voice from a preview using the ElevenLabs API.
-    """
+    if not voice_name:
+        raise ValidationError("Voice name cannot be empty")
+    if not voice_description:
+        raise ValidationError("Voice description cannot be empty")
+    if not generated_voice_id:
+        raise ValidationError("Generated voice ID cannot be empty")
+
     url = "https://api.elevenlabs.io/v1/text-to-voice/create-voice-from-preview"
     headers = {"xi-api-key": api_key, "Content-Type": "application/json"}
     payload = {
@@ -211,103 +282,96 @@ def create_voice_from_preview(
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        st.error(f"Failed to create voice from preview: {str(e)}")
-        return None
+        raise APIError("Failed to create voice from preview", str(e))
 
 
-### BULK GENERATION FUNCTIONS ###
+def process_text(text: str) -> Tuple[str, List[str]]:
+    """Process text to handle variables and preserve formatting.
 
+    Args:
+        text: Input text to process
 
-def process_text(text):
+    Returns:
+        Tuple of (processed_text, variables)
     """
-    Process the text to handle variables and preserve formatting.
-    """
-    # Replace \n with actual newlines
     text = text.replace("\\n", "\n")
-
-    # Handle variables (assuming format like {variable_name})
     variables = re.findall(r"\{(\w+)\}", text)
     return text, variables
 
 
 def bulk_generate_audio(
-    api_key,
-    model_id,
-    voice_id,
-    csv_file,
-    output_dir,
-    voice_settings,
-    seed_type,
-    seed=None,
-):
+    api_key: str,
+    model_id: str,
+    voice_id: str,
+    csv_file: BinaryIO,
+    output_dir: str,
+    voice_settings: Dict[str, Any],
+    seed_type: str,
+    seed: Optional[int] = None,
+) -> Tuple[bool, str]:
+    """Generate audio in bulk from CSV file.
+
+    Args:
+        api_key: ElevenLabs API key
+        model_id: Model ID to use
+        voice_id: Voice ID to use
+        csv_file: CSV file object
+        output_dir: Directory to save audio files
+        voice_settings: Voice settings dictionary
+        seed_type: Type of seed to use
+        seed: Optional fixed seed
+
+    Returns:
+        Tuple of (success, message)
+
+    Raises:
+        APIError: If API request fails
+        ValidationError: If parameters are invalid
+    """
     try:
         csv_file.seek(0)
-        logging.info("First 100 bytes of CSV file: %s", csv_file.read(100))
-        csv_file.seek(0)
-
         df = pd.read_csv(csv_file)
-        logging.info("DataFrame info:\n%s", df.info())
-        logging.info("DataFrame head:\n%s", df.head())
 
-        if df.empty:
-            raise ValueError("The CSV file is empty.")
+        if "text" not in df.columns:
+            raise ValidationError(
+                "CSV must contain 'text' column",
+                "Please ensure your CSV file has a column named 'text'",
+            )
 
-        results = []
+        os.makedirs(output_dir, exist_ok=True)
 
         for index, row in df.iterrows():
-            text, variables = process_text(row["text"])
-
-            # Replace variables in text and filename
-            for var in variables:
-                if var in row:
-                    text = text.replace(f"{{{var}}}", str(row[var]))
-                    if "filename" in row:
-                        row["filename"] = row["filename"].replace(
-                            f"{{{var}}}", str(row[var])
-                        )
-
-            filename = (
-                f"{row['filename']}.mp3" if "filename" in row else f"audio_{index}.mp3"
-            )
+            text = row["text"]
+            filename = f"{row.get('filename', f'audio_{index}')}.mp3"
             output_path = os.path.join(output_dir, filename)
 
-            # Determine seed for this generation
-            if seed_type == "Fixed":
-                current_seed = seed
-            else:
-                current_seed = random.randint(0, 9999999999)
+            current_seed = (
+                random.randint(0, 9999999999) if seed_type == "Random" else seed
+            )
+
+            # Cast voice settings to correct types
+            stability = float(voice_settings["stability"])
+            similarity_boost = float(voice_settings["similarity_boost"])
+            style = float(voice_settings["style"])
+            use_speaker_boost = bool(voice_settings["use_speaker_boost"])
 
             success, response_seed = generate_audio(
                 api_key,
-                voice_settings["stability"],
+                stability,
                 model_id,
-                voice_settings["similarity_boost"],
-                voice_settings["style"],
-                voice_settings["speaker_boost"],
+                similarity_boost,
+                style,
+                use_speaker_boost,
                 voice_id,
                 text,
                 output_path,
                 seed=current_seed,
             )
 
-            results.append(
-                {
-                    "filename": filename,
-                    "text": text,
-                    "success": success,
-                    "seed": response_seed if response_seed else current_seed,
-                }
-            )
+            if not success:
+                raise APIError(f"Failed to generate audio for row {index}")
 
-        return pd.DataFrame(results)
+        return True, "Bulk generation completed successfully"
 
-    except pd.errors.EmptyDataError:
-        logging.error("The CSV file is empty or not formatted correctly.")
-        st.error(
-            "The CSV file is empty or not formatted correctly. Please check your file and try again."
-        )
-        return pd.DataFrame()
     except Exception as e:
-        logging.error("An error occurred during bulk generation: %s", str(e))
-        st.error(f"An error occurred during bulk generation: {str(e)}")
-        return pd.DataFrame()
+        raise APIError("Failed to process bulk generation", str(e))
