@@ -8,31 +8,26 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import the Streamlit pages
-from navigation.Home import *
-from navigation.Bulk_Generation import *
+from pages.Voice_Design import *
+from pages.Bulk_Generation import *
+from pages.Voice_Design import main as voice_design_main
 
 
 @pytest.fixture
 def mock_streamlit():
-    with patch("streamlit.sidebar") as mock_sidebar, patch(
-        "streamlit.title"
-    ) as mock_title, patch("streamlit.subheader") as mock_subheader, patch(
-        "streamlit.selectbox"
-    ) as mock_selectbox, patch(
-        "streamlit.text_area"
-    ) as mock_text_area, patch(
-        "streamlit.text_input"
-    ) as mock_text_input, patch(
-        "streamlit.button"
-    ) as mock_button, patch(
-        "streamlit.expander"
-    ) as mock_expander, patch(
-        "streamlit.slider"
-    ) as mock_slider, patch(
-        "streamlit.checkbox"
-    ) as mock_checkbox, patch(
-        "streamlit.file_uploader"
-    ) as mock_file_uploader:
+    with (
+        patch("streamlit.sidebar") as mock_sidebar,
+        patch("streamlit.title") as mock_title,
+        patch("streamlit.subheader") as mock_subheader,
+        patch("streamlit.selectbox") as mock_selectbox,
+        patch("streamlit.text_area") as mock_text_area,
+        patch("streamlit.text_input") as mock_text_input,
+        patch("streamlit.button") as mock_button,
+        patch("streamlit.expander") as mock_expander,
+        patch("streamlit.slider") as mock_slider,
+        patch("streamlit.checkbox") as mock_checkbox,
+        patch("streamlit.file_uploader") as mock_file_uploader,
+    ):
         yield {
             "sidebar": mock_sidebar,
             "title": mock_title,
@@ -50,13 +45,12 @@ def mock_streamlit():
 
 @pytest.fixture
 def mock_elevenlabs_functions():
-    with patch("Elevenlabs_functions.fetch_models") as mock_fetch_models, patch(
-        "Elevenlabs_functions.fetch_voices"
-    ) as mock_fetch_voices, patch(
-        "Elevenlabs_functions.generate_audio"
-    ) as mock_generate_audio, patch(
-        "Elevenlabs_functions.bulk_generate_audio"
-    ) as mock_bulk_generate_audio:
+    with (
+        patch("Elevenlabs_functions.fetch_models") as mock_fetch_models,
+        patch("Elevenlabs_functions.fetch_voices") as mock_fetch_voices,
+        patch("Elevenlabs_functions.generate_audio") as mock_generate_audio,
+        patch("Elevenlabs_functions.bulk_generate_audio") as mock_bulk_generate_audio,
+    ):
         yield {
             "fetch_models": mock_fetch_models,
             "fetch_voices": mock_fetch_voices,
@@ -67,11 +61,10 @@ def mock_elevenlabs_functions():
 
 @pytest.fixture
 def mock_ollama_functions():
-    with patch(
-        "ollama_functions.enhance_script_with_ollama"
-    ) as mock_enhance_script, patch(
-        "ollama_functions.convert_word_to_phonetic"
-    ) as mock_convert_word:
+    with (
+        patch("ollama_functions.enhance_script_with_ollama") as mock_enhance_script,
+        patch("ollama_functions.convert_word_to_phonetic") as mock_convert_word,
+    ):
         yield {"enhance_script": mock_enhance_script, "convert_word": mock_convert_word}
 
 
@@ -104,9 +97,8 @@ def test_home_page(mock_streamlit, mock_elevenlabs_functions, mock_ollama_functi
     mock_streamlit["slider"].side_effect = [0.5, 0.7, 0.3]
     mock_streamlit["checkbox"].return_value = True
 
-    # Run the main function of the Home page
-    # Note: This is a simplified version, as we can't actually run the Streamlit app in a test environment
-    # Instead, we're checking if the key functions are called with the expected parameters
+    # Call the main function of the Voice Design page
+    voice_design_main()
 
     # Check if models and voices are fetched
     assert mock_elevenlabs_functions["fetch_models"].called
