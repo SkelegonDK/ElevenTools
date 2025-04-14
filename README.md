@@ -15,15 +15,19 @@ ElevenTools is a comprehensive toolbox for ElevenLabs, providing a user-friendly
 
 ## Installation
 
-1. Ensure you have Python 3.10 or later installed.
-2. Clone this repository:
+1. Ensure you have Python 3.12 installed.
+2. Install [uv](https://github.com/astral-sh/uv) (a fast Python package/dependency manager):
    ```bash
-   git clone https://github.com/your-username/eleventools.git
-   cd eleventools
+   curl -Ls https://astral.sh/uv/install.sh | sh
+   # or use Homebrew: brew install astral-sh/uv/uv
    ```
-3. Install the required packages:
+3. Sync your environment and install dependencies:
    ```bash
-   pip install -r requirements.txt
+   uv sync
+   ```
+   To include development dependencies:
+   ```bash
+   uv sync --extra dev
    ```
 
 ## Configuration
@@ -64,7 +68,7 @@ For more information on Ollama, visit [ollama.ai](https://ollama.ai).
 
 Run the Streamlit app:
 ```bash
-streamlit run app.py
+uv run -- streamlit run app.py
 ```
 
 Navigate to the provided local URL to access the ElevenTools interface.
@@ -86,29 +90,25 @@ ElevenTools uses pytest for testing. The test suite is organized into separate f
 
 To run the tests:
 
-1. Install pytest if you haven't already:
+1. Ensure dev dependencies are installed:
    ```bash
-   pip install pytest
+   uv sync --extra dev
    ```
-
 2. Run all tests:
    ```bash
-   pytest
+   uv run -- pytest
    ```
-
 3. To run tests for a specific file:
    ```bash
-   pytest test_functions.py
+   uv run -- pytest test_functions.py
    ```
-
 4. To run tests with more detailed output:
    ```bash
-   pytest -v
+   uv run -- pytest -v
    ```
-
 5. To run tests and see print statements:
    ```bash
-   pytest -s
+   uv run -- pytest -s
    ```
 
 When contributing new features or making changes, please add or update the relevant tests to ensure code quality and prevent regressions.
