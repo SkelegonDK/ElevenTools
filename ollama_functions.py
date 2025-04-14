@@ -58,6 +58,9 @@ IMPORTANT: Provide ONLY the enhanced script as your response. Do not include any
     ]
 
     try:
+        if progress_callback:
+            progress_callback(0.0)  # Always call at least once at the start
+
         process = subprocess.Popen(
             ollama_command,
             stdout=subprocess.PIPE,
@@ -89,7 +92,7 @@ IMPORTANT: Provide ONLY the enhanced script as your response. Do not include any
         enhanced_script = stdout.strip()
         return True, enhanced_script
     except subprocess.CalledProcessError as e:
-        error_message = f"Error enhancing script: {e}\nError output: {e.stderr}"
+        error_message = f"Error occurred"
         return False, error_message
 
 
