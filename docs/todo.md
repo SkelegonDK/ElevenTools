@@ -118,6 +118,15 @@
   - Dependencies: []
   - Estimated time: 1 day
 
+- [ ] [T16] Implement Ollama onboarding and setup page [Complexity: 4/10] [Priority: High] [Status: Pending]
+  - Context: New users are not informed about LLM (Ollama) choices or setup, leading to confusion and lack of control.
+  - Acceptance criteria: 
+      - A dedicated onboarding/setup page for Ollama is available as the first step for new users.
+      - Users are informed about LLM choices and can select/configure their preferred model.
+      - The app does not proceed to main features until setup is complete.
+  - Dependencies: []
+  - Estimated time: 1 day
+
 ## Archived/Completed Tasks
 
 - [✅] [T12] Implement automated testing [Complexity: 7/10] [Priority: High] [Status: Complete]
