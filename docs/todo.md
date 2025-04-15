@@ -112,7 +112,7 @@
     - [ ] [T10.3] Add usage examples and tests [Complexity: 1/10]
   - Estimated time: 1-2 days
 
-- [ ] [T11] Centralize API management using st.secrets [Complexity: 5/10] [Priority: Medium] [Status: Pending]
+- [ ] [T11] Centralize API management using st.secrets [Complexity: 5/10] [Priority: Medium] [Status: In-Progress]
   - Context: Secure and maintainable management of API keys and secrets, supporting future integrations.
   - Acceptance criteria: All API keys are managed via st.secrets, with documentation for rotation and environment support.
   - Dependencies: []
@@ -153,3 +153,9 @@
     - [✅] [T14.4] Create voice from preview functionality [Complexity: 1/10]
     - [✅] [T14.5] Add voice customization options [Complexity: 1/10]
   - Estimated time: 2 days
+
+- [✅] [T15] Remove Home.py and consolidate main entry point logic [Complexity: 2/10] [Priority: Medium] [Status: Complete]
+  - Context: Eliminates redundancy and confusion by ensuring a single entry point for the app, improving maintainability.
+  - Acceptance criteria: Home.py is deleted, and all main logic is in app.py. No duplicate entry points remain.
+  - Dependencies: []
+  - Estimated time: 15 minutes
