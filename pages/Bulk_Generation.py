@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import streamlit as st
-from Elevenlabs_functions import (
+from scripts.Elevenlabs_functions import (
     bulk_generate_audio,
     fetch_models,
     fetch_voices,
