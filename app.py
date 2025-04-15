@@ -1,12 +1,15 @@
 import streamlit as st
-from functions import detect_string_variables, detect_phonetic_conversion
-from Elevenlabs_functions import (
+from scripts.functions import detect_string_variables, detect_phonetic_conversion
+from scripts.Elevenlabs_functions import (
     generate_audio,
     fetch_models,
     fetch_voices,
     get_voice_id,
 )
-from ollama_functions import enhance_script_with_ollama, convert_word_to_phonetic
+from scripts.ollama_functions import (
+    enhance_script_with_ollama,
+    convert_word_to_phonetic,
+)
 from utils.error_handling import (
     handle_error,
     validate_api_key,
