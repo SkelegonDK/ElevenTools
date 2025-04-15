@@ -1,11 +1,11 @@
 import streamlit as st
-from Elevenlabs_functions import (
+from scripts.Elevenlabs_functions import (
     fetch_voices,
     generate_audio,
     generate_voice_previews,
     create_voice_from_preview,
 )
-from ollama_functions import get_ollama_response
+from scripts.ollama_functions import get_ollama_response
 
 with open("custom_style.css", encoding="utf-8") as css:
     st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
