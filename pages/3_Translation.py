@@ -1,5 +1,5 @@
 import streamlit as st
-from Translation_functions import translate_script
+from scripts.Translation_functions import translate_script
 
 with open("custom_style.css", encoding="utf-8") as css:
     st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
