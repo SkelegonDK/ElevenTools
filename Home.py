@@ -1,12 +1,15 @@
 import streamlit as st
-from functions import detect_string_variables, detect_phonetic_conversion
-from Elevenlabs_functions import (
+from scripts.functions import detect_string_variables, detect_phonetic_conversion
+from scripts.Elevenlabs_functions import (
     generate_audio,
     fetch_models,
     fetch_voices,
     get_voice_id,
 )
-from ollama_functions import enhance_script_with_ollama, convert_word_to_phonetic
+from scripts.ollama_functions import (
+    enhance_script_with_ollama,
+    convert_word_to_phonetic,
+)
 import uuid
 import random
 
@@ -219,8 +222,9 @@ if st.button("Generate Audio"):
                 st.stop()
         else:
             seed = random.randint(0, 9999999999)
-
-        temp_filename = f"VID_{selected_voice_name}_SEED_{seed}_UID_{uuid.uuid1()}.mp3"
+            temp_filename = (
+                f"VID_{selected_voice_name}_SEED_{seed}_UID_{uuid.uuid1()}.mp3"
+            )
 
         try:
             success, response_seed = generate_audio(
