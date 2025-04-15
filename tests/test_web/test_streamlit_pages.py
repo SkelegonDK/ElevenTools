@@ -3,6 +3,7 @@ from unittest.mock import patch, MagicMock
 import streamlit as st
 import sys
 import os
+import pandas as pd
 
 # Add the project root to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -11,6 +12,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from pages.Voice_Design import *
 from pages.Bulk_Generation import *
 from pages.Voice_Design import main as voice_design_main
+from pages.Bulk_Generation import main as bulk_generation_main
 
 
 @pytest.fixture
@@ -90,10 +92,16 @@ def test_home_page(mock_streamlit, mock_elevenlabs_functions, mock_ollama_functi
     mock_streamlit["selectbox"].side_effect = ["Model 1", "Voice 1"]
     mock_streamlit["text_area"].return_value = "Hello, world!"
     mock_streamlit["text_input"].return_value = "Enhance the script"
-    mock_streamlit["button"].side_effect = [
-        True,
-        False,
-    ]  # Enhance script, Generate audio
+
+    # Use a generator for button side_effect to avoid StopIteration
+    def button_side_effect():
+        yield True  # Enhance script
+        yield False  # Generate audio
+        while True:
+            yield False
+
+    mock_streamlit["button"].side_effect = button_side_effect()
+
     mock_streamlit["slider"].side_effect = [0.5, 0.7, 0.3]
     mock_streamlit["checkbox"].return_value = True
 
@@ -150,11 +158,17 @@ def test_bulk_generation_page(mock_streamlit, mock_elevenlabs_functions):
     mock_streamlit["slider"].side_effect = [0.5, 0.7, 0.3]
     mock_streamlit["checkbox"].return_value = True
     mock_streamlit["file_uploader"].return_value = MagicMock()
-    mock_streamlit["button"].return_value = True  # Generate Bulk Audio
 
-    # Run the main function of the Bulk Generation page
-    # Note: This is a simplified version, as we can't actually run the Streamlit app in a test environment
-    # Instead, we're checking if the key functions are called with the expected parameters
+    # Use a generator for button side_effect to avoid StopIteration
+    def button_side_effect():
+        yield True  # Generate Bulk Audio
+        while True:
+            yield False
+
+    mock_streamlit["button"].side_effect = button_side_effect()
+
+    # Call the main function of the Bulk Generation page
+    bulk_generation_main()
 
     # Check if models and voices are fetched
     assert mock_elevenlabs_functions["fetch_models"].called
