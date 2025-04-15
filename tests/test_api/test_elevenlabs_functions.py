@@ -1,10 +1,10 @@
-import pytest
 from unittest.mock import MagicMock, mock_open
+import pytest
 from io import StringIO
 import pandas as pd
 from typing import cast
 from pandas import DataFrame
-from Elevenlabs_functions import (
+from scripts.Elevenlabs_functions import (
     fetch_models,
     fetch_voices,
     get_voice_id,
@@ -144,13 +144,13 @@ def test_bulk_generate_audio(mocker):
         seed="54321",
     )
     assert len(result_df) == 2
-    assert result_df.loc[:, "filename"].tolist() == [
+    assert result_df["filename"].tolist() == [
         "greeting_{name}.mp3",
         "welcome_{place}.mp3",
     ]
-    assert result_df.loc[:, "text"].tolist() == ["Hello {name}", "Welcome to {place}"]
-    assert all(result_df.loc[:, "success"])
-    assert all(result_df.loc[:, "seed"] == "12345")
+    assert result_df["text"].tolist() == ["Hello {name}", "Welcome to {place}"]
+    assert all(result_df["success"].tolist())
+    assert all(result_df["seed"].tolist() == ["12345", "12345"])
 
 
 def test_bulk_generate_audio_with_empty_csv(mocker):
@@ -208,10 +208,10 @@ def test_bulk_generate_audio_with_random_seed(mocker):
         "Random",
     )
     assert len(result_df) == 1
-    assert result_df.loc[:, "filename"].tolist() == ["greeting_{name}.mp3"]
-    assert result_df.loc[:, "text"].tolist() == ["Hello {name}"]
-    assert all(result_df.loc[:, "success"])
-    assert result_df.loc[0, "seed"] == "random-seed"
+    assert result_df[0]["filename"] == "greeting_{name}.mp3"
+    assert result_df[0]["text"] == "Hello {name}"
+    assert result_df[0]["success"] == True
+    assert result_df[0]["seed"] == "random-seed"
 
 
 def test_generate_audio_with_speed(mocker):
