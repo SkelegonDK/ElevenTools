@@ -108,11 +108,10 @@ def main():
 - Any additional columns will be treated as variables to replace in the text.
 
 **Example CSV content:**
-```
-text,filename,name,job
-Hello {name}!,greeting_{name},Alice,developer
-{name} is a {job}.,job_intro_{name},Bob,designer
-```
+| text | filename | name | job |
+| --- | --- | --- | --- |
+| Hello {name}! | greeting_{name} | Alice | developer |
+| {name} is a {job}. | job_intro_{name} | Bob | designer |
 """
     )
 
