@@ -127,6 +127,72 @@
   - Dependencies: []
   - Estimated time: 1 day
 
+- [ ] [T17] Create tests for Ollama onboarding [Complexity: 3/10] [Priority: High] [Status: Pending]
+  - Context: Ensure the Ollama onboarding/setup flow is robust and user-friendly.
+  - Acceptance criteria: Automated tests cover Ollama installation detection, model listing, error handling, and user selection.
+  - Dependencies: [T16]
+  - Estimated time: 0.5 day
+
+- [ ] [T18] Add OpenRouter as an LLM provider [Complexity: 5/10] [Priority: High] [Status: Pending]
+  - Context: Enable ElevenTools to use OpenRouter as an alternative LLM provider for greater flexibility and fallback scenarios.
+  - Acceptance criteria: Users can select OpenRouter as an LLM provider, configure API keys, and use it in relevant workflows.
+  - Dependencies: []
+  - Estimated time: 1 day
+
+- [ ] [T19] Consolidate OpenRouter and Ollama as LLM providers [Complexity: 6/10] [Priority: High] [Status: Pending]
+  - Context: Provide a unified interface for managing and selecting LLM providers, improving user experience and maintainability.
+  - Acceptance criteria: Users can choose between Ollama and OpenRouter in a single onboarding/setup flow, and the app uses the selected provider throughout.
+  - Dependencies: [T16, T18]
+  - Estimated time: 1 day
+
+- [ ] [T20] Clean up Voice Design page [Complexity: 3/10] [Priority: Medium] [Status: Pending]
+  - Context: Refactor and improve the Voice Design page for clarity, maintainability, and user experience.
+  - Acceptance criteria: Code is organized, redundant logic is removed, and UI/UX is consistent with the rest of the app.
+  - Dependencies: []
+  - Estimated time: 0.5 day
+
+- [ ] [T21] Prepare for merge with main branch after tests [Complexity: 2/10] [Priority: Medium] [Status: Pending]
+  - Context: Ensure all features are tested and documentation is up to date before merging with the main branch.
+  - Acceptance criteria: All tests pass, documentation is current, and code is reviewed for merge readiness.
+  - Dependencies: [T17]
+  - Estimated time: 0.5 day
+
+- [ ] [T22] Update todo.md to reflect ElevenLabs and Ollama-only release [Complexity: 2/10] [Priority: High] [Status: Pending]
+  - Context: Ensure the task management and documentation accurately reflect the removal of OpenAI and OpenRouter features for this release.
+  - Acceptance criteria: All references to OpenAI and OpenRouter are removed from todo.md, and tasks are aligned with the current feature set.
+  - Dependencies: []
+  - Estimated time: 0.25 day
+
+- [ ] [T23] Implement File Explorer for Generated Audio [Complexity: 7/10] [Priority: High] [Status: Complete]
+  - Context: Users need an easy way to browse, review, and manage all generated audio files, with clear details about each generation. This will improve usability and transparency, especially as output volume grows.
+  - Dependencies: []
+  - Acceptance criteria:
+    - [✅] Users can browse all generated audio files from within the app
+    - [✅] Generation details (language, voice, date, ID, seed, source CSV if bulk) are visible for each file
+    - [✅] Single and bulk outputs are consolidated in a single 'outputs' folder
+    - [✅] Bulk outputs are named after the CSV file used
+    - [✅] Single outputs are stored in a separate folder with the format LANGUAGE_VOICE_NAME_DATE_ID_SEED
+    - [✅] Bulk generation outputs are displayed inside Streamlit expanders, with rows of audio players and their metadata underneath
+    - [✅] Single outputs are stacked as rows without expanders
+    - [✅] UI is intuitive and responsive
+  - Subtasks:
+    - [✅] [T23.1] Consolidate single and bulk outputs into a single 'outputs' folder [Complexity: 2/10]
+    - [✅] [T23.2] Name bulk outputs after the source CSV file [Complexity: 1/10]
+    - [✅] [T23.3] Store single outputs in a separate folder with detailed naming convention [Complexity: 1/10]
+    - [✅] [T23.4] Build file explorer UI: display bulk outputs in Streamlit expanders (with audio rows and metadata), and stack single outputs as rows without expanders [Complexity: 3/10]
+  - Estimated time: 2-3 days
+
+- [ ] [T24] Final Testing & Release Polish [Complexity: 4/10] [Priority: High] [Status: Pending]
+  - Context: Ensure the app is stable, user-friendly, and ready for release by performing comprehensive testing and final polish.
+  - Dependencies: [T23]
+  - Acceptance criteria:
+    - [ ] All regression and integration tests pass
+    - [ ] UI/UX is reviewed and any minor issues are fixed
+    - [ ] No critical or high-priority bugs remain
+    - [ ] Documentation is up to date
+    - [ ] Release checklist is completed
+  - Estimated time: 1-2 days
+
 ## Archived/Completed Tasks
 
 - [✅] [T12] Implement automated testing [Complexity: 7/10] [Priority: High] [Status: Complete]
