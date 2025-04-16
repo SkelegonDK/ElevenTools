@@ -21,6 +21,8 @@ from utils.error_handling import (
 import uuid
 import random
 import logging
+import os
+from datetime import datetime
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -36,11 +38,9 @@ except Exception as e:
 # Initialize API keys
 try:
     ELEVENLABS_API_KEY = st.secrets["ELEVENLABS_API_KEY"]
-    OPENAI_API = st.secrets["OPENAI_API_KEY"]
-
-    # Validate API keys
+    # Removed OpenAI_API key initialization
+    # Validate API key
     validate_api_key(ELEVENLABS_API_KEY, "ElevenLabs")
-    validate_api_key(OPENAI_API, "OpenAI")
 except Exception as e:
     handle_error(e)
     st.stop()
@@ -48,8 +48,6 @@ except Exception as e:
 # Ensure necessary variables are in session state for use across pages
 if "ELEVENLABS_API_KEY" not in st.session_state:
     st.session_state["ELEVENLABS_API_KEY"] = ELEVENLABS_API_KEY
-if "OPENAI_API" not in st.session_state:
-    st.session_state["OPENAI_API"] = OPENAI_API
 
 # Initialize session state with progress tracking
 progress = ProgressManager(total_steps=4)
@@ -291,9 +289,17 @@ if st.button("Generate Audio"):
             else:
                 seed = random.randint(0, 9999999999)
 
+            # Prepare output directory and filename for single outputs
+            single_output_dir = os.path.join(os.getcwd(), "outputs", "single")
+            os.makedirs(single_output_dir, exist_ok=True)
+            # Use 'unknown' as language for now (extend if language selection is added)
+            language = "unknown"
+            date_str = datetime.now().strftime("%Y%m%d")
+            unique_id = str(uuid.uuid4())[:8]
             temp_filename = (
-                f"VID_{selected_voice_name}_SEED_{seed}_UID_{uuid.uuid1()}.mp3"
+                f"{language}_{selected_voice_name}_{date_str}_{unique_id}_{seed}.mp3"
             )
+            output_path = os.path.join(single_output_dir, temp_filename)
 
             progress.update(25, "Initializing audio generation")
             success, response_seed = generate_audio(
@@ -305,7 +311,7 @@ if st.button("Generate Audio"):
                 use_speaker_boost,
                 selected_voice_id,
                 script_to_use,
-                temp_filename,
+                output_path,
                 seed=seed,
                 speed=(
                     voice_speed
@@ -325,6 +331,7 @@ if st.button("Generate Audio"):
                         "seed": response_seed if response_seed else seed,
                         "voice": selected_voice_name,
                         "text": script_to_use,
+                        "path": output_path,
                     }
                 )
             else:
@@ -340,4 +347,4 @@ Generated_audio = st.expander("Generated audio history", expanded=True)
 with Generated_audio:
     for audio in st.session_state["generated_audio"]:
         st.write(audio)
-        st.audio(audio["filename"], format="audio/mp3")
+        st.audio(audio["path"], format="audio/mp3")
