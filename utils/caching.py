@@ -1,4 +1,7 @@
-"""Caching utilities for ElevenTools."""
+"""Caching utilities for ElevenTools.
+
+This module provides caching functionality with TTL (Time To Live) support for the ElevenTools application.
+"""
 
 from typing import Any, Optional, Callable
 import functools
@@ -10,13 +13,21 @@ from datetime import datetime, timedelta
 
 
 class Cache:
-    """Simple cache implementation with TTL support."""
+    """Simple cache implementation with TTL support.
+
+    This class provides a file-based caching system with automatic expiration of cached items.
+    Cache files are stored in a .cache directory relative to this module.
+
+    Attributes:
+        ttl (int): Time to live in seconds for cached items.
+        cache_dir (str): Directory path where cache files are stored.
+    """
 
     def __init__(self, ttl_seconds: int = 3600):
         """Initialize cache with TTL.
 
         Args:
-            ttl_seconds: Time to live in seconds (default: 1 hour)
+            ttl_seconds (int): Time to live in seconds (default: 1 hour).
         """
         self.ttl = ttl_seconds
         self.cache_dir = os.path.join(os.path.dirname(__file__), "..", ".cache")
@@ -26,10 +37,10 @@ class Cache:
         """Get the file path for a cache key.
 
         Args:
-            key: Cache key
+            key (str): Cache key to get path for.
 
         Returns:
-            Path to cache file
+            str: Absolute path to the cache file for the given key.
         """
         # Use a hash of the key to avoid file system issues
         return os.path.join(self.cache_dir, f"{hash(key)}.json")
@@ -38,10 +49,10 @@ class Cache:
         """Get value from cache if not expired.
 
         Args:
-            key: Cache key
+            key (str): Cache key to retrieve.
 
         Returns:
-            Cached value or None if expired/missing
+            Optional[Any]: The cached value if found and not expired, None otherwise.
         """
         cache_path = self._get_cache_path(key)
         if not os.path.exists(cache_path):
@@ -64,8 +75,8 @@ class Cache:
         """Set value in cache with current timestamp.
 
         Args:
-            key: Cache key
-            value: Value to cache
+            key (str): Cache key to set.
+            value (Any): Value to cache.
         """
         cache_path = self._get_cache_path(key)
         data = {"timestamp": time.time(), "value": value}
@@ -83,11 +94,20 @@ class Cache:
 def cached(ttl_seconds: int = 3600) -> Callable:
     """Decorator for caching function results.
 
+    This decorator provides a simple way to cache function results with a TTL.
+    The cache key is generated from the function name and its arguments.
+
     Args:
-        ttl_seconds: Cache TTL in seconds (default: 1 hour)
+        ttl_seconds (int): Cache TTL in seconds (default: 1 hour).
 
     Returns:
-        Decorated function
+        Callable: A decorator function that adds caching to the decorated function.
+
+    Example:
+        @cached(ttl_seconds=3600)
+        def expensive_function(arg1, arg2):
+            # Function implementation
+            return result
     """
     cache = Cache(ttl_seconds)
 

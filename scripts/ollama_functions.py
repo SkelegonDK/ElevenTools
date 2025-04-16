@@ -1,6 +1,7 @@
 import subprocess
 import time
 import html
+from typing import Optional
 
 
 def enhance_script_with_ollama(script, enhancement_prompt="", progress_callback=None):
@@ -96,9 +97,23 @@ IMPORTANT: Provide ONLY the enhanced script as your response. Do not include any
         return False, error_message
 
 
-def convert_word_to_phonetic(word: str, language: str, model: str):
-    """
-    Convert a word to its phonetic spelling in a given language using Ollama.
+def convert_word_to_phonetic(word: str, language: str, model: str) -> Optional[str]:
+    """Convert a word to its phonetic spelling in a given language using Ollama.
+
+    Uses the Ollama LLM to convert a word into its phonetic spelling for the specified language.
+    The conversion style depends on the model type selected.
+
+    Args:
+        word (str): The word to convert to phonetic spelling.
+        language (str): The target language for phonetic conversion.
+        model (str): The model to use for conversion ('eleven_monolingual_v1' or 'eleven_multilingual_v2').
+
+    Returns:
+        Optional[str]: The phonetic spelling of the word if successful, None if conversion fails.
+            For example, "hello" might return "/həˈloʊ/".
+
+    Raises:
+        subprocess.CalledProcessError: If the Ollama command fails to execute.
     """
     multilingual_v2_prompt = f"""
     You speak perfect {language}.
@@ -153,8 +168,18 @@ Word to convert: {word}
 
 
 def get_ollama_response(prompt: str) -> str:
-    """
-    Get a response from Ollama using the llama3.2:3b model.
+    """Get a response from Ollama using the llama3.2:3b model.
+
+    Makes a call to the Ollama API with the provided prompt and returns the model's response.
+
+    Args:
+        prompt (str): The input prompt to send to the Ollama model.
+
+    Returns:
+        str: The response from the Ollama model, or an error message if the call fails.
+
+    Raises:
+        subprocess.CalledProcessError: If the Ollama command fails to execute.
     """
     ollama_command = [
         "ollama",

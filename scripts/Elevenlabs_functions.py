@@ -1,4 +1,8 @@
-"""ElevenLabs API integration functions."""
+"""ElevenLabs API integration functions.
+
+This module provides functions for interacting with the ElevenLabs Text-to-Speech API,
+including voice management, audio generation, and voice preview functionality.
+"""
 
 import os
 import json
@@ -25,13 +29,13 @@ def fetch_models(api_key: str) -> List[Tuple[str, str]]:
     """Fetch available models from ElevenLabs API.
 
     Args:
-        api_key: ElevenLabs API key
+        api_key (str): ElevenLabs API key for authentication.
 
     Returns:
-        List of tuples containing (model_id, model_name)
+        List[Tuple[str, str]]: List of tuples containing (model_id, model_name) pairs.
 
     Raises:
-        APIError: If API request fails
+        APIError: If the API request fails or returns an error response.
     """
     url = "https://api.elevenlabs.io/v1/models"
     headers = {"xi-api-key": api_key}
@@ -50,13 +54,13 @@ def fetch_voices(api_key: str) -> List[Tuple[str, str]]:
     """Fetch available voices from ElevenLabs API.
 
     Args:
-        api_key: ElevenLabs API key
+        api_key (str): ElevenLabs API key for authentication.
 
     Returns:
-        List of tuples containing (voice_id, voice_name)
+        List[Tuple[str, str]]: List of tuples containing (voice_id, voice_name) pairs.
 
     Raises:
-        APIError: If API request fails
+        APIError: If the API request fails or returns an error response.
     """
     url = "https://api.elevenlabs.io/v1/voices"
     headers = {"xi-api-key": api_key}
@@ -77,11 +81,11 @@ def get_voice_id(
     """Get voice ID for selected voice name.
 
     Args:
-        voices: List of (voice_id, voice_name) tuples
-        selected_voice_name: Name of selected voice
+        voices (List[Tuple[str, str]]): List of (voice_id, voice_name) tuples.
+        selected_voice_name (str): Name of the selected voice to find ID for.
 
     Returns:
-        Voice ID or None if not found
+        Optional[str]: The voice ID if found, None if the voice name doesn't exist.
     """
     for voice_id, name in voices:
         if name == selected_voice_name:
@@ -106,25 +110,25 @@ def generate_audio(
     """Generate audio using ElevenLabs Text-to-Speech API.
 
     Args:
-        xi_api_key: ElevenLabs API key
-        stability: Voice stability (0-1)
-        model_id: Model ID to use
-        similarity_boost: Voice similarity boost (0-1)
-        style: Voice style (0-1)
-        use_speaker_boost: Whether to use speaker boost
-        voice_id: Voice ID to use
-        text_to_speak: Text to convert to speech
-        output_path: Path to save audio file
-        seed: Optional seed for reproducibility
-        language_code: Optional language code
-        speed: Optional speed multiplier (0.5-2.0), only for multilingual v2 model
+        xi_api_key (str): ElevenLabs API key for authentication.
+        stability (float): Voice stability between 0 and 1.
+        model_id (str): ID of the model to use for generation.
+        similarity_boost (float): Voice similarity boost between 0 and 1.
+        style (float): Voice style between 0 and 1.
+        use_speaker_boost (bool): Whether to use speaker boost.
+        voice_id (str): ID of the voice to use.
+        text_to_speak (str): Text to convert to speech.
+        output_path (str, optional): Path to save the audio file. Defaults to "output.mp3".
+        seed (Optional[int], optional): Seed for reproducible generation. Defaults to None.
+        language_code (Optional[str], optional): Language code for multilingual models. Defaults to None.
+        speed (Optional[float], optional): Speed multiplier between 0.5 and 2.0. Only for multilingual v2 model. Defaults to None.
 
     Returns:
-        Tuple of (success, seed)
+        Tuple[bool, Optional[str]]: Tuple containing (success status, generation seed if successful).
 
     Raises:
-        APIError: If API request fails
-        ValidationError: If parameters are invalid
+        ValidationError: If any of the input parameters are invalid.
+        APIError: If the API request fails or returns an error response.
     """
     # Validate parameters
     if not (0 <= stability <= 1):
@@ -190,15 +194,18 @@ def generate_voice_previews(
     """Generate voice previews from description.
 
     Args:
-        api_key: ElevenLabs API key
-        voice_description: Description of desired voice
+        api_key (str): ElevenLabs API key for authentication.
+        voice_description (str): Description of the desired voice characteristics.
 
     Returns:
-        Dictionary with preview info or None if failed
+        Optional[Dict[str, Any]]: Dictionary containing preview information including:
+            - generated_voice_id: ID of the generated voice
+            - audio: List of dictionaries with preview IDs and file paths
+            Returns None if generation fails.
 
     Raises:
-        APIError: If API request fails
-        ValidationError: If parameters are invalid
+        ValidationError: If the voice description is empty.
+        APIError: If the API request fails or returns an error response.
     """
     if not voice_description:
         raise ValidationError("Voice description cannot be empty")
@@ -247,18 +254,18 @@ def create_voice_from_preview(
     """Create voice from preview.
 
     Args:
-        api_key: ElevenLabs API key
-        voice_name: Name for the new voice
-        voice_description: Description of the voice
-        generated_voice_id: ID of generated preview voice
-        played_ids: Optional list of played preview IDs
+        api_key (str): ElevenLabs API key for authentication.
+        voice_name (str): Name for the new voice.
+        voice_description (str): Description of the voice characteristics.
+        generated_voice_id (str): ID of the generated preview voice to use.
+        played_ids (Optional[List[str]], optional): List of played preview IDs. Defaults to None.
 
     Returns:
-        Response data or None if failed
+        Optional[Dict[str, Any]]: Response data from the API if successful, None if failed.
 
     Raises:
-        APIError: If API request fails
-        ValidationError: If parameters are invalid
+        ValidationError: If any required parameters are empty.
+        APIError: If the API request fails or returns an error response.
     """
     if not voice_name:
         raise ValidationError("Voice name cannot be empty")
@@ -289,10 +296,12 @@ def process_text(text: str) -> Tuple[str, List[str]]:
     """Process text to handle variables and preserve formatting.
 
     Args:
-        text: Input text to process
+        text (str): Input text to process.
 
     Returns:
-        Tuple of (processed_text, variables)
+        Tuple[str, List[str]]: Tuple containing:
+            - Processed text with newlines preserved
+            - List of variable names found in the text
     """
     text = text.replace("\\n", "\n")
     variables = re.findall(r"\{(\w+)\}", text)
@@ -312,21 +321,23 @@ def bulk_generate_audio(
     """Generate audio in bulk from CSV file.
 
     Args:
-        api_key: ElevenLabs API key
-        model_id: Model ID to use
-        voice_id: Voice ID to use
-        csv_file: CSV file object
-        output_dir: Directory to save audio files
-        voice_settings: Voice settings dictionary
-        seed_type: Type of seed to use
-        seed: Optional fixed seed
+        api_key (str): ElevenLabs API key for authentication.
+        model_id (str): ID of the model to use.
+        voice_id (str): ID of the voice to use.
+        csv_file (BinaryIO): CSV file object containing text and filename columns.
+        output_dir (str): Directory to save generated audio files.
+        voice_settings (Dict[str, Any]): Dictionary containing voice generation settings.
+        seed_type (str): Type of seed to use for generation.
+        seed (Optional[int], optional): Fixed seed value. Defaults to None.
 
     Returns:
-        Tuple of (success, message)
+        Tuple[bool, str]: Tuple containing:
+            - Success status
+            - Status message or error description
 
     Raises:
-        APIError: If API request fails
-        ValidationError: If parameters are invalid
+        ValidationError: If the CSV file format is invalid.
+        APIError: If the API request fails or returns an error response.
     """
     try:
         csv_file.seek(0)
