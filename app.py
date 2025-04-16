@@ -27,7 +27,7 @@ from datetime import datetime
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
-st.set_page_config(page_title="ElevenTools", page_icon="🔊", layout="centered")
+st.set_page_config(page_title="ElevenTools", page_icon="🔊", layout="wide")
 
 try:
     with open("custom_style.css", encoding="utf-8") as css:
