@@ -193,6 +193,39 @@
     - [ ] Release checklist is completed
   - Estimated time: 1-2 days
 
+- [ ] [T25] Variable Detection in Bulk Generation [Complexity: 4/10] [Priority: High] [Status: Pending]
+  - Context: Users need to be able to detect and validate variables in their CSV files before bulk generation to prevent errors and improve user experience.
+  - Acceptance criteria:
+    - [ ] Variables in CSV text columns are automatically detected and highlighted
+    - [ ] Users are shown a list of all unique variables found in their CSV
+    - [ ] Variable validation is performed before bulk generation starts
+    - [ ] Clear error messages are shown for missing or invalid variables
+    - [ ] Users can preview how variables will be replaced in the text
+  - Dependencies: []
+  - Subtasks:
+    - [ ] [T25.1] Implement variable detection for CSV files [Complexity: 1/10]
+    - [ ] [T25.2] Create variable validation system [Complexity: 2/10]
+    - [ ] [T25.3] Add variable preview functionality [Complexity: 1/10]
+  - Estimated time: 1 day
+
+- [ ] [T26] CSV Editor for Bulk Generation [Complexity: 5/10] [Priority: High] [Status: Pending]
+  - Context: Users need an easy way to create properly formatted CSV files for bulk generation without leaving the app.
+  - Acceptance criteria:
+    - [ ] Users can create new CSV files with the correct format directly in the app
+    - [ ] Editor supports adding/removing rows and columns
+    - [ ] Required columns (text, filename) are pre-populated
+    - [ ] Optional columns can be added as needed
+    - [ ] Variables can be inserted using a helper interface
+    - [ ] CSV can be downloaded in the correct format
+    - [ ] CSV preview is available before download
+  - Dependencies: []
+  - Subtasks:
+    - [ ] [T26.1] Create CSV editor interface [Complexity: 2/10]
+    - [ ] [T26.2] Implement row/column management [Complexity: 1/10]
+    - [ ] [T26.3] Add variable insertion helper [Complexity: 1/10]
+    - [ ] [T26.4] Implement CSV download functionality [Complexity: 1/10]
+  - Estimated time: 1-2 days
+
 ## Archived/Completed Tasks
 
 - [✅] [T12] Implement automated testing [Complexity: 7/10] [Priority: High] [Status: Complete]
