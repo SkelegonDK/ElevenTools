@@ -1,7 +1,7 @@
 # ElevenTools Architecture
 
 > **Important Directive:**
-> 
+>
 > Do not assume details about the tech stack. If any aspect of the stack, environment, or workflow is not completely clear, always ask for human feedback and clarification before proceeding.
 
 ## Overview
