@@ -127,7 +127,7 @@ Hello {name}!,greeting_{name},Alice,developer
 
             if st.button("Generate Bulk Audio"):
                 csv_filename = uploaded_file.name.split(".")[0]
-                output_dir = os.path.join("bulk_output", csv_filename)
+                output_dir = os.path.join(os.getcwd(), "outputs", csv_filename)
                 os.makedirs(output_dir, exist_ok=True)
 
                 # Prepare seed for bulk generation
@@ -136,7 +136,7 @@ Hello {name}!,greeting_{name},Alice,developer
                 else:
                     seed = None  # Random seeds will be generated in the bulk_generate_audio function
 
-                results_df = bulk_generate_audio(
+                success, message = bulk_generate_audio(
                     st.session_state["ELEVENLABS_API_KEY"],
                     selected_model_id,
                     selected_voice_id,
@@ -147,18 +147,10 @@ Hello {name}!,greeting_{name},Alice,developer
                     seed,
                 )
 
-                if not results_df.empty:
+                if success:
                     st.success("Bulk generation completed!")
-                    st.write("Generation Results:")
-                    st.write(results_df)
-
-                    for index, row in results_df.iterrows():
-                        if row["success"]:
-                            st.write(f"Audio for: {row['text']}")
-                            st.audio(
-                                os.path.join(output_dir, row["filename"]),
-                                format="audio/mp3",
-                            )
+                    st.write(message)
+                    # TODO: Display generated files and audio previews if a manifest is available
                 else:
                     st.error(
                         "Bulk generation failed or produced no results. Please check the logs for more information."
