@@ -1,9 +1,11 @@
 # ElevenTools Design Document
 
 ## Overview
+
 ElevenTools is a comprehensive interface for ElevenLabs' text-to-speech API, designed to streamline the process of generating high-quality voice content. It provides both single and bulk generation capabilities, with advanced features for customization and reproducibility.
 
 ## Core Principles
+
 1. User-Friendly: Intuitive interface for both novice and experienced users.
 2. Flexibility: Support for various use cases, from single audio clips to large-scale batch processing.
 3. Reproducibility: Emphasis on seed management for consistent results.
@@ -12,6 +14,7 @@ ElevenTools is a comprehensive interface for ElevenLabs' text-to-speech API, des
 ## Architecture
 
 ### Frontend
+
 - Streamlit-based web application with multi-page structure:
   * Main page (app.py): Advanced text-to-speech interface
   * Voice Design page: Voice creation and customization
@@ -21,11 +24,13 @@ ElevenTools is a comprehensive interface for ElevenLabs' text-to-speech API, des
 - Session state management for consistent user experience
 
 ### Backend
+
 - Python-based core logic
 - Modular function structure for easy maintenance and extension
 - API integration with ElevenLabs and Ollama (llama3.2:3b model)
 
 ### Data Flow
+
 1. User input (text, settings) → 
 2. Processing (variable replacement, phonetic conversion) → 
 3. API requests (ElevenLabs for TTS, Ollama for translations and phonetics) → 
@@ -169,6 +174,22 @@ ElevenTools is a comprehensive interface for ElevenLabs' text-to-speech API, des
    - Detailed voice characteristic controls
    - Style transfer between voices
    - Accent and dialect management
+
+## File Explorer for Generated Audio
+
+To improve usability and transparency, ElevenTools provides a built-in File Explorer for all generated audio files:
+
+- **Output Organization:**
+  - All generated audio (single and bulk) is consolidated in a single `outputs` folder.
+  - **Bulk outputs** are grouped by the source CSV file used for generation. Each group is named after the CSV file.
+  - **Single outputs** are stored in a separate folder within `outputs`, with filenames in the format `LANGUAGE_VOICE_NAME_DATE_ID_SEED` for easy identification.
+
+- **File Explorer UI:**
+  - Accessible from within the app, allowing users to browse, review, and manage all generated audio files.
+  - **Bulk outputs** are displayed inside Streamlit expanders, each expander labeled with the CSV file name. Inside each expander, audio files are shown as rows with audio players and metadata (language, voice, date, ID, seed, source CSV).
+  - **Single outputs** are displayed as stacked rows (no expanders), each row showing an audio player and all relevant metadata.
+  - All generation details are visible for each file, supporting transparency and reproducibility.
+  - The UI is designed to be intuitive and responsive, supporting both novice and advanced users.
 
 ## Conclusion
 ElevenTools aims to be the go-to solution for professional-grade text-to-speech generation, offering a perfect balance of simplicity and advanced features. By continually evolving based on user feedback and technological advancements, ElevenTools strives to remain at the forefront of voice synthesis technology.
