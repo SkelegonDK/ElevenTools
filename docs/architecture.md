@@ -25,6 +25,7 @@ ElevenTools is a modular, extensible platform for high-quality text-to-speech an
 ---
 
 ## Package & Environment Management
+
 - All dependencies are listed in `requirements.txt` with explicit version pinning.
 - Justification comments are included for each dependency.
 - **Use `uv` for all dependency and environment management.**
@@ -45,7 +46,7 @@ ElevenTools is a modular, extensible platform for high-quality text-to-speech an
 
 ## Environments
 - **Local Development:**
-  - Python 3.10+ (managed by uv)
+  - Python 3.12+ (managed by uv)
   - Ollama must be installed and running locally for LLM features
   - ElevenLabs API key required for TTS features
 - **Environment Variables & Secrets:**
