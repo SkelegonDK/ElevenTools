@@ -352,9 +352,38 @@ def bulk_generate_audio(
         os.makedirs(output_dir, exist_ok=True)
 
         for index, row in df.iterrows():
-            text = row["text"]
-            filename = f"{row.get('filename', f'audio_{index}')}.mp3"
-            output_path = os.path.join(output_dir, filename)
+            text_template = row["text"]
+            filename_template = str(
+                row.get("filename", f"audio_{index}")
+            )  # Ensure template is a string
+
+            # Perform variable substitution for both text and filename
+            processed_text = str(text_template)  # Ensure text is a string
+            processed_filename_base = filename_template
+
+            for col_name, col_value in row.items():
+                if col_name not in [
+                    "text",
+                    "filename",
+                ]:  # Avoid self-reference or double processing
+                    placeholder = f"{{{col_name}}}"
+                    # Ensure col_value is a string for replacement
+                    str_col_value = str(col_value) if pd.notna(col_value) else ""
+                    processed_text = processed_text.replace(placeholder, str_col_value)
+                    processed_filename_base = processed_filename_base.replace(
+                        placeholder, str_col_value
+                    )
+
+            # Sanitize filename to prevent path issues and ensure it's valid
+            # Remove or replace characters that are problematic in filenames
+            sanitized_filename_base = re.sub(
+                r"[\\/:*?\"<>|]", "_", processed_filename_base
+            )
+            # Prevent excessively long filenames (e.g., limit to 100 chars before extension)
+            sanitized_filename_base = sanitized_filename_base[:100]
+
+            final_filename_mp3 = f"{sanitized_filename_base}.mp3"
+            output_path = os.path.join(output_dir, final_filename_mp3)
 
             current_seed = (
                 random.randint(0, 9999999999) if seed_type == "Random" else seed
@@ -378,7 +407,7 @@ def bulk_generate_audio(
                 style,
                 use_speaker_boost,
                 voice_id,
-                text,
+                processed_text,  # Use processed text
                 output_path,
                 seed=current_seed,
                 speed=speed_value,  # Pass speed here
