@@ -94,7 +94,7 @@ def main():
         "stability": voice_stability,
         "similarity_boost": voice_similarity,
         "style": voice_style,
-        "speaker_boost": speaker_boost,
+        "use_speaker_boost": speaker_boost,
     }
 
     if selected_model_id == "eleven_multilingual_v2":

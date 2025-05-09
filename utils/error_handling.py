@@ -14,6 +14,11 @@ class ElevenToolsError(Exception):
         self.details = details
         super().__init__(self.message)
 
+    def __str__(self) -> str:
+        if self.details:
+            return f"{self.message} (Details: {self.details})"
+        return self.message
+
 
 class APIError(ElevenToolsError):
     """Exception for API-related errors."""
