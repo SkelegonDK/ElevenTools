@@ -365,6 +365,10 @@ def bulk_generate_audio(
             similarity_boost = float(voice_settings["similarity_boost"])
             style = float(voice_settings["style"])
             use_speaker_boost = bool(voice_settings["use_speaker_boost"])
+            # Extract speed if present, otherwise default to None
+            speed_value = voice_settings.get("speed")
+            if speed_value is not None:
+                speed_value = float(speed_value)
 
             success, response_seed = generate_audio(
                 api_key,
@@ -377,6 +381,7 @@ def bulk_generate_audio(
                 text,
                 output_path,
                 seed=current_seed,
+                speed=speed_value,  # Pass speed here
             )
 
             if not success:
