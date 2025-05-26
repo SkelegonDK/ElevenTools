@@ -4,6 +4,7 @@ import os
 
 EXPECTED_KEYS = [
     ("ELEVENLABS_API_KEY", "ElevenLabs"),
+    ("OPENROUTER_API_KEY", "OpenRouter"),
 ]
 
 SECRETS_PATH = os.path.join(
@@ -16,8 +17,10 @@ def main():
     st.title("API Management")
     st.info(
         """
-        This page shows the status of all API keys and secrets used by ElevenTools. 
-        All keys are securely managed via Streamlit's `st.secrets` and `.streamlit/secrets.toml`.
+        This page shows the status of all API keys and secrets used by ElevenTools.\n\n"
+        "API keys are stored in your browser session for privacy and per-user security.\n"
+        "They are never written to disk or shared between users.\n"
+        "If you do not enter a key here, the app will use the key from `.streamlit/secrets.toml` if available."
         """
     )
 
@@ -25,7 +28,8 @@ def main():
     st.header("Current API Keys & Status")
     key_status = []
     for env_key, service in EXPECTED_KEYS:
-        value = st.secrets.get(env_key, None)
+        # Prefer session state, fallback to st.secrets
+        value = st.session_state.get(env_key) or st.secrets.get(env_key, None)
         try:
             validate_api_key(value, service)
             status = "✅ Valid"
@@ -36,6 +40,11 @@ def main():
                 "Service": service,
                 "Key Name": env_key,
                 "Status": status,
+                "Source": (
+                    "Session"
+                    if env_key in st.session_state
+                    else ("Secrets" if env_key in st.secrets else "Not set")
+                ),
             }
         )
 
@@ -57,26 +66,49 @@ def main():
     )
 
     # Section: Add/Update API Keys
-    st.header("Add or Update API Keys")
+    st.header("Add or Update API Keys (Session Only)")
     st.markdown(
         """
-        1. Open the `.streamlit/secrets.toml` file in your project root.
-        2. Add or update your API keys in the following format:
-        ```toml
-        ELEVENLABS_API_KEY = "your_elevenlabs_api_key"
-        ```
-        3. Save the file and reload this page.
+        Enter your API keys below. These will be stored **only in your browser session** and are never saved to disk or shared.\n\n"
+        "If you leave a field blank, the app will use the key from `.streamlit/secrets.toml` if available.\n\n"
+        "To clear a key for this session, enter an empty value and click 'Save'.\n"
         """
     )
+
+    with st.form("api_key_form"):
+        eleven_key = st.text_input(
+            "ElevenLabs API Key",
+            value=st.session_state.get("ELEVENLABS_API_KEY", ""),
+            type="password",
+            help="Your ElevenLabs API key. Stored only in this session.",
+        )
+        openrouter_key = st.text_input(
+            "OpenRouter API Key",
+            value=st.session_state.get("OPENROUTER_API_KEY", ""),
+            type="password",
+            help="Your OpenRouter API key. Stored only in this session.",
+        )
+        submitted = st.form_submit_button("Save API Keys")
+        if submitted:
+            if eleven_key:
+                st.session_state["ELEVENLABS_API_KEY"] = eleven_key
+            elif "ELEVENLABS_API_KEY" in st.session_state:
+                del st.session_state["ELEVENLABS_API_KEY"]
+            if openrouter_key:
+                st.session_state["OPENROUTER_API_KEY"] = openrouter_key
+            elif "OPENROUTER_API_KEY" in st.session_state:
+                del st.session_state["OPENROUTER_API_KEY"]
+            st.success("API keys updated for this session.")
+
     st.caption(
-        "Never share your API keys publicly. Rotate keys regularly for security."
+        "Never share your API keys publicly. Keys entered here are only stored in your browser session and will be cleared when you close the browser or tab."
     )
 
     # Section: Troubleshooting & Docs
     st.header("Troubleshooting & Documentation")
     st.markdown(
         """
-        - If you see a ❌ status, check that your key is present and valid in `.streamlit/secrets.toml`.
+        - If you see a ❌ status, check that your key is present and valid in this session or in `.streamlit/secrets.toml`.
         - For more help, see the [README.md](../README.md) or [Streamlit secrets documentation](https://docs.streamlit.io/streamlit-community-cloud/develop-and-deploy/app-secrets).
         - For key rotation and environment support, see your team or deployment documentation.
         """
