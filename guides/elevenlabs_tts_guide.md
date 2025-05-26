@@ -25,16 +25,19 @@ The most consistent way to introduce pauses is by using the `<break>` tag. This 
 These methods are less consistent but can be useful in certain situations:
 
 1. Dashes:
+
 ```
 "It - is - getting late."
 ```
 
 2. Multiple dashes for longer pauses:
+
 ```
 "Let me think -- -- I've got it!"
 ```
 
 3. Ellipsis (adds hesitation):
+
 ```
 "I... yeah, I guess so..."
 ```
@@ -48,11 +51,13 @@ These methods are less consistent but can be useful in certain situations:
 Use the `<phoneme>` tag to specify pronunciation using IPA or CMU Arpabet:
 
 ### IPA Example:
+
 ```
 <phoneme alphabet="ipa" ph="ˈæktʃuəli">actually</phoneme>
 ```
 
 ### CMU Arpabet Example:
+
 ```
 <phoneme alphabet="cmu-arpabet" ph="AE1 K CH UW0 AH0 L IY0">actually</phoneme>
 ```

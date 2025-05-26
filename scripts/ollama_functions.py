@@ -1,11 +1,12 @@
 import subprocess
 import time
 import html
+from typing import Optional
 
 
 def enhance_script_with_ollama(script, enhancement_prompt="", progress_callback=None):
     """
-    Enhance the given script using the Ollama llama3.1:8b model.
+    Enhance the given script using the Ollama llama3.2:3b model.
 
     :param script: The script to enhance
     :param enhancement_prompt: Optional prompt for enhancement guidance
@@ -15,7 +16,7 @@ def enhance_script_with_ollama(script, enhancement_prompt="", progress_callback=
     ollama_command = [
         "ollama",
         "run",
-        "llama3.1:8b",
+        "llama3.2:3b",
         f"""# Enhance the following script for text-to-speech purposes, focusing on creating a natural and expressive output.
         
         ## Apply the following techniques:
@@ -58,6 +59,9 @@ IMPORTANT: Provide ONLY the enhanced script as your response. Do not include any
     ]
 
     try:
+        if progress_callback:
+            progress_callback(0.0)  # Always call at least once at the start
+
         process = subprocess.Popen(
             ollama_command,
             stdout=subprocess.PIPE,
@@ -89,13 +93,27 @@ IMPORTANT: Provide ONLY the enhanced script as your response. Do not include any
         enhanced_script = stdout.strip()
         return True, enhanced_script
     except subprocess.CalledProcessError as e:
-        error_message = f"Error enhancing script: {e}\nError output: {e.stderr}"
+        error_message = f"Error occurred"
         return False, error_message
 
 
-def convert_word_to_phonetic(word: str, language: str, model: str):
-    """
-    Convert a word to its phonetic spelling in a given language using Ollama.
+def convert_word_to_phonetic(word: str, language: str, model: str) -> Optional[str]:
+    """Convert a word to its phonetic spelling in a given language using Ollama.
+
+    Uses the Ollama LLM to convert a word into its phonetic spelling for the specified language.
+    The conversion style depends on the model type selected.
+
+    Args:
+        word (str): The word to convert to phonetic spelling.
+        language (str): The target language for phonetic conversion.
+        model (str): The model to use for conversion ('eleven_monolingual_v1' or 'eleven_multilingual_v2').
+
+    Returns:
+        Optional[str]: The phonetic spelling of the word if successful, None if conversion fails.
+            For example, "hello" might return "/həˈloʊ/".
+
+    Raises:
+        subprocess.CalledProcessError: If the Ollama command fails to execute.
     """
     multilingual_v2_prompt = f"""
     You speak perfect {language}.
@@ -116,7 +134,7 @@ def convert_word_to_phonetic(word: str, language: str, model: str):
     ollama_command = [
         "ollama",
         "run",
-        "llama3.1:8b",
+        "llama3.2:3b",
         f"""You are an expert linguist and translator.
 
 {prompt}
@@ -147,3 +165,45 @@ Word to convert: {word}
             f"Error converting word to phonetic: {e}\nError output: {e.stderr}"
         )
         return None
+
+
+def get_ollama_response(prompt: str) -> str:
+    """Get a response from Ollama using the llama3.2:3b model.
+
+    Makes a call to the Ollama API with the provided prompt and returns the model's response.
+
+    Args:
+        prompt (str): The input prompt to send to the Ollama model.
+
+    Returns:
+        str: The response from the Ollama model, or an error message if the call fails.
+
+    Raises:
+        subprocess.CalledProcessError: If the Ollama command fails to execute.
+    """
+    ollama_command = [
+        "ollama",
+        "run",
+        "llama3.2:3b",
+        prompt,
+    ]
+
+    try:
+        process = subprocess.Popen(
+            ollama_command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+        )
+
+        stdout, stderr = process.communicate()
+
+        if process.returncode != 0:
+            raise subprocess.CalledProcessError(
+                process.returncode, ollama_command, stderr
+            )
+
+        return stdout.strip()
+    except subprocess.CalledProcessError as e:
+        error_message = f"Error getting Ollama response: {e}\nError output: {e.stderr}"
+        return error_message
