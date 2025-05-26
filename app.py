@@ -29,6 +29,7 @@ logging.basicConfig(level=logging.INFO)
 
 st.set_page_config(page_title="ElevenTools", page_icon="🔊", layout="wide")
 
+
 try:
     with open("custom_style.css", encoding="utf-8") as css:
         st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
