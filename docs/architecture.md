@@ -128,4 +128,16 @@ ElevenTools is a modular, extensible platform for high-quality text-to-speech an
 
 ---
 
+## Version Control & Branching Model
+
+- `main`: Production branch, always stable and deployable. All releases are tagged from here.
+- `develop`: Ongoing development branch. All new features and bugfixes are merged here before going to main.
+- `cloud`: Experimental or cloud-specific features branch, based on develop.
+
+**Recent update:**
+- `main` was updated to match `develop` (June 2024).
+- `cloud` branch created from `develop` for cloud-specific work
+
+---
+
 For further details, see `docs/design.md` and `docs/todo.md`.
