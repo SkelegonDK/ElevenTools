@@ -267,3 +267,54 @@
   - Acceptance criteria: Home.py is deleted, and all main logic is in app.py. No duplicate entry points remain.
   - Dependencies: []
   - Estimated time: 15 minutes
+
+- [✅] [T23] Update main branch to match develop and create cloud branch [Complexity: 2/10] [Priority: High] [Status: Complete]
+  - Context: Ensures main is up to date and a new cloud branch is available for cloud-specific work.
+  - Dependencies: []
+  - Acceptance Criteria:
+    - [x] main is merged with develop
+    - [x] cloud branch created from develop
+  - Estimated time: 0.25 day
+
+- [ ] [T24] Update documentation to reflect new branching model [Complexity: 2/10] [Priority: Medium] [Status: Pending]
+  - Context: Documentation should always reflect the current branching and development workflow.
+  - Dependencies: [T23]
+  - Acceptance Criteria:
+    - [ ] architecture.md and README.md updated with new branch model
+    - [ ] Team is aware of new workflow
+  - Estimated time: 0.25 day
+
+## Tasks
+
+- [✅] [T200] Remove Ollama integration [Complexity: 3/10] [Priority: High] [Status: Complete]
+  - Context: Switching to cloud-ready architecture with OpenRouter
+  - Acceptance criteria:
+    - [✅] Remove Ollama setup page
+    - [✅] Remove Ollama functions
+    - [✅] Remove Ollama tests
+    - [✅] Update documentation
+
+- [✅] [T201] Implement OpenRouter integration [Complexity: 4/10] [Priority: High] [Status: Complete]
+  - Context: Replace Ollama with OpenRouter for cloud compatibility
+  - Acceptance criteria:
+    - [✅] Create OpenRouter functions module
+    - [✅] Implement session-based API key management
+    - [✅] Update documentation
+    - [✅] All OpenRouter integration tests are passing as of 2025-05-26 (see tests/test_api/test_openrouter_functions.py)
+
+- [✅] [T202] Update API Management for cloud deployment [Complexity: 3/10] [Priority: High] [Status: Complete]
+  - Context: Ensure secure API key management in cloud environment
+  - Acceptance criteria:
+    - [✅] Implement session-based API key storage
+    - [✅] Add OpenRouter API key management
+    - [✅] Update UI with clear instructions
+    - [✅] Implement API key validation
+
+- [ ] [T27] Implement caching/deduplication for OpenRouter API calls [Complexity: 4/10] [Priority: Medium] [Status: Pending]
+  - Context: Prevent unnecessary/redundant requests to OpenRouter, reduce costs and improve performance. Tests are already in place to document current behavior and will need to be updated when caching is implemented.
+  - Dependencies: [T201] (OpenRouter integration), [T202] (API Management), [T6] (Testing Enhancement)
+  - Acceptance criteria:
+    - [ ] Identical requests do not trigger new API calls
+    - [ ] Caching/deduplication logic is covered by tests
+    - [ ] No regression in error handling or API key management
+  - Estimated time: 1 day

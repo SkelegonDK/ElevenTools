@@ -10,6 +10,7 @@ ElevenTools is a comprehensive interface for ElevenLabs' text-to-speech API, des
 2. Flexibility: Support for various use cases, from single audio clips to large-scale batch processing.
 3. Reproducibility: Emphasis on seed management for consistent results.
 4. Extensibility: Modular design to easily incorporate new features and integrations.
+5. Cloud-Ready: Designed to run seamlessly in cloud environments with secure API key management.
 
 ## Architecture
 
@@ -20,20 +21,22 @@ ElevenTools is a comprehensive interface for ElevenLabs' text-to-speech API, des
   * Voice Design page: Voice creation and customization
   * Bulk Generation page: Batch processing of audio files
   * Translation page: Script translation capabilities
+  * API Management page: Secure API key management
 - Responsive design with sidebar for global settings
-- Session state management for consistent user experience
+- Session state management for consistent user experience and secure API key storage
 
 ### Backend
 
 - Python-based core logic
 - Modular function structure for easy maintenance and extension
-- API integration with ElevenLabs and Ollama (llama3.2:3b model)
+- API integration with ElevenLabs and OpenRouter
+- Session-based API key management for secure cloud deployment
 
 ### Data Flow
 
 1. User input (text, settings) → 
 2. Processing (variable replacement, phonetic conversion) → 
-3. API requests (ElevenLabs for TTS, Ollama for translations and phonetics) → 
+3. API requests (ElevenLabs for TTS, OpenRouter for translations and phonetics) → 
 4. Audio generation → 
 5. Result presentation and storage
 
@@ -48,7 +51,7 @@ ElevenTools is a comprehensive interface for ElevenLabs' text-to-speech API, des
 
 2. Text Processing
    - Variable replacement system for personalized content
-   - Integration with Ollama for translations and phonetic conversions
+   - Integration with OpenRouter for translations and phonetic conversions
    - Prompt enhancement for voice descriptions
 
 3. Audio Generation
@@ -91,7 +94,7 @@ ElevenTools is a comprehensive interface for ElevenLabs' text-to-speech API, des
 
 4. Script Translation (Translation Page)
    - Multi-language support
-   - Integration with Ollama for translations
+   - Integration with OpenRouter for translations
    - Direct text input and output
 
 5. Seed Management
@@ -108,9 +111,10 @@ ElevenTools is a comprehensive interface for ElevenLabs' text-to-speech API, des
 ## Technical Considerations
 
 1. API Management
-   - Secure handling of API keys
+   - Secure handling of API keys through session state
+   - Per-user API key storage for cloud deployment
    - Rate limiting and error handling for API requests
-   - Integration with multiple APIs (ElevenLabs, Ollama)
+   - Integration with multiple APIs (ElevenLabs, OpenRouter)
 
 2. Performance Optimization
    - Caching of frequently used data (models, voices)
@@ -124,6 +128,9 @@ ElevenTools is a comprehensive interface for ElevenLabs' text-to-speech API, des
 4. Scalability
    - Design considerations for handling increased load and larger datasets
    - Efficient voice generation and preview system
+
+5. Testing
+   - OpenRouter integration is fully tested, with all tests passing as of 2025-05-26 (see tests/test_api/test_openrouter_functions.py)
 
 ## Future Vision
 
