@@ -11,6 +11,10 @@ from scripts.Elevenlabs_functions import (
     fetch_voices,
     get_voice_id,
 )
+from scripts.openrouter_functions import (
+    enhance_script_with_openrouter,
+    convert_word_to_phonetic_openrouter,
+)
 
 from utils.error_handling import (
     handle_error,
@@ -163,7 +167,7 @@ if st.button("Enhance script"):
             def update_progress(prog):
                 progress.update(int(prog * 100), "Enhancing script")
 
-            success, result = enhance_script_with_ollama(
+            success, result = enhance_script_with_openrouter(
                 script, enhancement_prompt, update_progress
             )
 
@@ -224,7 +228,7 @@ if script_to_use:
                     word = phonetic[1]
                     progress.update(idx + 1, f"Converting {word} to phonetic")
                     try:
-                        phonetic_text = convert_word_to_phonetic(
+                        phonetic_text = convert_word_to_phonetic_openrouter(
                             word=word, language=language, model=selected_model_id
                         )
                         script_to_use = script_to_use.replace(
