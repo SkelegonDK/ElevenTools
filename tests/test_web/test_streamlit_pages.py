@@ -9,9 +9,7 @@ import pandas as pd
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import the Streamlit pages
-from pages.Voice_Design import *
 from pages.Bulk_Generation import *
-from pages.Voice_Design import main as voice_design_main
 from pages.Bulk_Generation import main as bulk_generation_main
 
 
@@ -62,15 +60,21 @@ def mock_elevenlabs_functions():
 
 
 @pytest.fixture
-def mock_ollama_functions():
+def mock_openrouter_functions():
     with (
-        patch("ollama_functions.enhance_script_with_ollama") as mock_enhance_script,
-        patch("ollama_functions.convert_word_to_phonetic") as mock_convert_word,
+        patch(
+            "scripts.openrouter_functions.enhance_script_with_openrouter"
+        ) as mock_enhance_script,
+        patch(
+            "scripts.openrouter_functions.convert_word_to_phonetic_openrouter"
+        ) as mock_convert_word,
     ):
         yield {"enhance_script": mock_enhance_script, "convert_word": mock_convert_word}
 
 
-def test_home_page(mock_streamlit, mock_elevenlabs_functions, mock_ollama_functions):
+def test_home_page(
+    mock_streamlit, mock_elevenlabs_functions, mock_openrouter_functions
+):
     # Set up mock returns
     mock_elevenlabs_functions["fetch_models"].return_value = [
         ("model1", "Model 1"),
@@ -81,8 +85,8 @@ def test_home_page(mock_streamlit, mock_elevenlabs_functions, mock_ollama_functi
         ("voice2", "Voice 2"),
     ]
     mock_elevenlabs_functions["generate_audio"].return_value = (True, "12345")
-    mock_ollama_functions["enhance_script"].return_value = (True, "Enhanced script")
-    mock_ollama_functions["convert_word"].return_value = "/foʊˈnɛtɪk/"
+    mock_openrouter_functions["enhance_script"].return_value = (True, "Enhanced script")
+    mock_openrouter_functions["convert_word"].return_value = "/foʊˈnɛtɪk/"
 
     # Set up session state
     if "generated_audio" not in st.session_state:
@@ -105,16 +109,13 @@ def test_home_page(mock_streamlit, mock_elevenlabs_functions, mock_ollama_functi
     mock_streamlit["slider"].side_effect = [0.5, 0.7, 0.3]
     mock_streamlit["checkbox"].return_value = True
 
-    # Call the main function of the Voice Design page
-    voice_design_main()
-
     # Check if models and voices are fetched
     assert mock_elevenlabs_functions["fetch_models"].called
     assert mock_elevenlabs_functions["fetch_voices"].called
 
     # Check if script enhancement is called
-    assert mock_ollama_functions["enhance_script"].called
-    mock_ollama_functions["enhance_script"].assert_called_with(
+    assert mock_openrouter_functions["enhance_script"].called
+    mock_openrouter_functions["enhance_script"].assert_called_with(
         "Hello, world!", "Enhance the script", pytest.approx
     )
 
