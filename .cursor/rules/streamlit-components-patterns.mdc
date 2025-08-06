@@ -1,0 +1,1149 @@
+---
+description: whenever you are working with streamlit components
+alwaysApply: false
+---
+# Streamlit Components & Advanced Patterns
+
+## Component-Specific Rules
+
+### Form Handling
+- Use `st.form` for grouped inputs that should submit together
+- Always provide clear submit button labels
+- Validate form data before processing
+- Show success/error messages after form submission
+- Example secure form pattern:
+```python
+def secure_contact_form():
+    """Secure contact form with validation."""
+    with st.form("contact_form"):
+        st.subheader("Contact Us")
+        
+        name = st.text_input("Name", max_chars=100)
+        email = st.text_input("Email", max_chars=254)
+        message = st.text_area("Message", max_chars=1000)
+        
+        submitted = st.form_submit_button("Send Message")
+        
+        if submitted:
+            # Validate inputs
+            if not name.strip():
+                st.error("Name is required")
+                return
+            
+            if not email or "@" not in email:
+                st.error("Valid email is required")
+                return
+            
+            if len(message.strip()) < 10:
+                st.error("Message must be at least 10 characters")
+                return
+            
+            # Process form (sanitize inputs)
+            clean_data = {
+                "name": html.escape(name.strip()),
+                "email": email.strip().lower(),
+                "message": html.escape(message.strip())
+            }
+            
+            if send_message(clean_data):
+                st.success("Message sent successfully!")
+            else:
+                st.error("Failed to send message. Please try again.")
+```
+
+### File Upload Security
+- Always validate file types using both extension and MIME type
+- Implement file size limits
+- Scan uploads for malicious content when possible
+- Store uploads in secure, isolated directories
+- Example secure file upload:
+```python
+def secure_file_upload(allowed_types: List[str], max_size_mb: int = 10):
+    """Secure file upload with comprehensive validation."""
+    uploaded_file = st.file_uploader(
+        "Choose a file",
+        type=allowed_types,
+        help=f"Max size: {max_size_mb}MB. Allowed: {', '.join(allowed_types)}"
+    )
+    
+    if uploaded_file is not None:
+        # Size validation
+        if uploaded_file.size > max_size_mb * 1024 * 1024:
+            st.error(f"File too large. Maximum size: {max_size_mb}MB")
+            return None
+        
+        # Type validation
+        file_extension = Path(uploaded_file.name).suffix.lower()
+        if file_extension[1:] not in [t.lower() for t in allowed_types]:
+            st.error(f"Invalid file type. Allowed: {', '.join(allowed_types)}")
+            return None
+        
+        # Content validation for text files
+        if file_extension in ['.txt', '.csv', '.json']:
+            try:
+                content = uploaded_file.read().decode('utf-8')
+                uploaded_file.seek(0)  # Reset file pointer
+                
+                # Basic content validation
+                if len(content) == 0:
+                    st.error("File appears to be empty")
+                    return None
+                    
+            except UnicodeDecodeError:
+                st.error("File contains invalid characters")
+                return None
+        
+        return uploaded_file
+    
+    return None
+```
+
+### Data Visualization Security
+- Sanitize data before plotting to prevent code injection
+- Limit plot complexity to prevent performance issues
+- Validate data ranges to prevent visualization distortion
+- Example secure plotting:
+```python
+@st.cache_data
+def create_secure_plot(data: pd.DataFrame, x_col: str, y_col: str) -> dict:
+    """Create secure plotly figure with data validation."""
+    # Validate column names (prevent injection)
+    safe_columns = [col for col in data.columns if col.isalnum() or '_' in col]
+    if x_col not in safe_columns or y_col not in safe_columns:
+        raise ValueError("Invalid column names")
+    
+    # Limit data size for performance
+    if len(data) > 10000:
+        data = data.sample(n=10000)
+        st.info("Showing sample of 10,000 points for performance")
+    
+    # Validate data types
+    if not pd.api.types.is_numeric_dtype(data[x_col]):
+        raise ValueError(f"{x_col} must be numeric")
+    if not pd.api.types.is_numeric_dtype(data[y_col]):
+        raise ValueError(f"{y_col} must be numeric")
+    
+    # Create plot with safe configuration
+    fig = px.scatter(
+        data, 
+        x=x_col, 
+        y=y_col,
+        title=f"{html.escape(y_col)} vs {html.escape(x_col)}"
+    )
+    
+    # Secure plot configuration
+    fig.update_layout(
+        showlegend=True,
+        xaxis_title=html.escape(x_col),
+        yaxis_title=html.escape(y_col)
+    )
+    
+    return fig
+```
+
+### Chat Interface Security
+- Sanitize all user messages before display
+- Implement rate limiting for message submission
+- Validate message length and content
+- Store chat history securely
+- Example secure chat:
+```python
+def secure_chat_interface():
+    """Secure chat interface with validation."""
+    # Initialize chat history
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+    
+    # Display chat history
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(html.escape(message["content"]))
+    
+    # Chat input with validation
+    if prompt := st.chat_input("What's on your mind?"):
+        # Validate message
+        if len(prompt.strip()) == 0:
+            st.error("Please enter a message")
+            return
+        
+        if len(prompt) > 1000:
+            st.error("Message too long (max 1000 characters)")
+            return
+        
+        # Rate limiting check
+        if check_rate_limit(st.session_state.get("user_id")):
+            st.error("Too many messages. Please wait before sending another.")
+            return
+        
+        # Sanitize and store message
+        clean_prompt = html.escape(prompt.strip())
+        st.session_state.messages.append({
+            "role": "user",
+            "content": clean_prompt,
+            "timestamp": datetime.now().isoformat()
+        })
+        
+        # Process and respond
+        with st.chat_message("user"):
+            st.markdown(clean_prompt)
+        
+        with st.chat_message("assistant"):
+            response = generate_safe_response(clean_prompt)
+            st.markdown(response)
+            
+        st.session_state.messages.append({
+            "role": "assistant",
+            "content": response,
+            "timestamp": datetime.now().isoformat()
+        })
+```
+
+## Advanced Patterns
+
+### Multi-Page Navigation Security
+- Validate user permissions for each page
+- Implement secure page routing
+- Protect sensitive pages with authentication
+- Example secure navigation:
+```python
+def secure_navigation():
+    """Secure multi-page navigation with role-based access."""
+    # Define page permissions
+    page_permissions = {
+        "dashboard": ["user", "admin"],
+        "analytics": ["admin"],
+        "settings": ["admin"],
+        "profile": ["user", "admin"]
+    }
+    
+    # Get user role
+    user_role = st.session_state.get("role")
+    if not user_role:
+        st.error("Authentication required")
+        st.stop()
+    
+    # Filter pages based on permissions
+    available_pages = {
+        name: page for name, page in all_pages.items()
+        if user_role in page_permissions.get(name, [])
+    }
+    
+    if not available_pages:
+        st.error("No pages available for your role")
+        st.stop()
+    
+    # Create navigation
+    pg = st.navigation(available_pages)
+    pg.run()
+```
+
+### Dynamic Content Loading
+- Use fragments for real-time updates
+- Implement efficient data polling
+- Handle connection failures gracefully
+- Example dynamic content:
+```python
+@st.fragment(run_every="30s")
+def live_metrics_dashboard():
+    """Live metrics with error handling."""
+    try:
+        # Fetch latest metrics with timeout
+        metrics = fetch_metrics_with_timeout(timeout=10)
+        
+        if metrics:
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                st.metric(
+                    "Active Users",
+                    value=metrics.get("active_users", 0),
+                    delta=metrics.get("user_delta", 0)
+                )
+            
+            with col2:
+                st.metric(
+                    "System Load",
+                    value=f"{metrics.get('cpu_usage', 0):.1%}",
+                    delta=f"{metrics.get('cpu_delta', 0):+.1%}",
+                    delta_color="inverse"
+                )
+            
+            with col3:
+                st.metric(
+                    "Error Rate",
+                    value=f"{metrics.get('error_rate', 0):.2%}",
+                    delta=f"{metrics.get('error_delta', 0):+.2%}",
+                    delta_color="inverse"
+                )
+            
+            # Update timestamp
+            st.caption(f"Last updated: {datetime.now().strftime('%H:%M:%S')}")
+        
+        else:
+            st.warning("Unable to fetch current metrics")
+            
+    except Exception as e:
+        st.error("Metrics temporarily unavailable")
+        # Log error for debugging
+        logger.error(f"Metrics fetch failed: {e}")
+```
+
+### Database Integration Security
+- Use parameterized queries to prevent SQL injection
+- Implement connection pooling for performance
+- Handle database errors gracefully
+- Use read-only connections when possible
+- Example secure database pattern:
+```python
+@st.cache_resource
+def get_database_connection():
+    """Get secure database connection."""
+    return psycopg2.connect(
+        host=st.secrets["database"]["host"],
+        database=st.secrets["database"]["name"],
+        user=st.secrets["database"]["user"],
+        password=st.secrets["database"]["password"],
+        sslmode='require'
+    )
+
+@st.cache_data(ttl=300)
+def secure_database_query(query: str, params: tuple = ()) -> pd.DataFrame:
+    """Execute secure parameterized database query."""
+    # Validate query - only allow SELECT statements
+    if not query.strip().upper().startswith('SELECT'):
+        raise ValueError("Only SELECT queries are allowed")
+    
+    # Check for suspicious patterns
+    suspicious_patterns = ['DROP', 'DELETE', 'UPDATE', 'INSERT', 'ALTER', '--', ';']
+    query_upper = query.upper()
+    for pattern in suspicious_patterns:
+        if pattern in query_upper:
+            raise ValueError(f"Query contains forbidden pattern: {pattern}")
+    
+    try:
+        conn = get_database_connection()
+        df = pd.read_sql_query(query, conn, params=params)
+        return df
+    except Exception as e:
+        st.error("Database query failed")
+        logger.error(f"Database error: {e}")
+        return pd.DataFrame()
+```
+
+### API Integration Patterns
+- Implement proper retry logic with exponential backoff
+- Use circuit breakers for external services
+- Cache API responses appropriately
+- Handle rate limits gracefully
+- Example robust API integration:
+```python
+@st.cache_data(ttl=600)
+def resilient_api_call(endpoint: str, retries: int = 3) -> Optional[dict]:
+    """Resilient API call with retry logic."""
+    for attempt in range(retries):
+        try:
+            response = requests.get(
+                endpoint,
+                headers={"Authorization": f"Bearer {st.secrets['api_key']}"},
+                timeout=30
+            )
+            
+            # Handle rate limiting
+            if response.status_code == 429:
+                retry_after = int(response.headers.get('Retry-After', 60))
+                if attempt < retries - 1:  # Don't sleep on last attempt
+                    time.sleep(min(retry_after, 300))  # Max 5 min wait
+                    continue
+                else:
+                    st.error("API rate limit exceeded. Please try again later.")
+                    return None
+            
+            response.raise_for_status()
+            return response.json()
+            
+        except requests.exceptions.Timeout:
+            if attempt < retries - 1:
+                time.sleep(2 ** attempt)  # Exponential backoff
+                continue
+            else:
+                st.error("Request timed out after multiple attempts")
+                return None
+                
+        except requests.exceptions.RequestException as e:
+            if attempt < retries - 1:
+                time.sleep(2 ** attempt)
+                continue
+            else:
+                st.error(f"API request failed: {e}")
+                return None
+    
+    return None
+```
+
+## Performance Optimization Patterns
+
+### Efficient Data Processing
+- Process data in chunks for large datasets
+- Use vectorized operations where possible
+- Implement lazy loading for better responsiveness
+- Example efficient processing:
+```python
+@st.cache_data
+def process_large_dataset(file_path: str, chunk_size: int = 10000) -> pd.DataFrame:
+    """Process large CSV files efficiently."""
+    chunks = []
+    total_rows = 0
+    
+    # Create progress tracking
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+    
+    try:
+        # Read file info first
+        with open(file_path, 'r') as f:
+            total_lines = sum(1 for _ in f) - 1  # Subtract header
+        
+        # Process in chunks
+        for i, chunk in enumerate(pd.read_csv(file_path, chunksize=chunk_size)):
+            # Process chunk
+            processed_chunk = chunk.dropna().reset_index(drop=True)
+            chunks.append(processed_chunk)
+            
+            total_rows += len(processed_chunk)
+            progress = min((i + 1) * chunk_size / total_lines, 1.0)
+            
+            progress_bar.progress(progress)
+            status_text.text(f"Processed {total_rows:,} rows...")
+        
+        # Combine all chunks
+        result = pd.concat(chunks, ignore_index=True)
+        status_text.text(f"✅ Processing complete! {len(result):,} rows loaded.")
+        
+        return result
+        
+    except Exception as e:
+        st.error(f"Error processing file: {e}")
+        return pd.DataFrame()
+```
+
+### Memory-Efficient Visualizations
+- Sample data for large plots
+- Use appropriate chart types for data size
+- Implement pagination for large tables
+- Example memory-efficient visualization:
+```python
+def create_efficient_visualization(df: pd.DataFrame, chart_type: str = "line"):
+    """Create memory-efficient visualizations."""
+    # Determine if sampling is needed
+    max_points = 5000
+    if len(df) > max_points:
+        sample_df = df.sample(n=max_points)
+        st.info(f"Showing {max_points:,} sampled points from {len(df):,} total points")
+    else:
+        sample_df = df
+    
+    # Memory-efficient chart creation
+    if chart_type == "line":
+        st.line_chart(sample_df.set_index(sample_df.columns[0]))
+    elif chart_type == "scatter":
+        if len(sample_df.columns) >= 2:
+            fig = px.scatter(
+                sample_df, 
+                x=sample_df.columns[0], 
+                y=sample_df.columns[1],
+                opacity=0.7 if len(sample_df) > 1000 else 1.0
+            )
+            st.plotly_chart(fig, use_container_width=True)
+    elif chart_type == "histogram":
+        st.histogram(sample_df[sample_df.columns[0]])
+```
+
+## Testing Patterns
+
+### Component Testing
+- Test each component in isolation
+- Mock external dependencies
+- Verify error handling paths
+- Example component test:
+```python
+def test_secure_file_upload():
+    """Test secure file upload component."""
+    at = AppTest.from_function(secure_file_upload)
+    
+    # Test valid file
+    at.file_uploader[0].upload_from_path("valid_file.csv")
+    at.run()
+    assert not at.error
+    
+    # Test oversized file
+    at.file_uploader[0].upload_from_path("large_file.csv")
+    at.run()
+    assert "File too large" in str(at.error[0].value)
+    
+    # Test invalid file type
+    at.file_uploader[0].upload_from_path("invalid_file.exe")
+    at.run()
+    assert "Invalid file type" in str(at.error[0].value)
+```
+
+### Integration Testing
+- Test complete user workflows
+- Verify state management across components
+- Test error recovery scenarios
+- Example integration test:
+```python
+def test_complete_data_workflow():
+    """Test complete data processing workflow."""
+    at = AppTest.from_file("app.py")
+    at.secrets["api_key"] = "test_key"
+    
+    # Step 1: Upload file
+    at.file_uploader("data_upload").upload_from_path("test_data.csv")
+    at.run()
+    
+    # Step 2: Configure processing
+    at.selectbox("processing_type").select("advanced")
+    at.button("process_data").click()
+    at.run()
+    
+    # Step 3: Verify results
+    assert "Processing complete" in at.success[0].value
+    assert len(at.session_state["processed_data"]) > 0
+```
+
+## Deployment Security
+
+### Production Configuration
+- Enable all security features in production
+- Configure proper logging and monitoring
+- Set up automated security scans
+- Example production config:
+```toml
+# .streamlit/config.toml (Production)
+[server]
+enableCORS = true
+enableXsrfProtection = true
+cookieSecret = "production-secret-key"
+maxUploadSize = 50
+headless = true
+
+[runner]
+enforceSerializableSessionState = true
+magicEnabled = false
+
+[browser]
+gatherUsageStats = false
+
+[logger]
+level = "info"
+enableRich = false
+```
+
+### Monitoring and Logging
+- Implement comprehensive logging
+- Monitor performance metrics
+- Set up alerts for security events
+- Example monitoring setup:
+```python
+import logging
+from datetime import datetime
+
+# Configure security logging
+security_logger = logging.getLogger('streamlit_security')
+security_logger.setLevel(logging.INFO)
+
+def log_security_event(event_type: str, details: dict):
+    """Log security-related events."""
+    log_entry = {
+        "timestamp": datetime.now().isoformat(),
+        "event_type": event_type,
+        "user_id": st.session_state.get("user_id"),
+        "details": details
+    }
+    security_logger.info(f"SECURITY_EVENT: {log_entry}")
+
+def monitor_performance():
+    """Monitor app performance."""
+    start_time = time.time()
+    
+    # Your app logic here
+    yield
+    
+    duration = time.time() - start_time
+    if duration > 10:  # Log slow operations
+        logging.warning(f"Slow operation detected: {duration:.2f}s")
+```
+
+These patterns ensure robust, secure, and performant Streamlit applications with proper component organization and advanced functionality.# Streamlit Components & Advanced Patterns
+
+## Component-Specific Rules
+
+### Form Handling
+- Use `st.form` for grouped inputs that should submit together
+- Always provide clear submit button labels
+- Validate form data before processing
+- Show success/error messages after form submission
+- Example secure form pattern:
+```python
+def secure_contact_form():
+    """Secure contact form with validation."""
+    with st.form("contact_form"):
+        st.subheader("Contact Us")
+        
+        name = st.text_input("Name", max_chars=100)
+        email = st.text_input("Email", max_chars=254)
+        message = st.text_area("Message", max_chars=1000)
+        
+        submitted = st.form_submit_button("Send Message")
+        
+        if submitted:
+            # Validate inputs
+            if not name.strip():
+                st.error("Name is required")
+                return
+            
+            if not email or "@" not in email:
+                st.error("Valid email is required")
+                return
+            
+            if len(message.strip()) < 10:
+                st.error("Message must be at least 10 characters")
+                return
+            
+            # Process form (sanitize inputs)
+            clean_data = {
+                "name": html.escape(name.strip()),
+                "email": email.strip().lower(),
+                "message": html.escape(message.strip())
+            }
+            
+            if send_message(clean_data):
+                st.success("Message sent successfully!")
+            else:
+                st.error("Failed to send message. Please try again.")
+```
+
+### File Upload Security
+- Always validate file types using both extension and MIME type
+- Implement file size limits
+- Scan uploads for malicious content when possible
+- Store uploads in secure, isolated directories
+- Example secure file upload:
+```python
+def secure_file_upload(allowed_types: List[str], max_size_mb: int = 10):
+    """Secure file upload with comprehensive validation."""
+    uploaded_file = st.file_uploader(
+        "Choose a file",
+        type=allowed_types,
+        help=f"Max size: {max_size_mb}MB. Allowed: {', '.join(allowed_types)}"
+    )
+    
+    if uploaded_file is not None:
+        # Size validation
+        if uploaded_file.size > max_size_mb * 1024 * 1024:
+            st.error(f"File too large. Maximum size: {max_size_mb}MB")
+            return None
+        
+        # Type validation
+        file_extension = Path(uploaded_file.name).suffix.lower()
+        if file_extension[1:] not in [t.lower() for t in allowed_types]:
+            st.error(f"Invalid file type. Allowed: {', '.join(allowed_types)}")
+            return None
+        
+        # Content validation for text files
+        if file_extension in ['.txt', '.csv', '.json']:
+            try:
+                content = uploaded_file.read().decode('utf-8')
+                uploaded_file.seek(0)  # Reset file pointer
+                
+                # Basic content validation
+                if len(content) == 0:
+                    st.error("File appears to be empty")
+                    return None
+                    
+            except UnicodeDecodeError:
+                st.error("File contains invalid characters")
+                return None
+        
+        return uploaded_file
+    
+    return None
+```
+
+### Data Visualization Security
+- Sanitize data before plotting to prevent code injection
+- Limit plot complexity to prevent performance issues
+- Validate data ranges to prevent visualization distortion
+- Example secure plotting:
+```python
+@st.cache_data
+def create_secure_plot(data: pd.DataFrame, x_col: str, y_col: str) -> dict:
+    """Create secure plotly figure with data validation."""
+    # Validate column names (prevent injection)
+    safe_columns = [col for col in data.columns if col.isalnum() or '_' in col]
+    if x_col not in safe_columns or y_col not in safe_columns:
+        raise ValueError("Invalid column names")
+    
+    # Limit data size for performance
+    if len(data) > 10000:
+        data = data.sample(n=10000)
+        st.info("Showing sample of 10,000 points for performance")
+    
+    # Validate data types
+    if not pd.api.types.is_numeric_dtype(data[x_col]):
+        raise ValueError(f"{x_col} must be numeric")
+    if not pd.api.types.is_numeric_dtype(data[y_col]):
+        raise ValueError(f"{y_col} must be numeric")
+    
+    # Create plot with safe configuration
+    fig = px.scatter(
+        data, 
+        x=x_col, 
+        y=y_col,
+        title=f"{html.escape(y_col)} vs {html.escape(x_col)}"
+    )
+    
+    # Secure plot configuration
+    fig.update_layout(
+        showlegend=True,
+        xaxis_title=html.escape(x_col),
+        yaxis_title=html.escape(y_col)
+    )
+    
+    return fig
+```
+
+### Chat Interface Security
+- Sanitize all user messages before display
+- Implement rate limiting for message submission
+- Validate message length and content
+- Store chat history securely
+- Example secure chat:
+```python
+def secure_chat_interface():
+    """Secure chat interface with validation."""
+    # Initialize chat history
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+    
+    # Display chat history
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(html.escape(message["content"]))
+    
+    # Chat input with validation
+    if prompt := st.chat_input("What's on your mind?"):
+        # Validate message
+        if len(prompt.strip()) == 0:
+            st.error("Please enter a message")
+            return
+        
+        if len(prompt) > 1000:
+            st.error("Message too long (max 1000 characters)")
+            return
+        
+        # Rate limiting check
+        if check_rate_limit(st.session_state.get("user_id")):
+            st.error("Too many messages. Please wait before sending another.")
+            return
+        
+        # Sanitize and store message
+        clean_prompt = html.escape(prompt.strip())
+        st.session_state.messages.append({
+            "role": "user",
+            "content": clean_prompt,
+            "timestamp": datetime.now().isoformat()
+        })
+        
+        # Process and respond
+        with st.chat_message("user"):
+            st.markdown(clean_prompt)
+        
+        with st.chat_message("assistant"):
+            response = generate_safe_response(clean_prompt)
+            st.markdown(response)
+            
+        st.session_state.messages.append({
+            "role": "assistant",
+            "content": response,
+            "timestamp": datetime.now().isoformat()
+        })
+```
+
+## Advanced Patterns
+
+### Multi-Page Navigation Security
+- Validate user permissions for each page
+- Implement secure page routing
+- Protect sensitive pages with authentication
+- Example secure navigation:
+```python
+def secure_navigation():
+    """Secure multi-page navigation with role-based access."""
+    # Define page permissions
+    page_permissions = {
+        "dashboard": ["user", "admin"],
+        "analytics": ["admin"],
+        "settings": ["admin"],
+        "profile": ["user", "admin"]
+    }
+    
+    # Get user role
+    user_role = st.session_state.get("role")
+    if not user_role:
+        st.error("Authentication required")
+        st.stop()
+    
+    # Filter pages based on permissions
+    available_pages = {
+        name: page for name, page in all_pages.items()
+        if user_role in page_permissions.get(name, [])
+    }
+    
+    if not available_pages:
+        st.error("No pages available for your role")
+        st.stop()
+    
+    # Create navigation
+    pg = st.navigation(available_pages)
+    pg.run()
+```
+
+### Dynamic Content Loading
+- Use fragments for real-time updates
+- Implement efficient data polling
+- Handle connection failures gracefully
+- Example dynamic content:
+```python
+@st.fragment(run_every="30s")
+def live_metrics_dashboard():
+    """Live metrics with error handling."""
+    try:
+        # Fetch latest metrics with timeout
+        metrics = fetch_metrics_with_timeout(timeout=10)
+        
+        if metrics:
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                st.metric(
+                    "Active Users",
+                    value=metrics.get("active_users", 0),
+                    delta=metrics.get("user_delta", 0)
+                )
+            
+            with col2:
+                st.metric(
+                    "System Load",
+                    value=f"{metrics.get('cpu_usage', 0):.1%}",
+                    delta=f"{metrics.get('cpu_delta', 0):+.1%}",
+                    delta_color="inverse"
+                )
+            
+            with col3:
+                st.metric(
+                    "Error Rate",
+                    value=f"{metrics.get('error_rate', 0):.2%}",
+                    delta=f"{metrics.get('error_delta', 0):+.2%}",
+                    delta_color="inverse"
+                )
+            
+            # Update timestamp
+            st.caption(f"Last updated: {datetime.now().strftime('%H:%M:%S')}")
+        
+        else:
+            st.warning("Unable to fetch current metrics")
+            
+    except Exception as e:
+        st.error("Metrics temporarily unavailable")
+        # Log error for debugging
+        logger.error(f"Metrics fetch failed: {e}")
+```
+
+### Database Integration Security
+- Use parameterized queries to prevent SQL injection
+- Implement connection pooling for performance
+- Handle database errors gracefully
+- Use read-only connections when possible
+- Example secure database pattern:
+```python
+@st.cache_resource
+def get_database_connection():
+    """Get secure database connection."""
+    return psycopg2.connect(
+        host=st.secrets["database"]["host"],
+        database=st.secrets["database"]["name"],
+        user=st.secrets["database"]["user"],
+        password=st.secrets["database"]["password"],
+        sslmode='require'
+    )
+
+@st.cache_data(ttl=300)
+def secure_database_query(query: str, params: tuple = ()) -> pd.DataFrame:
+    """Execute secure parameterized database query."""
+    # Validate query - only allow SELECT statements
+    if not query.strip().upper().startswith('SELECT'):
+        raise ValueError("Only SELECT queries are allowed")
+    
+    # Check for suspicious patterns
+    suspicious_patterns = ['DROP', 'DELETE', 'UPDATE', 'INSERT', 'ALTER', '--', ';']
+    query_upper = query.upper()
+    for pattern in suspicious_patterns:
+        if pattern in query_upper:
+            raise ValueError(f"Query contains forbidden pattern: {pattern}")
+    
+    try:
+        conn = get_database_connection()
+        df = pd.read_sql_query(query, conn, params=params)
+        return df
+    except Exception as e:
+        st.error("Database query failed")
+        logger.error(f"Database error: {e}")
+        return pd.DataFrame()
+```
+
+### API Integration Patterns
+- Implement proper retry logic with exponential backoff
+- Use circuit breakers for external services
+- Cache API responses appropriately
+- Handle rate limits gracefully
+- Example robust API integration:
+```python
+@st.cache_data(ttl=600)
+def resilient_api_call(endpoint: str, retries: int = 3) -> Optional[dict]:
+    """Resilient API call with retry logic."""
+    for attempt in range(retries):
+        try:
+            response = requests.get(
+                endpoint,
+                headers={"Authorization": f"Bearer {st.secrets['api_key']}"},
+                timeout=30
+            )
+            
+            # Handle rate limiting
+            if response.status_code == 429:
+                retry_after = int(response.headers.get('Retry-After', 60))
+                if attempt < retries - 1:  # Don't sleep on last attempt
+                    time.sleep(min(retry_after, 300))  # Max 5 min wait
+                    continue
+                else:
+                    st.error("API rate limit exceeded. Please try again later.")
+                    return None
+            
+            response.raise_for_status()
+            return response.json()
+            
+        except requests.exceptions.Timeout:
+            if attempt < retries - 1:
+                time.sleep(2 ** attempt)  # Exponential backoff
+                continue
+            else:
+                st.error("Request timed out after multiple attempts")
+                return None
+                
+        except requests.exceptions.RequestException as e:
+            if attempt < retries - 1:
+                time.sleep(2 ** attempt)
+                continue
+            else:
+                st.error(f"API request failed: {e}")
+                return None
+    
+    return None
+```
+
+## Performance Optimization Patterns
+
+### Efficient Data Processing
+- Process data in chunks for large datasets
+- Use vectorized operations where possible
+- Implement lazy loading for better responsiveness
+- Example efficient processing:
+```python
+@st.cache_data
+def process_large_dataset(file_path: str, chunk_size: int = 10000) -> pd.DataFrame:
+    """Process large CSV files efficiently."""
+    chunks = []
+    total_rows = 0
+    
+    # Create progress tracking
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+    
+    try:
+        # Read file info first
+        with open(file_path, 'r') as f:
+            total_lines = sum(1 for _ in f) - 1  # Subtract header
+        
+        # Process in chunks
+        for i, chunk in enumerate(pd.read_csv(file_path, chunksize=chunk_size)):
+            # Process chunk
+            processed_chunk = chunk.dropna().reset_index(drop=True)
+            chunks.append(processed_chunk)
+            
+            total_rows += len(processed_chunk)
+            progress = min((i + 1) * chunk_size / total_lines, 1.0)
+            
+            progress_bar.progress(progress)
+            status_text.text(f"Processed {total_rows:,} rows...")
+        
+        # Combine all chunks
+        result = pd.concat(chunks, ignore_index=True)
+        status_text.text(f"✅ Processing complete! {len(result):,} rows loaded.")
+        
+        return result
+        
+    except Exception as e:
+        st.error(f"Error processing file: {e}")
+        return pd.DataFrame()
+```
+
+### Memory-Efficient Visualizations
+- Sample data for large plots
+- Use appropriate chart types for data size
+- Implement pagination for large tables
+- Example memory-efficient visualization:
+```python
+def create_efficient_visualization(df: pd.DataFrame, chart_type: str = "line"):
+    """Create memory-efficient visualizations."""
+    # Determine if sampling is needed
+    max_points = 5000
+    if len(df) > max_points:
+        sample_df = df.sample(n=max_points)
+        st.info(f"Showing {max_points:,} sampled points from {len(df):,} total points")
+    else:
+        sample_df = df
+    
+    # Memory-efficient chart creation
+    if chart_type == "line":
+        st.line_chart(sample_df.set_index(sample_df.columns[0]))
+    elif chart_type == "scatter":
+        if len(sample_df.columns) >= 2:
+            fig = px.scatter(
+                sample_df, 
+                x=sample_df.columns[0], 
+                y=sample_df.columns[1],
+                opacity=0.7 if len(sample_df) > 1000 else 1.0
+            )
+            st.plotly_chart(fig, use_container_width=True)
+    elif chart_type == "histogram":
+        st.histogram(sample_df[sample_df.columns[0]])
+```
+
+## Testing Patterns
+
+### Component Testing
+- Test each component in isolation
+- Mock external dependencies
+- Verify error handling paths
+- Example component test:
+```python
+def test_secure_file_upload():
+    """Test secure file upload component."""
+    at = AppTest.from_function(secure_file_upload)
+    
+    # Test valid file
+    at.file_uploader[0].upload_from_path("valid_file.csv")
+    at.run()
+    assert not at.error
+    
+    # Test oversized file
+    at.file_uploader[0].upload_from_path("large_file.csv")
+    at.run()
+    assert "File too large" in str(at.error[0].value)
+    
+    # Test invalid file type
+    at.file_uploader[0].upload_from_path("invalid_file.exe")
+    at.run()
+    assert "Invalid file type" in str(at.error[0].value)
+```
+
+### Integration Testing
+- Test complete user workflows
+- Verify state management across components
+- Test error recovery scenarios
+- Example integration test:
+```python
+def test_complete_data_workflow():
+    """Test complete data processing workflow."""
+    at = AppTest.from_file("app.py")
+    at.secrets["api_key"] = "test_key"
+    
+    # Step 1: Upload file
+    at.file_uploader("data_upload").upload_from_path("test_data.csv")
+    at.run()
+    
+    # Step 2: Configure processing
+    at.selectbox("processing_type").select("advanced")
+    at.button("process_data").click()
+    at.run()
+    
+    # Step 3: Verify results
+    assert "Processing complete" in at.success[0].value
+    assert len(at.session_state["processed_data"]) > 0
+```
+
+## Deployment Security
+
+### Production Configuration
+- Enable all security features in production
+- Configure proper logging and monitoring
+- Set up automated security scans
+- Example production config:
+```toml
+# .streamlit/config.toml (Production)
+[server]
+enableCORS = true
+enableXsrfProtection = true
+cookieSecret = "production-secret-key"
+maxUploadSize = 50
+headless = true
+
+[runner]
+enforceSerializableSessionState = true
+magicEnabled = false
+
+[browser]
+gatherUsageStats = false
+
+[logger]
+level = "info"
+enableRich = false
+```
+
+### Monitoring and Logging
+- Implement comprehensive logging
+- Monitor performance metrics
+- Set up alerts for security events
+- Example monitoring setup:
+```python
+import logging
+from datetime import datetime
+
+# Configure security logging
+security_logger = logging.getLogger('streamlit_security')
+security_logger.setLevel(logging.INFO)
+
+def log_security_event(event_type: str, details: dict):
+    """Log security-related events."""
+    log_entry = {
+        "timestamp": datetime.now().isoformat(),
+        "event_type": event_type,
+        "user_id": st.session_state.get("user_id"),
+        "details": details
+    }
+    security_logger.info(f"SECURITY_EVENT: {log_entry}")
+
+def monitor_performance():
+    """Monitor app performance."""
+    start_time = time.time()
+    
+    # Your app logic here
+    yield
+    
+    duration = time.time() - start_time
+    if duration > 10:  # Log slow operations
+        logging.warning(f"Slow operation detected: {duration:.2f}s")
+```
+
+These patterns ensure robust, secure, and performant Streamlit applications with proper component organization and advanced functionality.
