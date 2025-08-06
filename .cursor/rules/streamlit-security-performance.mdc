@@ -1,0 +1,999 @@
+---
+globs: *.py
+alwaysApply: false
+---
+# Streamlit Security & Performance Rules
+
+## Environment & Package Management
+
+### UV Package Manager
+- **MANDATORY**: Always use `uv` for package management and virtual environments
+- Never use `pip` directly - use `uv add`, `uv remove`, `uv sync`
+- Pin dependency versions in `pyproject.toml` with clear version constraints
+- Document dependency rationale in comments when adding new packages
+- Use `uv lock` to generate reproducible builds
+- Example: `uv add "streamlit>=1.42.0" --dev pytest`
+
+### Dependency Security
+- Regularly audit dependencies with `uv audit`
+- Prefer well-maintained packages with high trust scores
+- Document security considerations for each external dependency
+- Use minimal dependencies - avoid bloated packages
+
+## Security Best Practices
+
+### Secrets Management
+- **CRITICAL**: Never hardcode secrets, API keys, or credentials in source code
+- Always use `.streamlit/secrets.toml` for sensitive configuration
+- Add `secrets.toml` to `.gitignore` immediately
+- Use environment variables as fallback for production deployment
+- Structure secrets hierarchically for clarity:
+```toml
+# .streamlit/secrets.toml
+[api_keys]
+openai = "sk-..."
+elevenlabs = "..."
+
+[database]
+host = "localhost"
+username = "user"
+password = "secure_password"
+
+[auth]
+redirect_uri = "http://localhost:8501/oauth2callback"
+cookie_secret = "your_strong_random_secret"
+client_id = "your_client_id"
+client_secret = "your_client_secret"
+```
+
+### Authentication & Authorization
+- Implement proper user authentication using `st.login()` and `st.logout()`
+- Use OIDC providers (Google, Microsoft, Auth0) instead of custom auth
+- Store user roles and permissions in `st.session_state.role`
+- Validate user permissions before displaying sensitive content
+- Use `st.stop()` to halt execution for unauthorized users
+- Example authentication pattern:
+```python
+if not st.user.is_logged_in:
+    st.button("Log in with Google", on_click=st.login, args=["google"])
+    st.stop()
+
+# Check user role
+if "role" not in st.session_state:
+    st.session_state.role = determine_user_role(st.user)
+```
+
+### Input Validation & Sanitization
+- **ALWAYS** validate user inputs before processing
+- Sanitize file uploads and limit file types/sizes
+- Use Streamlit's built-in validation where possible
+- Implement server-side validation for critical operations
+- Escape user content when displaying to prevent XSS
+- Example validation pattern:
+```python
+# Validate file upload
+uploaded_file = st.file_uploader("Upload CSV", type=['csv'])
+if uploaded_file:
+    if uploaded_file.size > MAX_FILE_SIZE:
+        st.error("File too large")
+        st.stop()
+    
+    # Validate file content
+    try:
+        df = pd.read_csv(uploaded_file)
+        validate_dataframe_schema(df)
+    except Exception as e:
+        st.error(f"Invalid file format: {e}")
+        st.stop()
+```
+
+### Session State Security
+- Use `enforceSerializableSessionState = true` in config for production
+- Never store sensitive data in session state without encryption
+- Clear sensitive session data on logout
+- Validate session state integrity for critical operations
+- Example secure session management:
+```python
+# .streamlit/config.toml
+[runner]
+enforceSerializableSessionState = true
+
+# In app
+def clear_sensitive_data():
+    for key in list(st.session_state.keys()):
+        if key.startswith('sensitive_'):
+            del st.session_state[key]
+```
+
+## Performance Optimization
+
+### Caching Strategy
+- **MANDATORY**: Use appropriate caching decorators for all expensive operations
+- Use `@st.cache_data` for data transformations, API calls, file reading
+- Use `@st.cache_resource` for ML models, database connections, global resources
+- Set appropriate TTL values based on data freshness requirements
+- Clear cache when data changes with `.clear()` methods
+- Example caching patterns:
+```python
+@st.cache_data(ttl=3600)  # Cache for 1 hour
+def load_data_from_api(url: str) -> pd.DataFrame:
+    response = requests.get(url)
+    return pd.DataFrame(response.json())
+
+@st.cache_resource
+def load_ml_model():
+    return joblib.load('model.pkl')
+
+@st.cache_data(hash_funcs={np.ndarray: str})
+def process_array(arr: np.ndarray) -> np.ndarray:
+    return np.sqrt(arr)
+```
+
+### Memory Management
+- Limit DataFrame sizes in session state (max 1000 rows for display)
+- Use data sampling for large datasets
+- Clear unused session state variables
+- Monitor memory usage in production
+- Example memory optimization:
+```python
+# Limit data in session state
+if len(st.session_state.data) > 1000:
+    st.session_state.data = st.session_state.data.tail(1000)
+
+# Sample large datasets
+@st.cache_data
+def sample_large_dataset(df: pd.DataFrame, max_rows: int = 10000) -> pd.DataFrame:
+    if len(df) > max_rows:
+        return df.sample(n=max_rows)
+    return df
+```
+
+### Fragment Optimization
+- Use `@st.fragment` for independent UI components
+- Set appropriate `run_every` for real-time updates
+- Avoid fragments for one-time operations
+- Example fragment usage:
+```python
+@st.fragment(run_every="10s")
+def update_metrics():
+    metrics = fetch_latest_metrics()
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("CPU", f"{metrics.cpu}%")
+    with col2:
+        st.metric("Memory", f"{metrics.memory}%")
+    with col3:
+        st.metric("Disk", f"{metrics.disk}%")
+```
+
+## Code Quality & Structure
+
+### Code Organization
+- Structure apps with clear separation of concerns
+- Use type hints for all function parameters and return values
+- Create reusable functions for common operations
+- Keep business logic separate from UI code
+- Example structure:
+```python
+from typing import Optional, Dict, Any
+import streamlit as st
+import pandas as pd
+
+def load_config() -> Dict[str, Any]:
+    """Load application configuration."""
+    return {
+        "max_file_size": 200,
+        "allowed_extensions": [".csv", ".xlsx"],
+        "cache_ttl": 3600
+    }
+
+def validate_upload(file: Optional[st.runtime.uploaded_file_manager.UploadedFile]) -> bool:
+    """Validate uploaded file."""
+    if not file:
+        return False
+    
+    config = load_config()
+    if file.size > config["max_file_size"] * 1024 * 1024:
+        st.error(f"File too large. Max size: {config['max_file_size']}MB")
+        return False
+    
+    return True
+
+def main():
+    st.title("Data Processor")
+    
+    file = st.file_uploader("Upload file")
+    if file and validate_upload(file):
+        process_file(file)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Error Handling
+- Implement comprehensive error handling with user-friendly messages
+- Use try-catch blocks around external API calls
+- Provide fallback options when operations fail
+- Log errors for debugging while showing safe messages to users
+- Example error handling:
+```python
+def safe_api_call(endpoint: str) -> Optional[Dict]:
+    """Make API call with proper error handling."""
+    try:
+        response = requests.get(endpoint, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.Timeout:
+        st.error("Request timed out. Please try again.")
+        return None
+    except requests.exceptions.HTTPError as e:
+        st.error(f"API error: {e.response.status_code}")
+        return None
+    except Exception as e:
+        st.error("An unexpected error occurred.")
+        # Log actual error for debugging
+        st.exception(e) if st.secrets.get("debug_mode") else None
+        return None
+```
+
+### State Management
+- Initialize session state variables with clear defaults
+- Use consistent naming conventions for state keys
+- Group related state variables logically
+- Clean up state when no longer needed
+- Example state management:
+```python
+def init_session_state():
+    """Initialize all session state variables."""
+    defaults = {
+        "authenticated": False,
+        "user_role": None,
+        "current_data": None,
+        "processing_stage": "input",
+        "error_count": 0
+    }
+    
+    for key, default_value in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = default_value
+
+def reset_processing_state():
+    """Reset state for new processing session."""
+    processing_keys = [k for k in st.session_state.keys() 
+                      if k.startswith("processing_")]
+    for key in processing_keys:
+        del st.session_state[key]
+```
+
+## UI/UX Best Practices
+
+### Elegant Design
+- Use consistent spacing and alignment
+- Implement responsive layouts with columns
+- Use appropriate colors and themes
+- Provide clear loading indicators for long operations
+- Show progress bars for multi-step processes
+- Example elegant UI:
+```python
+def create_metric_dashboard(data: Dict[str, float]):
+    """Create elegant metrics dashboard."""
+    st.markdown("### 📊 Performance Metrics")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric(
+            label="Success Rate",
+            value=f"{data['success_rate']:.1%}",
+            delta=f"{data['success_delta']:+.1%}"
+        )
+    
+    with col2:
+        st.metric(
+            label="Response Time",
+            value=f"{data['avg_response']:.0f}ms",
+            delta=f"{data['response_delta']:+.0f}ms",
+            delta_color="inverse"
+        )
+    
+    # Add visual separator
+    st.markdown("---")
+```
+
+### Loading States
+- Always show loading states for operations > 1 second
+- Use contextual loading messages
+- Implement progress tracking for long operations
+- Example loading patterns:
+```python
+def process_with_progress(items: List[Any]) -> List[Any]:
+    """Process items with progress indicator."""
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+    results = []
+    
+    for i, item in enumerate(items):
+        status_text.text(f"Processing item {i+1} of {len(items)}")
+        
+        result = process_item(item)
+        results.append(result)
+        
+        progress_bar.progress((i + 1) / len(items))
+    
+    status_text.text("Processing complete!")
+    return results
+```
+
+### Input Validation UI
+- Provide immediate feedback on input validation
+- Use helper text to guide users
+- Show clear error messages with solutions
+- Example validation UI:
+```python
+def validated_number_input(label: str, min_val: float, max_val: float) -> Optional[float]:
+    """Number input with validation feedback."""
+    value = st.number_input(
+        label,
+        min_value=min_val,
+        max_value=max_val,
+        help=f"Enter a value between {min_val} and {max_val}"
+    )
+    
+    if value < min_val or value > max_val:
+        st.error(f"Value must be between {min_val} and {max_val}")
+        return None
+    
+    return value
+```
+
+## Testing & Deployment
+
+### Testing Requirements
+- Use `st.testing.v1.AppTest` for unit testing Streamlit apps
+- Test all user interaction flows
+- Mock external API calls and file operations
+- Test error handling scenarios
+- Example test pattern:
+```python
+import streamlit as st
+from streamlit.testing.v1 import AppTest
+
+def test_file_upload_validation():
+    """Test file upload validation."""
+    at = AppTest.from_file("app.py")
+    at.secrets["max_file_size"] = 10  # 10MB limit
+    
+    # Test with valid file
+    at.file_uploader("upload").upload_from_path("test_file.csv")
+    at.run()
+    assert not at.error  # Should not show error
+    
+    # Test with oversized file
+    at.file_uploader("upload").upload_from_path("large_file.csv")
+    at.run()
+    assert "File too large" in str(at.error[0].value)
+```
+
+### Deployment Checklist
+- Set `enforceSerializableSessionState = true` for production
+- Configure appropriate cache TTL values
+- Set up proper error logging
+- Use HTTPS in production
+- Configure CORS and XSRF protection
+- Example production config:
+```toml
+# .streamlit/config.toml
+[runner]
+enforceSerializableSessionState = true
+
+[server]
+enableCORS = true
+enableXsrfProtection = true
+maxUploadSize = 200
+
+[browser]
+gatherUsageStats = false
+```
+
+## Code Examples & Patterns
+
+### Secure API Integration
+```python
+@st.cache_data(ttl=600)
+def secure_api_call(endpoint: str, params: Dict[str, Any]) -> Optional[Dict]:
+    """Secure API call with proper error handling."""
+    api_key = st.secrets["api_keys"]["service_name"]
+    
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        response = requests.get(
+            endpoint,
+            params=params,
+            headers=headers,
+            timeout=30
+        )
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        st.error("API call failed. Please try again later.")
+        return None
+```
+
+### Secure File Processing
+```python
+def secure_file_processor(uploaded_file) -> Optional[pd.DataFrame]:
+    """Securely process uploaded files."""
+    if not uploaded_file:
+        return None
+    
+    # Validate file type
+    if uploaded_file.type not in ["text/csv", "application/vnd.ms-excel"]:
+        st.error("Only CSV and Excel files are allowed")
+        return None
+    
+    # Validate file size
+    if uploaded_file.size > 50 * 1024 * 1024:  # 50MB limit
+        st.error("File too large. Maximum size is 50MB")
+        return None
+    
+    try:
+        # Safe file reading
+        if uploaded_file.name.endswith('.csv'):
+            df = pd.read_csv(uploaded_file, nrows=10000)  # Limit rows
+        else:
+            df = pd.read_excel(uploaded_file, nrows=10000)
+        
+        # Validate DataFrame
+        if df.empty:
+            st.error("File appears to be empty")
+            return None
+        
+        return df
+    except Exception as e:
+        st.error(f"Error reading file: {str(e)}")
+        return None
+```
+
+### Performance-Optimized Data Display
+```python
+@st.cache_data
+def optimize_dataframe_display(df: pd.DataFrame) -> pd.DataFrame:
+    """Optimize DataFrame for display."""
+    # Sample large datasets
+    if len(df) > 1000:
+        df = df.sample(n=1000)
+        st.info(f"Showing sample of {len(df)} rows from larger dataset")
+    
+    # Optimize data types
+    for col in df.select_dtypes(include=['object']).columns:
+        if df[col].nunique() < len(df) * 0.5:  # If < 50% unique
+            df[col] = df[col].astype('category')
+    
+    return df
+```
+
+## Anti-Patterns to Avoid
+
+### Security Anti-Patterns
+- ❌ Hardcoding secrets in source code
+- ❌ Storing passwords in session state without encryption
+- ❌ Trusting user input without validation
+- ❌ Using `eval()` or `exec()` with user input
+- ❌ Exposing internal error details to users
+
+### Performance Anti-Patterns
+- ❌ Not using caching for expensive operations
+- ❌ Loading large datasets without pagination
+- ❌ Recreating resources on every rerun
+- ❌ Using global variables instead of session state
+- ❌ Not cleaning up session state
+
+### Code Quality Anti-Patterns
+- ❌ Missing type hints
+- ❌ No error handling around external calls
+- ❌ Monolithic functions without separation of concerns
+- ❌ Inconsistent naming conventions
+- ❌ No documentation for complex logic
+
+This comprehensive rule set ensures secure, performant, and elegant Streamlit applications using UV for package management.# Streamlit Security & Performance Rules
+
+## Environment & Package Management
+
+### UV Package Manager
+- **MANDATORY**: Always use `uv` for package management and virtual environments
+- Never use `pip` directly - use `uv add`, `uv remove`, `uv sync`
+- Pin dependency versions in `pyproject.toml` with clear version constraints
+- Document dependency rationale in comments when adding new packages
+- Use `uv lock` to generate reproducible builds
+- Example: `uv add "streamlit>=1.42.0" --dev pytest`
+
+### Dependency Security
+- Regularly audit dependencies with `uv audit`
+- Prefer well-maintained packages with high trust scores
+- Document security considerations for each external dependency
+- Use minimal dependencies - avoid bloated packages
+
+## Security Best Practices
+
+### Secrets Management
+- **CRITICAL**: Never hardcode secrets, API keys, or credentials in source code
+- Always use `.streamlit/secrets.toml` for sensitive configuration
+- Add `secrets.toml` to `.gitignore` immediately
+- Use environment variables as fallback for production deployment
+- Structure secrets hierarchically for clarity:
+```toml
+# .streamlit/secrets.toml
+[api_keys]
+openai = "sk-..."
+elevenlabs = "..."
+
+[database]
+host = "localhost"
+username = "user"
+password = "secure_password"
+
+[auth]
+redirect_uri = "http://localhost:8501/oauth2callback"
+cookie_secret = "your_strong_random_secret"
+client_id = "your_client_id"
+client_secret = "your_client_secret"
+```
+
+### Authentication & Authorization
+- Implement proper user authentication using `st.login()` and `st.logout()`
+- Use OIDC providers (Google, Microsoft, Auth0) instead of custom auth
+- Store user roles and permissions in `st.session_state.role`
+- Validate user permissions before displaying sensitive content
+- Use `st.stop()` to halt execution for unauthorized users
+- Example authentication pattern:
+```python
+if not st.user.is_logged_in:
+    st.button("Log in with Google", on_click=st.login, args=["google"])
+    st.stop()
+
+# Check user role
+if "role" not in st.session_state:
+    st.session_state.role = determine_user_role(st.user)
+```
+
+### Input Validation & Sanitization
+- **ALWAYS** validate user inputs before processing
+- Sanitize file uploads and limit file types/sizes
+- Use Streamlit's built-in validation where possible
+- Implement server-side validation for critical operations
+- Escape user content when displaying to prevent XSS
+- Example validation pattern:
+```python
+# Validate file upload
+uploaded_file = st.file_uploader("Upload CSV", type=['csv'])
+if uploaded_file:
+    if uploaded_file.size > MAX_FILE_SIZE:
+        st.error("File too large")
+        st.stop()
+    
+    # Validate file content
+    try:
+        df = pd.read_csv(uploaded_file)
+        validate_dataframe_schema(df)
+    except Exception as e:
+        st.error(f"Invalid file format: {e}")
+        st.stop()
+```
+
+### Session State Security
+- Use `enforceSerializableSessionState = true` in config for production
+- Never store sensitive data in session state without encryption
+- Clear sensitive session data on logout
+- Validate session state integrity for critical operations
+- Example secure session management:
+```python
+# .streamlit/config.toml
+[runner]
+enforceSerializableSessionState = true
+
+# In app
+def clear_sensitive_data():
+    for key in list(st.session_state.keys()):
+        if key.startswith('sensitive_'):
+            del st.session_state[key]
+```
+
+## Performance Optimization
+
+### Caching Strategy
+- **MANDATORY**: Use appropriate caching decorators for all expensive operations
+- Use `@st.cache_data` for data transformations, API calls, file reading
+- Use `@st.cache_resource` for ML models, database connections, global resources
+- Set appropriate TTL values based on data freshness requirements
+- Clear cache when data changes with `.clear()` methods
+- Example caching patterns:
+```python
+@st.cache_data(ttl=3600)  # Cache for 1 hour
+def load_data_from_api(url: str) -> pd.DataFrame:
+    response = requests.get(url)
+    return pd.DataFrame(response.json())
+
+@st.cache_resource
+def load_ml_model():
+    return joblib.load('model.pkl')
+
+@st.cache_data(hash_funcs={np.ndarray: str})
+def process_array(arr: np.ndarray) -> np.ndarray:
+    return np.sqrt(arr)
+```
+
+### Memory Management
+- Limit DataFrame sizes in session state (max 1000 rows for display)
+- Use data sampling for large datasets
+- Clear unused session state variables
+- Monitor memory usage in production
+- Example memory optimization:
+```python
+# Limit data in session state
+if len(st.session_state.data) > 1000:
+    st.session_state.data = st.session_state.data.tail(1000)
+
+# Sample large datasets
+@st.cache_data
+def sample_large_dataset(df: pd.DataFrame, max_rows: int = 10000) -> pd.DataFrame:
+    if len(df) > max_rows:
+        return df.sample(n=max_rows)
+    return df
+```
+
+### Fragment Optimization
+- Use `@st.fragment` for independent UI components
+- Set appropriate `run_every` for real-time updates
+- Avoid fragments for one-time operations
+- Example fragment usage:
+```python
+@st.fragment(run_every="10s")
+def update_metrics():
+    metrics = fetch_latest_metrics()
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("CPU", f"{metrics.cpu}%")
+    with col2:
+        st.metric("Memory", f"{metrics.memory}%")
+    with col3:
+        st.metric("Disk", f"{metrics.disk}%")
+```
+
+## Code Quality & Structure
+
+### Code Organization
+- Structure apps with clear separation of concerns
+- Use type hints for all function parameters and return values
+- Create reusable functions for common operations
+- Keep business logic separate from UI code
+- Example structure:
+```python
+from typing import Optional, Dict, Any
+import streamlit as st
+import pandas as pd
+
+def load_config() -> Dict[str, Any]:
+    """Load application configuration."""
+    return {
+        "max_file_size": 200,
+        "allowed_extensions": [".csv", ".xlsx"],
+        "cache_ttl": 3600
+    }
+
+def validate_upload(file: Optional[st.runtime.uploaded_file_manager.UploadedFile]) -> bool:
+    """Validate uploaded file."""
+    if not file:
+        return False
+    
+    config = load_config()
+    if file.size > config["max_file_size"] * 1024 * 1024:
+        st.error(f"File too large. Max size: {config['max_file_size']}MB")
+        return False
+    
+    return True
+
+def main():
+    st.title("Data Processor")
+    
+    file = st.file_uploader("Upload file")
+    if file and validate_upload(file):
+        process_file(file)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Error Handling
+- Implement comprehensive error handling with user-friendly messages
+- Use try-catch blocks around external API calls
+- Provide fallback options when operations fail
+- Log errors for debugging while showing safe messages to users
+- Example error handling:
+```python
+def safe_api_call(endpoint: str) -> Optional[Dict]:
+    """Make API call with proper error handling."""
+    try:
+        response = requests.get(endpoint, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.Timeout:
+        st.error("Request timed out. Please try again.")
+        return None
+    except requests.exceptions.HTTPError as e:
+        st.error(f"API error: {e.response.status_code}")
+        return None
+    except Exception as e:
+        st.error("An unexpected error occurred.")
+        # Log actual error for debugging
+        st.exception(e) if st.secrets.get("debug_mode") else None
+        return None
+```
+
+### State Management
+- Initialize session state variables with clear defaults
+- Use consistent naming conventions for state keys
+- Group related state variables logically
+- Clean up state when no longer needed
+- Example state management:
+```python
+def init_session_state():
+    """Initialize all session state variables."""
+    defaults = {
+        "authenticated": False,
+        "user_role": None,
+        "current_data": None,
+        "processing_stage": "input",
+        "error_count": 0
+    }
+    
+    for key, default_value in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = default_value
+
+def reset_processing_state():
+    """Reset state for new processing session."""
+    processing_keys = [k for k in st.session_state.keys() 
+                      if k.startswith("processing_")]
+    for key in processing_keys:
+        del st.session_state[key]
+```
+
+## UI/UX Best Practices
+
+### Elegant Design
+- Use consistent spacing and alignment
+- Implement responsive layouts with columns
+- Use appropriate colors and themes
+- Provide clear loading indicators for long operations
+- Show progress bars for multi-step processes
+- Example elegant UI:
+```python
+def create_metric_dashboard(data: Dict[str, float]):
+    """Create elegant metrics dashboard."""
+    st.markdown("### 📊 Performance Metrics")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric(
+            label="Success Rate",
+            value=f"{data['success_rate']:.1%}",
+            delta=f"{data['success_delta']:+.1%}"
+        )
+    
+    with col2:
+        st.metric(
+            label="Response Time",
+            value=f"{data['avg_response']:.0f}ms",
+            delta=f"{data['response_delta']:+.0f}ms",
+            delta_color="inverse"
+        )
+    
+    # Add visual separator
+    st.markdown("---")
+```
+
+### Loading States
+- Always show loading states for operations > 1 second
+- Use contextual loading messages
+- Implement progress tracking for long operations
+- Example loading patterns:
+```python
+def process_with_progress(items: List[Any]) -> List[Any]:
+    """Process items with progress indicator."""
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+    results = []
+    
+    for i, item in enumerate(items):
+        status_text.text(f"Processing item {i+1} of {len(items)}")
+        
+        result = process_item(item)
+        results.append(result)
+        
+        progress_bar.progress((i + 1) / len(items))
+    
+    status_text.text("Processing complete!")
+    return results
+```
+
+### Input Validation UI
+- Provide immediate feedback on input validation
+- Use helper text to guide users
+- Show clear error messages with solutions
+- Example validation UI:
+```python
+def validated_number_input(label: str, min_val: float, max_val: float) -> Optional[float]:
+    """Number input with validation feedback."""
+    value = st.number_input(
+        label,
+        min_value=min_val,
+        max_value=max_val,
+        help=f"Enter a value between {min_val} and {max_val}"
+    )
+    
+    if value < min_val or value > max_val:
+        st.error(f"Value must be between {min_val} and {max_val}")
+        return None
+    
+    return value
+```
+
+## Testing & Deployment
+
+### Testing Requirements
+- Use `st.testing.v1.AppTest` for unit testing Streamlit apps
+- Test all user interaction flows
+- Mock external API calls and file operations
+- Test error handling scenarios
+- Example test pattern:
+```python
+import streamlit as st
+from streamlit.testing.v1 import AppTest
+
+def test_file_upload_validation():
+    """Test file upload validation."""
+    at = AppTest.from_file("app.py")
+    at.secrets["max_file_size"] = 10  # 10MB limit
+    
+    # Test with valid file
+    at.file_uploader("upload").upload_from_path("test_file.csv")
+    at.run()
+    assert not at.error  # Should not show error
+    
+    # Test with oversized file
+    at.file_uploader("upload").upload_from_path("large_file.csv")
+    at.run()
+    assert "File too large" in str(at.error[0].value)
+```
+
+### Deployment Checklist
+- Set `enforceSerializableSessionState = true` for production
+- Configure appropriate cache TTL values
+- Set up proper error logging
+- Use HTTPS in production
+- Configure CORS and XSRF protection
+- Example production config:
+```toml
+# .streamlit/config.toml
+[runner]
+enforceSerializableSessionState = true
+
+[server]
+enableCORS = true
+enableXsrfProtection = true
+maxUploadSize = 200
+
+[browser]
+gatherUsageStats = false
+```
+
+## Code Examples & Patterns
+
+### Secure API Integration
+```python
+@st.cache_data(ttl=600)
+def secure_api_call(endpoint: str, params: Dict[str, Any]) -> Optional[Dict]:
+    """Secure API call with proper error handling."""
+    api_key = st.secrets["api_keys"]["service_name"]
+    
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        response = requests.get(
+            endpoint,
+            params=params,
+            headers=headers,
+            timeout=30
+        )
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        st.error("API call failed. Please try again later.")
+        return None
+```
+
+### Secure File Processing
+```python
+def secure_file_processor(uploaded_file) -> Optional[pd.DataFrame]:
+    """Securely process uploaded files."""
+    if not uploaded_file:
+        return None
+    
+    # Validate file type
+    if uploaded_file.type not in ["text/csv", "application/vnd.ms-excel"]:
+        st.error("Only CSV and Excel files are allowed")
+        return None
+    
+    # Validate file size
+    if uploaded_file.size > 50 * 1024 * 1024:  # 50MB limit
+        st.error("File too large. Maximum size is 50MB")
+        return None
+    
+    try:
+        # Safe file reading
+        if uploaded_file.name.endswith('.csv'):
+            df = pd.read_csv(uploaded_file, nrows=10000)  # Limit rows
+        else:
+            df = pd.read_excel(uploaded_file, nrows=10000)
+        
+        # Validate DataFrame
+        if df.empty:
+            st.error("File appears to be empty")
+            return None
+        
+        return df
+    except Exception as e:
+        st.error(f"Error reading file: {str(e)}")
+        return None
+```
+
+### Performance-Optimized Data Display
+```python
+@st.cache_data
+def optimize_dataframe_display(df: pd.DataFrame) -> pd.DataFrame:
+    """Optimize DataFrame for display."""
+    # Sample large datasets
+    if len(df) > 1000:
+        df = df.sample(n=1000)
+        st.info(f"Showing sample of {len(df)} rows from larger dataset")
+    
+    # Optimize data types
+    for col in df.select_dtypes(include=['object']).columns:
+        if df[col].nunique() < len(df) * 0.5:  # If < 50% unique
+            df[col] = df[col].astype('category')
+    
+    return df
+```
+
+## Anti-Patterns to Avoid
+
+### Security Anti-Patterns
+- ❌ Hardcoding secrets in source code
+- ❌ Storing passwords in session state without encryption
+- ❌ Trusting user input without validation
+- ❌ Using `eval()` or `exec()` with user input
+- ❌ Exposing internal error details to users
+
+### Performance Anti-Patterns
+- ❌ Not using caching for expensive operations
+- ❌ Loading large datasets without pagination
+- ❌ Recreating resources on every rerun
+- ❌ Using global variables instead of session state
+- ❌ Not cleaning up session state
+
+### Code Quality Anti-Patterns
+- ❌ Missing type hints
+- ❌ No error handling around external calls
+- ❌ Monolithic functions without separation of concerns
+- ❌ Inconsistent naming conventions
+- ❌ No documentation for complex logic
+
+This comprehensive rule set ensures secure, performant, and elegant Streamlit applications using UV for package management.

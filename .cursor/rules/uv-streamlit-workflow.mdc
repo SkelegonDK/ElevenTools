@@ -1,0 +1,1173 @@
+---
+description: always used in terminal
+alwaysApply: false
+---
+# UV & Streamlit Development Workflow
+
+## UV Package Management Rules
+
+### Project Initialization
+- **MANDATORY**: Always use UV for Python project management
+- Initialize projects with `uv init` for proper structure
+- Use `pyproject.toml` for all dependency management
+- Never use `requirements.txt` when `pyproject.toml` is available
+- Example project initialization:
+```bash
+# Initialize new Streamlit project
+uv init streamlit-app
+cd streamlit-app
+
+# Add Streamlit and common dependencies
+uv add streamlit
+uv add pandas numpy plotly
+uv add --dev pytest streamlit-testing ruff black
+
+# Create proper project structure
+mkdir -p pages utils tests .streamlit
+```
+
+### Dependency Management
+- Pin critical dependencies to specific versions
+- Use version constraints for flexibility where appropriate
+- Document dependency purposes in `pyproject.toml`
+- Regular dependency auditing with `uv audit`
+- Example `pyproject.toml` configuration:
+```toml
+[project]
+name = "streamlit-app"
+version = "0.1.0"
+description = "Secure Streamlit application"
+authors = [{name = "Your Name", email = "your.email@example.com"}]
+readme = "README.md"
+requires-python = ">=3.9"
+
+dependencies = [
+    # Core Streamlit stack
+    "streamlit>=1.42.0,<2.0.0",
+    "pandas>=2.0.0,<3.0.0",
+    "numpy>=1.24.0,<2.0.0",
+    "plotly>=5.15.0,<6.0.0",
+    
+    # Security and validation
+    "cryptography>=41.0.0",
+    "pydantic>=2.0.0,<3.0.0",
+    "python-jose[cryptography]>=3.3.0",
+    
+    # HTTP and API
+    "requests>=2.31.0,<3.0.0",
+    "httpx>=0.25.0,<1.0.0",
+    
+    # Database (optional)
+    "sqlalchemy>=2.0.0,<3.0.0",
+    "psycopg2-binary>=2.9.0,<3.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "streamlit-testing>=0.1.0",
+    
+    # Code quality
+    "ruff>=0.1.0",
+    "black>=23.0.0",
+    "mypy>=1.5.0",
+    
+    # Security scanning
+    "bandit>=1.7.0",
+    "safety>=2.3.0",
+]
+
+prod = [
+    # Production monitoring
+    "sentry-sdk>=1.32.0",
+    "prometheus-client>=0.17.0",
+]
+
+[tool.ruff]
+target-version = "py39"
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "S",   # flake8-bandit (security)
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by black)
+    "S101",  # assert used (OK in tests)
+]
+
+[tool.black]
+target-version = ["py39"]
+line-length = 88
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+```
+
+### Virtual Environment Management
+- Use UV's automatic virtual environment creation
+- Never commit virtual environments to version control
+- Use `uv sync` for reproducible environments
+- Document Python version requirements
+- Example workflow:
+```bash
+# Create and activate environment automatically
+uv run streamlit run app.py
+
+# Or manually manage
+uv venv
+source .venv/bin/activate  # On Unix
+# .venv\Scripts\activate  # On Windows
+
+# Install dependencies
+uv sync
+
+# Add new dependency
+uv add requests
+uv add --dev pytest
+
+# Update dependencies
+uv lock --upgrade
+```
+
+### Security with UV
+- Regularly audit dependencies: `uv audit`
+- Pin security-critical packages to specific versions
+- Use `uv pip list --outdated` to check for updates
+- Monitor security advisories for dependencies
+- Example security workflow:
+```bash
+# Audit dependencies for vulnerabilities
+uv audit
+
+# Check for outdated packages
+uv pip list --outdated
+
+# Update specific security-critical package
+uv add "cryptography>=41.0.7"
+
+# Generate lock file for reproducible builds
+uv lock
+```
+
+## Development Workflow
+
+### Local Development Setup
+- Use `uv run` for consistent execution environment
+- Set up pre-commit hooks for code quality
+- Configure IDE integration with UV
+- Example development setup:
+```bash
+# Clone repository
+git clone <repo-url>
+cd streamlit-app
+
+# Setup development environment
+uv sync --dev
+
+# Install pre-commit hooks
+uv run pre-commit install
+
+# Run application
+uv run streamlit run app.py
+
+# Run tests
+uv run pytest
+
+# Format code
+uv run black .
+uv run ruff --fix .
+
+# Type checking
+uv run mypy .
+```
+
+### Code Quality Integration
+- Use Ruff for fast linting and formatting
+- Integrate Black for code formatting
+- Use MyPy for type checking
+- Configure pre-commit hooks
+- Example `.pre-commit-config.yaml`:
+```yaml
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.0
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.5.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-requests]
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        args: ["-c", "pyproject.toml"]
+```
+
+### Testing with UV
+- Use pytest for comprehensive testing
+- Test Streamlit apps with `streamlit-testing`
+- Mock external dependencies in tests
+- Example test structure:
+```python
+# tests/conftest.py
+import pytest
+from streamlit.testing.v1 import AppTest
+
+@pytest.fixture
+def app_test():
+    """Fixture for Streamlit app testing."""
+    at = AppTest.from_file("app.py")
+    at.secrets["test_mode"] = True
+    return at
+
+@pytest.fixture
+def mock_api_response():
+    """Mock API response for testing."""
+    return {
+        "status": "success",
+        "data": {"value": 123}
+    }
+
+# tests/test_app.py
+import pytest
+from unittest.mock import patch
+
+def test_app_loads_correctly(app_test):
+    """Test that app loads without errors."""
+    app_test.run()
+    assert not app_test.exception
+
+def test_file_upload_validation(app_test):
+    """Test file upload validation."""
+    # Test valid file
+    app_test.file_uploader("upload").upload_from_path("tests/data/valid.csv")
+    app_test.run()
+    assert not app_test.error
+
+@patch('requests.get')
+def test_api_integration(mock_get, app_test, mock_api_response):
+    """Test API integration with mocking."""
+    mock_get.return_value.json.return_value = mock_api_response
+    mock_get.return_value.status_code = 200
+    
+    app_test.button("fetch_data").click()
+    app_test.run()
+    
+    assert "success" in str(app_test.success[0].value)
+
+# Run tests with coverage
+# uv run pytest --cov=app --cov-report=html
+```
+
+### Environment Configuration
+- Use `.env` files for local development
+- Separate configurations for dev/staging/prod
+- Use UV with environment-specific requirements
+- Example environment setup:
+```bash
+# .env.local
+ENVIRONMENT=development
+DEBUG=true
+LOG_LEVEL=debug
+API_BASE_URL=http://localhost:8000
+
+# .env.staging
+ENVIRONMENT=staging
+DEBUG=false
+LOG_LEVEL=info
+API_BASE_URL=https://api-staging.example.com
+
+# .env.production
+ENVIRONMENT=production
+DEBUG=false
+LOG_LEVEL=warning
+API_BASE_URL=https://api.example.com
+```
+
+```python
+# config.py
+import os
+from pydantic import BaseSettings
+
+class Settings(BaseSettings):
+    environment: str = "development"
+    debug: bool = False
+    log_level: str = "info"
+    api_base_url: str = "http://localhost:8000"
+    
+    class Config:
+        env_file = f".env.{os.getenv('ENVIRONMENT', 'local')}"
+        env_file_encoding = 'utf-8'
+
+settings = Settings()
+```
+
+## Performance Optimization with UV
+
+### Dependency Optimization
+- Use `uv tree` to analyze dependency relationships
+- Remove unused dependencies regularly
+- Use optional dependencies for features
+- Example dependency analysis:
+```bash
+# Analyze dependency tree
+uv tree
+
+# Check for unused dependencies
+uv run pip-autoremove
+
+# Add optional dependencies
+uv add --optional=ml "scikit-learn>=1.3.0"
+uv add --optional=viz "plotly>=5.15.0" "dash>=2.14.0"
+
+# Install with optional dependencies
+uv sync --extra ml --extra viz
+```
+
+### Build Optimization
+- Use UV's fast dependency resolution
+- Cache dependencies for CI/CD
+- Optimize Docker builds with UV
+- Example optimized Dockerfile:
+```dockerfile
+FROM python:3.11-slim
+
+# Install UV
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+
+# Set working directory
+WORKDIR /app
+
+# Copy dependency files
+COPY pyproject.toml uv.lock ./
+
+# Install dependencies
+RUN uv sync --frozen --no-dev
+
+# Copy application code
+COPY . .
+
+# Set environment variables
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Expose port
+EXPOSE 8501
+
+# Health check
+HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
+
+# Run application
+CMD ["uv", "run", "streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+```
+
+### CI/CD Integration
+- Cache UV dependencies in CI
+- Use UV for reproducible builds
+- Integrate security scanning
+- Example GitHub Actions workflow:
+```yaml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install UV
+      uses: astral-sh/setup-uv@v1
+      with:
+        version: "latest"
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/uv
+        key: ${{ runner.os }}-uv-${{ hashFiles('**/uv.lock') }}
+    
+    - name: Install dependencies
+      run: uv sync --dev
+    
+    - name: Run security audit
+      run: uv run bandit -r . -f json -o bandit-report.json
+    
+    - name: Run linting
+      run: |
+        uv run ruff check .
+        uv run black --check .
+    
+    - name: Run type checking
+      run: uv run mypy .
+    
+    - name: Run tests
+      run: uv run pytest --cov=app --cov-report=xml
+    
+    - name: Upload coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install UV
+      uses: astral-sh/setup-uv@v1
+    
+    - name: Security audit
+      run: |
+        uv audit
+        uv run safety check
+
+  deploy:
+    needs: [test, security]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy to production
+      run: |
+        # Your deployment script here
+        echo "Deploying to production..."
+```
+
+## Production Deployment
+
+### Environment Preparation
+- Use UV for consistent production environments
+- Generate lock files for reproducible deployments
+- Set up proper logging and monitoring
+- Example production setup:
+```bash
+# Production deployment script
+#!/bin/bash
+
+# Install UV if not present
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create production environment
+uv sync --frozen --no-dev
+
+# Set production environment variables
+export ENVIRONMENT=production
+export STREAMLIT_SERVER_PORT=8501
+export STREAMLIT_SERVER_ADDRESS=0.0.0.0
+
+# Run application with production settings
+uv run streamlit run app.py \
+  --server.port=$STREAMLIT_SERVER_PORT \
+  --server.address=$STREAMLIT_SERVER_ADDRESS \
+  --server.enableCORS=true \
+  --server.enableXsrfProtection=true
+```
+
+### Monitoring and Maintenance
+- Use UV for dependency updates
+- Monitor security vulnerabilities
+- Regular dependency audits
+- Example maintenance script:
+```bash
+#!/bin/bash
+# maintenance.sh
+
+# Update dependencies
+echo "Checking for dependency updates..."
+uv lock --upgrade
+
+# Security audit
+echo "Running security audit..."
+uv audit
+
+# Check for outdated packages
+echo "Checking for outdated packages..."
+uv pip list --outdated
+
+# Run tests to ensure updates don't break functionality
+echo "Running tests..."
+uv run pytest
+
+# Generate dependency report
+echo "Generating dependency report..."
+uv tree > dependency-report.txt
+
+echo "Maintenance complete!"
+```
+
+### Performance Monitoring
+- Monitor application performance with UV metrics
+- Track dependency resolution times
+- Optimize based on performance data
+- Example monitoring script:
+```python
+# monitoring.py
+import time
+import subprocess
+import json
+from datetime import datetime
+
+def monitor_uv_performance():
+    """Monitor UV performance metrics."""
+    metrics = {}
+    
+    # Time dependency resolution
+    start_time = time.time()
+    result = subprocess.run(['uv', 'lock', '--dry-run'], 
+                          capture_output=True, text=True)
+    resolution_time = time.time() - start_time
+    
+    metrics['dependency_resolution_time'] = resolution_time
+    metrics['timestamp'] = datetime.now().isoformat()
+    metrics['lock_file_size'] = os.path.getsize('uv.lock')
+    
+    # Log metrics
+    with open('performance-metrics.json', 'a') as f:
+        f.write(json.dumps(metrics) + '\n')
+    
+    return metrics
+
+if __name__ == "__main__":
+    metrics = monitor_uv_performance()
+    print(f"Dependency resolution took {metrics['dependency_resolution_time']:.2f}s")
+```
+
+## Best Practices Summary
+
+### Development Workflow
+1. **Start with UV**: Always initialize projects with `uv init`
+2. **Pin Critical Dependencies**: Security and core functionality packages
+3. **Use Lock Files**: Commit `uv.lock` for reproducible builds
+4. **Regular Audits**: Run `uv audit` weekly
+5. **Test Everything**: Use `streamlit-testing` for comprehensive tests
+6. **Automate Quality**: Use pre-commit hooks and CI/CD
+7. **Monitor Performance**: Track dependency resolution and app performance
+8. **Secure by Default**: Enable all security features in production
+
+### Common Anti-Patterns to Avoid
+- ❌ Using pip instead of UV for dependency management
+- ❌ Not pinning security-critical dependencies
+- ❌ Ignoring `uv audit` warnings
+- ❌ Not using lock files for reproducible builds
+- ❌ Mixing package managers (pip + UV)
+- ❌ Not testing with exact production dependencies
+- ❌ Deploying without security scanning
+- ❌ Not monitoring dependency vulnerabilities
+
+This comprehensive workflow ensures efficient, secure, and maintainable Streamlit applications using UV's modern Python package management capabilities.# UV & Streamlit Development Workflow
+
+## UV Package Management Rules
+
+### Project Initialization
+- **MANDATORY**: Always use UV for Python project management
+- Initialize projects with `uv init` for proper structure
+- Use `pyproject.toml` for all dependency management
+- Never use `requirements.txt` when `pyproject.toml` is available
+- Example project initialization:
+```bash
+# Initialize new Streamlit project
+uv init streamlit-app
+cd streamlit-app
+
+# Add Streamlit and common dependencies
+uv add streamlit
+uv add pandas numpy plotly
+uv add --dev pytest streamlit-testing ruff black
+
+# Create proper project structure
+mkdir -p pages utils tests .streamlit
+```
+
+### Dependency Management
+- Pin critical dependencies to specific versions
+- Use version constraints for flexibility where appropriate
+- Document dependency purposes in `pyproject.toml`
+- Regular dependency auditing with `uv audit`
+- Example `pyproject.toml` configuration:
+```toml
+[project]
+name = "streamlit-app"
+version = "0.1.0"
+description = "Secure Streamlit application"
+authors = [{name = "Your Name", email = "your.email@example.com"}]
+readme = "README.md"
+requires-python = ">=3.9"
+
+dependencies = [
+    # Core Streamlit stack
+    "streamlit>=1.42.0,<2.0.0",
+    "pandas>=2.0.0,<3.0.0",
+    "numpy>=1.24.0,<2.0.0",
+    "plotly>=5.15.0,<6.0.0",
+    
+    # Security and validation
+    "cryptography>=41.0.0",
+    "pydantic>=2.0.0,<3.0.0",
+    "python-jose[cryptography]>=3.3.0",
+    
+    # HTTP and API
+    "requests>=2.31.0,<3.0.0",
+    "httpx>=0.25.0,<1.0.0",
+    
+    # Database (optional)
+    "sqlalchemy>=2.0.0,<3.0.0",
+    "psycopg2-binary>=2.9.0,<3.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "streamlit-testing>=0.1.0",
+    
+    # Code quality
+    "ruff>=0.1.0",
+    "black>=23.0.0",
+    "mypy>=1.5.0",
+    
+    # Security scanning
+    "bandit>=1.7.0",
+    "safety>=2.3.0",
+]
+
+prod = [
+    # Production monitoring
+    "sentry-sdk>=1.32.0",
+    "prometheus-client>=0.17.0",
+]
+
+[tool.ruff]
+target-version = "py39"
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "S",   # flake8-bandit (security)
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by black)
+    "S101",  # assert used (OK in tests)
+]
+
+[tool.black]
+target-version = ["py39"]
+line-length = 88
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+```
+
+### Virtual Environment Management
+- Use UV's automatic virtual environment creation
+- Never commit virtual environments to version control
+- Use `uv sync` for reproducible environments
+- Document Python version requirements
+- Example workflow:
+```bash
+# Create and activate environment automatically
+uv run streamlit run app.py
+
+# Or manually manage
+uv venv
+source .venv/bin/activate  # On Unix
+# .venv\Scripts\activate  # On Windows
+
+# Install dependencies
+uv sync
+
+# Add new dependency
+uv add requests
+uv add --dev pytest
+
+# Update dependencies
+uv lock --upgrade
+```
+
+### Security with UV
+- Regularly audit dependencies: `uv audit`
+- Pin security-critical packages to specific versions
+- Use `uv pip list --outdated` to check for updates
+- Monitor security advisories for dependencies
+- Example security workflow:
+```bash
+# Audit dependencies for vulnerabilities
+uv audit
+
+# Check for outdated packages
+uv pip list --outdated
+
+# Update specific security-critical package
+uv add "cryptography>=41.0.7"
+
+# Generate lock file for reproducible builds
+uv lock
+```
+
+## Development Workflow
+
+### Local Development Setup
+- Use `uv run` for consistent execution environment
+- Set up pre-commit hooks for code quality
+- Configure IDE integration with UV
+- Example development setup:
+```bash
+# Clone repository
+git clone <repo-url>
+cd streamlit-app
+
+# Setup development environment
+uv sync --dev
+
+# Install pre-commit hooks
+uv run pre-commit install
+
+# Run application
+uv run streamlit run app.py
+
+# Run tests
+uv run pytest
+
+# Format code
+uv run black .
+uv run ruff --fix .
+
+# Type checking
+uv run mypy .
+```
+
+### Code Quality Integration
+- Use Ruff for fast linting and formatting
+- Integrate Black for code formatting
+- Use MyPy for type checking
+- Configure pre-commit hooks
+- Example `.pre-commit-config.yaml`:
+```yaml
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.0
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.5.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-requests]
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        args: ["-c", "pyproject.toml"]
+```
+
+### Testing with UV
+- Use pytest for comprehensive testing
+- Test Streamlit apps with `streamlit-testing`
+- Mock external dependencies in tests
+- Example test structure:
+```python
+# tests/conftest.py
+import pytest
+from streamlit.testing.v1 import AppTest
+
+@pytest.fixture
+def app_test():
+    """Fixture for Streamlit app testing."""
+    at = AppTest.from_file("app.py")
+    at.secrets["test_mode"] = True
+    return at
+
+@pytest.fixture
+def mock_api_response():
+    """Mock API response for testing."""
+    return {
+        "status": "success",
+        "data": {"value": 123}
+    }
+
+# tests/test_app.py
+import pytest
+from unittest.mock import patch
+
+def test_app_loads_correctly(app_test):
+    """Test that app loads without errors."""
+    app_test.run()
+    assert not app_test.exception
+
+def test_file_upload_validation(app_test):
+    """Test file upload validation."""
+    # Test valid file
+    app_test.file_uploader("upload").upload_from_path("tests/data/valid.csv")
+    app_test.run()
+    assert not app_test.error
+
+@patch('requests.get')
+def test_api_integration(mock_get, app_test, mock_api_response):
+    """Test API integration with mocking."""
+    mock_get.return_value.json.return_value = mock_api_response
+    mock_get.return_value.status_code = 200
+    
+    app_test.button("fetch_data").click()
+    app_test.run()
+    
+    assert "success" in str(app_test.success[0].value)
+
+# Run tests with coverage
+# uv run pytest --cov=app --cov-report=html
+```
+
+### Environment Configuration
+- Use `.env` files for local development
+- Separate configurations for dev/staging/prod
+- Use UV with environment-specific requirements
+- Example environment setup:
+```bash
+# .env.local
+ENVIRONMENT=development
+DEBUG=true
+LOG_LEVEL=debug
+API_BASE_URL=http://localhost:8000
+
+# .env.staging
+ENVIRONMENT=staging
+DEBUG=false
+LOG_LEVEL=info
+API_BASE_URL=https://api-staging.example.com
+
+# .env.production
+ENVIRONMENT=production
+DEBUG=false
+LOG_LEVEL=warning
+API_BASE_URL=https://api.example.com
+```
+
+```python
+# config.py
+import os
+from pydantic import BaseSettings
+
+class Settings(BaseSettings):
+    environment: str = "development"
+    debug: bool = False
+    log_level: str = "info"
+    api_base_url: str = "http://localhost:8000"
+    
+    class Config:
+        env_file = f".env.{os.getenv('ENVIRONMENT', 'local')}"
+        env_file_encoding = 'utf-8'
+
+settings = Settings()
+```
+
+## Performance Optimization with UV
+
+### Dependency Optimization
+- Use `uv tree` to analyze dependency relationships
+- Remove unused dependencies regularly
+- Use optional dependencies for features
+- Example dependency analysis:
+```bash
+# Analyze dependency tree
+uv tree
+
+# Check for unused dependencies
+uv run pip-autoremove
+
+# Add optional dependencies
+uv add --optional=ml "scikit-learn>=1.3.0"
+uv add --optional=viz "plotly>=5.15.0" "dash>=2.14.0"
+
+# Install with optional dependencies
+uv sync --extra ml --extra viz
+```
+
+### Build Optimization
+- Use UV's fast dependency resolution
+- Cache dependencies for CI/CD
+- Optimize Docker builds with UV
+- Example optimized Dockerfile:
+```dockerfile
+FROM python:3.11-slim
+
+# Install UV
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+
+# Set working directory
+WORKDIR /app
+
+# Copy dependency files
+COPY pyproject.toml uv.lock ./
+
+# Install dependencies
+RUN uv sync --frozen --no-dev
+
+# Copy application code
+COPY . .
+
+# Set environment variables
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Expose port
+EXPOSE 8501
+
+# Health check
+HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
+
+# Run application
+CMD ["uv", "run", "streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+```
+
+### CI/CD Integration
+- Cache UV dependencies in CI
+- Use UV for reproducible builds
+- Integrate security scanning
+- Example GitHub Actions workflow:
+```yaml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install UV
+      uses: astral-sh/setup-uv@v1
+      with:
+        version: "latest"
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/uv
+        key: ${{ runner.os }}-uv-${{ hashFiles('**/uv.lock') }}
+    
+    - name: Install dependencies
+      run: uv sync --dev
+    
+    - name: Run security audit
+      run: uv run bandit -r . -f json -o bandit-report.json
+    
+    - name: Run linting
+      run: |
+        uv run ruff check .
+        uv run black --check .
+    
+    - name: Run type checking
+      run: uv run mypy .
+    
+    - name: Run tests
+      run: uv run pytest --cov=app --cov-report=xml
+    
+    - name: Upload coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install UV
+      uses: astral-sh/setup-uv@v1
+    
+    - name: Security audit
+      run: |
+        uv audit
+        uv run safety check
+
+  deploy:
+    needs: [test, security]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy to production
+      run: |
+        # Your deployment script here
+        echo "Deploying to production..."
+```
+
+## Production Deployment
+
+### Environment Preparation
+- Use UV for consistent production environments
+- Generate lock files for reproducible deployments
+- Set up proper logging and monitoring
+- Example production setup:
+```bash
+# Production deployment script
+#!/bin/bash
+
+# Install UV if not present
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create production environment
+uv sync --frozen --no-dev
+
+# Set production environment variables
+export ENVIRONMENT=production
+export STREAMLIT_SERVER_PORT=8501
+export STREAMLIT_SERVER_ADDRESS=0.0.0.0
+
+# Run application with production settings
+uv run streamlit run app.py \
+  --server.port=$STREAMLIT_SERVER_PORT \
+  --server.address=$STREAMLIT_SERVER_ADDRESS \
+  --server.enableCORS=true \
+  --server.enableXsrfProtection=true
+```
+
+### Monitoring and Maintenance
+- Use UV for dependency updates
+- Monitor security vulnerabilities
+- Regular dependency audits
+- Example maintenance script:
+```bash
+#!/bin/bash
+# maintenance.sh
+
+# Update dependencies
+echo "Checking for dependency updates..."
+uv lock --upgrade
+
+# Security audit
+echo "Running security audit..."
+uv audit
+
+# Check for outdated packages
+echo "Checking for outdated packages..."
+uv pip list --outdated
+
+# Run tests to ensure updates don't break functionality
+echo "Running tests..."
+uv run pytest
+
+# Generate dependency report
+echo "Generating dependency report..."
+uv tree > dependency-report.txt
+
+echo "Maintenance complete!"
+```
+
+### Performance Monitoring
+- Monitor application performance with UV metrics
+- Track dependency resolution times
+- Optimize based on performance data
+- Example monitoring script:
+```python
+# monitoring.py
+import time
+import subprocess
+import json
+from datetime import datetime
+
+def monitor_uv_performance():
+    """Monitor UV performance metrics."""
+    metrics = {}
+    
+    # Time dependency resolution
+    start_time = time.time()
+    result = subprocess.run(['uv', 'lock', '--dry-run'], 
+                          capture_output=True, text=True)
+    resolution_time = time.time() - start_time
+    
+    metrics['dependency_resolution_time'] = resolution_time
+    metrics['timestamp'] = datetime.now().isoformat()
+    metrics['lock_file_size'] = os.path.getsize('uv.lock')
+    
+    # Log metrics
+    with open('performance-metrics.json', 'a') as f:
+        f.write(json.dumps(metrics) + '\n')
+    
+    return metrics
+
+if __name__ == "__main__":
+    metrics = monitor_uv_performance()
+    print(f"Dependency resolution took {metrics['dependency_resolution_time']:.2f}s")
+```
+
+## Best Practices Summary
+
+### Development Workflow
+1. **Start with UV**: Always initialize projects with `uv init`
+2. **Pin Critical Dependencies**: Security and core functionality packages
+3. **Use Lock Files**: Commit `uv.lock` for reproducible builds
+4. **Regular Audits**: Run `uv audit` weekly
+5. **Test Everything**: Use `streamlit-testing` for comprehensive tests
+6. **Automate Quality**: Use pre-commit hooks and CI/CD
+7. **Monitor Performance**: Track dependency resolution and app performance
+8. **Secure by Default**: Enable all security features in production
+
+### Common Anti-Patterns to Avoid
+- ❌ Using pip instead of UV for dependency management
+- ❌ Not pinning security-critical dependencies
+- ❌ Ignoring `uv audit` warnings
+- ❌ Not using lock files for reproducible builds
+- ❌ Mixing package managers (pip + UV)
+- ❌ Not testing with exact production dependencies
+- ❌ Deploying without security scanning
+- ❌ Not monitoring dependency vulnerabilities
+
+This comprehensive workflow ensures efficient, secure, and maintainable Streamlit applications using UV's modern Python package management capabilities.
