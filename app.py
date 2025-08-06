@@ -1,3 +1,8 @@
+import uuid
+import random
+import logging
+import os
+from datetime import datetime
 import streamlit as st
 from scripts.functions import detect_string_variables, detect_phonetic_conversion
 from scripts.Elevenlabs_functions import (
@@ -6,23 +11,15 @@ from scripts.Elevenlabs_functions import (
     fetch_voices,
     get_voice_id,
 )
-from scripts.ollama_functions import (
-    enhance_script_with_ollama,
-    convert_word_to_phonetic,
-)
+
 from utils.error_handling import (
     handle_error,
     validate_api_key,
     ProgressManager,
     APIError,
     ValidationError,
-    ConfigurationError,
 )
-import uuid
-import random
-import logging
-import os
-from datetime import datetime
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
