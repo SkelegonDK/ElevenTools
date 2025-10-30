@@ -8,7 +8,7 @@ ElevenTools is a comprehensive interface for ElevenLabs' text-to-speech API, des
 
 1. User-Friendly: Intuitive interface for both novice and experienced users.
 2. Flexibility: Support for various use cases, from single audio clips to large-scale batch processing.
-3. Reproducibility: Emphasis on seed management for consistent results.
+3. Reproducibility: Consistent results through standardized voice settings and text processing.
 4. Extensibility: Modular design to easily incorporate new features and integrations.
 5. Cloud-Ready: Designed to run seamlessly in cloud environments with secure API key management.
 
@@ -57,7 +57,6 @@ ElevenTools is a comprehensive interface for ElevenLabs' text-to-speech API, des
 3. Audio Generation
    - Single generation with immediate playback
    - Bulk generation from CSV files
-   - Seed management for reproducibility
    - Voice preview system with multiple voices
 
 4. Settings Management
@@ -80,7 +79,6 @@ ElevenTools is a comprehensive interface for ElevenLabs' text-to-speech API, des
 2. Bulk Audio Generation (Bulk Generation Page)
    - CSV file upload for batch processing
    - Support for text variables in CSV
-   - Option for random or fixed seed across batch
    - Bulk playback and optional download of generated audio
 
 3. Voice Design Studio (Voice Design Page)
@@ -97,12 +95,7 @@ ElevenTools is a comprehensive interface for ElevenLabs' text-to-speech API, des
    - Integration with OpenRouter for translations
    - Direct text input and output
 
-5. Seed Management
-   - Random seed generation
-   - Fixed seed option for reproducibility
-   - Seed logging for each generated audio
-
-6. Voice Customization
+5. Voice Customization
    - Adjustable parameters: stability, similarity, style
    - Speaker boost option
    - Voice generation from text descriptions
@@ -189,11 +182,11 @@ To improve usability and transparency, ElevenTools provides a built-in File Expl
 - **Output Organization:**
   - All generated audio (single and bulk) is consolidated in a single `outputs` folder.
   - **Bulk outputs** are grouped by the source CSV file used for generation. Each group is named after the CSV file.
-  - **Single outputs** are stored in a separate folder within `outputs`, with filenames in the format `LANGUAGE_VOICE_NAME_DATE_ID_SEED` for easy identification.
+  - **Single outputs** are stored in a separate folder within `outputs`, with filenames in the format `LANGUAGE_VOICE_NAME_DATE_ID` for easy identification.
 
 - **File Explorer UI:**
   - Accessible from within the app, allowing users to browse, review, and manage all generated audio files.
-  - **Bulk outputs** are displayed inside Streamlit expanders, each expander labeled with the CSV file name. Inside each expander, audio files are shown as rows with audio players and metadata (language, voice, date, ID, seed, source CSV).
+  - **Bulk outputs** are displayed inside Streamlit expanders, each expander labeled with the CSV file name. Inside each expander, audio files are shown as rows with audio players and metadata (language, voice, date, ID, source CSV).
   - **Single outputs** are displayed as stacked rows (no expanders), each row showing an audio player and all relevant metadata.
   - All generation details are visible for each file, supporting transparency and reproducibility.
   - The UI is designed to be intuitive and responsive, supporting both novice and advanced users.

@@ -15,8 +15,8 @@ if not os.path.exists(OUTPUTS_DIR):
 else:
     # --- Helper functions ---
     def parse_single_filename(filename):
-        # Expected format: LANGUAGE_VOICE_NAME_DATE_ID_SEED.mp3
-        pattern = r"^(?P<lang>[^_]+)_(?P<voice>[^_]+)_(?P<date>[^_]+)_(?P<id>[^_]+)_(?P<seed>[^_]+)\.mp3$"
+        # Expected format: LANGUAGE_VOICE_NAME_DATE_ID.mp3
+        pattern = r"^(?P<lang>[^_]+)_(?P<voice>[^_]+)_(?P<date>[^_]+)_(?P<id>[^_]+)\.mp3$"
         match = re.match(pattern, filename)
         if match:
             return match.groupdict()
@@ -75,7 +75,6 @@ else:
                         st.write(f"**Voice:** {meta['voice']}")
                         st.write(f"**Date:** {meta['date']}")
                         st.write(f"**ID:** {meta['id']}")
-                        st.write(f"**Seed:** {meta['seed']}")
                     else:
                         st.write("_Could not parse metadata from filename._")
 

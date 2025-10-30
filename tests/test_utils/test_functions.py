@@ -1,5 +1,5 @@
 import pytest
-from functions import detect_string_variables, detect_phonetic_variables, detect_phonetic_conversion
+from scripts.functions import detect_string_variables, detect_phonetic_variables, detect_phonetic_conversion
 
 def test_detect_string_variables():
     text = "Hello {name}, welcome to {place}!"

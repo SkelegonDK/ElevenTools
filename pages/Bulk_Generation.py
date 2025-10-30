@@ -21,25 +21,7 @@ def main():
     # Initialize session state
     if "ELEVENLABS_API_KEY" not in st.session_state:
         st.session_state["ELEVENLABS_API_KEY"] = st.secrets["ELEVENLABS_API_KEY"]
-    if "seed_type" not in st.session_state:
-        st.session_state["seed_type"] = "Random"
-
-    # Sidebar for seed input
-    sidebar = st.sidebar
-    with sidebar:
-        st.title("Seed Settings")
-        st.session_state["seed_type"] = st.radio("Seed Type", ["Random", "Fixed"])
-
-        if st.session_state["seed_type"] == "Fixed":
-            fixed_seed = sidebar.text_input(
-                "Fixed Seed", help="Set a fixed seed to improve reproducibility."
-            )
-            st.caption(
-                """Setting a fixed seed will ensure that the audio generated is consistent across runs.
-                For example when using variables in the script."""
-            )
-        else:
-            st.caption("Random seeds will be generated for each audio file.")
+    # Sidebar - seed settings removed
 
     # Fetch models and voices
     if "models" not in st.session_state:
@@ -128,12 +110,6 @@ def main():
                 output_dir = os.path.join(os.getcwd(), "outputs", csv_filename)
                 os.makedirs(output_dir, exist_ok=True)
 
-                # Prepare seed for bulk generation
-                if st.session_state["seed_type"] == "Fixed":
-                    seed = int(fixed_seed) if fixed_seed.isdigit() else None
-                else:
-                    seed = None  # Random seeds will be generated in the bulk_generate_audio function
-
                 success, message = bulk_generate_audio(
                     st.session_state["ELEVENLABS_API_KEY"],
                     selected_model_id,
@@ -141,8 +117,6 @@ def main():
                     uploaded_file,
                     output_dir,
                     voice_settings_dict,
-                    st.session_state["seed_type"],
-                    seed,
                 )
 
                 if success:

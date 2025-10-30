@@ -27,6 +27,7 @@ def mock_streamlit():
         patch("streamlit.slider") as mock_slider,
         patch("streamlit.checkbox") as mock_checkbox,
         patch("streamlit.file_uploader") as mock_file_uploader,
+        patch("streamlit.write") as mock_write,
     ):
         yield {
             "sidebar": mock_sidebar,
@@ -40,16 +41,19 @@ def mock_streamlit():
             "slider": mock_slider,
             "checkbox": mock_checkbox,
             "file_uploader": mock_file_uploader,
+            "write": mock_write,
         }
 
 
 @pytest.fixture
 def mock_elevenlabs_functions():
     with (
-        patch("Elevenlabs_functions.fetch_models") as mock_fetch_models,
-        patch("Elevenlabs_functions.fetch_voices") as mock_fetch_voices,
-        patch("Elevenlabs_functions.generate_audio") as mock_generate_audio,
-        patch("Elevenlabs_functions.bulk_generate_audio") as mock_bulk_generate_audio,
+        patch("pages.Bulk_Generation.fetch_models") as mock_fetch_models,
+        patch("scripts.Elevenlabs_functions.fetch_voices") as mock_fetch_voices,
+        patch("scripts.Elevenlabs_functions.generate_audio") as mock_generate_audio,
+        patch(
+            "scripts.Elevenlabs_functions.bulk_generate_audio"
+        ) as mock_bulk_generate_audio,
     ):
         yield {
             "fetch_models": mock_fetch_models,
@@ -131,7 +135,6 @@ def test_home_page(
         "voice1",
         "Enhanced script",
         pytest.approx,
-        seed=None,
     )
 
 
@@ -150,7 +153,6 @@ def test_bulk_generation_page(mock_streamlit, mock_elevenlabs_functions):
             "filename": ["audio1.mp3", "audio2.mp3"],
             "text": ["Hello, world!", "Goodbye, world!"],
             "success": [True, True],
-            "seed": ["12345", "67890"],
         }
     )
 
@@ -189,8 +191,6 @@ def test_bulk_generation_page(mock_streamlit, mock_elevenlabs_functions):
             "style": 0.3,
             "speaker_boost": True,
         },
-        "Random",
-        seed=None,
     )
 
     # Check if the results are displayed

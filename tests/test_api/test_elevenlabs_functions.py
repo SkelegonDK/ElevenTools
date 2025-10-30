@@ -16,7 +16,7 @@ from scripts.Elevenlabs_functions import (
 
 
 def test_fetch_models(mocker):
-    mock_get = mocker.patch("Elevenlabs_functions.requests.get")
+    mock_get = mocker.patch("scripts.Elevenlabs_functions.requests.get")
     mock_response = MagicMock()
     mock_response.json.return_value = [
         {"model_id": "model1", "name": "Model 1"},
@@ -29,7 +29,7 @@ def test_fetch_models(mocker):
 
 
 def test_fetch_voices(mocker):
-    mock_get = mocker.patch("Elevenlabs_functions.requests.get")
+    mock_get = mocker.patch("scripts.Elevenlabs_functions.requests.get")
     mock_response = MagicMock()
     mock_response.json.return_value = {
         "voices": [
@@ -51,15 +51,14 @@ def test_get_voice_id():
 
 
 def test_generate_audio(mocker):
-    mock_post = mocker.patch("Elevenlabs_functions.requests.post")
-    mock_file = mocker.patch("Elevenlabs_functions.open", mock_open())
+    mock_post = mocker.patch("scripts.Elevenlabs_functions.requests.post")
+    mock_file = mocker.patch("scripts.Elevenlabs_functions.open", mock_open())
     mock_response = MagicMock()
     mock_response.ok = True
     mock_response.content = b"fake audio content"
-    mock_response.headers = {"x-seed": "12345"}
     mock_post.return_value = mock_response
 
-    success, seed = generate_audio(
+    success = generate_audio(
         "fake_api_key",
         0.5,
         "model1",
@@ -72,13 +71,12 @@ def test_generate_audio(mocker):
     )
 
     assert success is True
-    assert seed == "12345"
     mock_file.assert_called_once_with("output.mp3", "wb")
     mock_file().write.assert_called_once_with(b"fake audio content")
 
 
 def test_generate_audio_failure(mocker):
-    mock_post = mocker.patch("Elevenlabs_functions.requests.post")
+    mock_post = mocker.patch("scripts.Elevenlabs_functions.requests.post")
     mock_response = MagicMock()
     mock_response.ok = False
     mock_response.text = "API Error"
@@ -119,7 +117,6 @@ def test_bulk_generate_audio(mocker):
             "filename": ["greeting_{name}.mp3", "welcome_{place}.mp3"],
             "text": ["Hello {name}", "Welcome to {place}"],
             "success": [True, True],
-            "seed": ["12345", "12345"],
         }
     )
     mocker.patch(
@@ -140,8 +137,6 @@ def test_bulk_generate_audio(mocker):
         csv_file,
         "output_dir",
         voice_settings,
-        "Fixed",
-        seed="54321",
     )
     assert len(result_df) == 2
     assert result_df["filename"].tolist() == [
@@ -150,11 +145,10 @@ def test_bulk_generate_audio(mocker):
     ]
     assert result_df["text"].tolist() == ["Hello {name}", "Welcome to {place}"]
     assert all(result_df["success"].tolist())
-    assert all(result_df["seed"].tolist() == ["12345", "12345"])
 
 
 def test_bulk_generate_audio_with_empty_csv(mocker):
-    df = pd.DataFrame(columns=["filename", "text", "success", "seed"])
+    df = pd.DataFrame(columns=["filename", "text", "success"])
     mocker.patch(
         "tests.test_api.test_elevenlabs_functions.bulk_generate_audio", return_value=df
     )
@@ -172,8 +166,6 @@ def test_bulk_generate_audio_with_empty_csv(mocker):
         csv_file,
         "output_dir",
         voice_settings,
-        "Fixed",
-        seed="54321",
     )
     assert len(result_df) == 0
 
@@ -184,7 +176,6 @@ def test_bulk_generate_audio_with_random_seed(mocker):
             "filename": ["greeting_{name}.mp3"],
             "text": ["Hello {name}"],
             "success": [True],
-            "seed": ["random-seed"],
         }
     )
     mocker.patch(
@@ -205,25 +196,22 @@ def test_bulk_generate_audio_with_random_seed(mocker):
         csv_file,
         "output_dir",
         voice_settings,
-        "Random",
     )
     assert len(result_df) == 1
     assert result_df[0]["filename"] == "greeting_{name}.mp3"
     assert result_df[0]["text"] == "Hello {name}"
     assert result_df[0]["success"] == True
-    assert result_df[0]["seed"] == "random-seed"
 
 
 def test_generate_audio_with_speed(mocker):
-    mock_post = mocker.patch("Elevenlabs_functions.requests.post")
-    mock_file = mocker.patch("Elevenlabs_functions.open", mock_open())
+    mock_post = mocker.patch("scripts.Elevenlabs_functions.requests.post")
+    mock_file = mocker.patch("scripts.Elevenlabs_functions.open", mock_open())
     mock_response = MagicMock()
     mock_response.ok = True
     mock_response.content = b"fake audio content"
-    mock_response.headers = {"x-seed": "12345"}
     mock_post.return_value = mock_response
     # Test valid speed with multilingual v2 model
-    success, seed = generate_audio(
+    success = generate_audio(
         "fake_api_key",
         0.5,
         "eleven_multilingual_v2",
@@ -236,7 +224,6 @@ def test_generate_audio_with_speed(mocker):
         speed=1.5,
     )
     assert success is True
-    assert seed == "12345"
     # Verify speed was included in payload
     payload = mock_post.call_args[1]["json"]
     assert payload["voice_settings"]["speed"] == 1.5
@@ -299,7 +286,6 @@ def test_bulk_generate_audio_with_speed(mocker):
             "filename": ["greeting_{name}.mp3"],
             "text": ["Hello {name}"],
             "success": [True],
-            "seed": ["12345"],
         }
     )
     mocker.patch(
@@ -321,8 +307,6 @@ def test_bulk_generate_audio_with_speed(mocker):
         csv_file,
         "output_dir",
         voice_settings,
-        "Fixed",
-        seed="54321",
     )
     assert len(result_df) == 1
     assert result_df.loc[:, "filename"].tolist() == ["greeting_{name}.mp3"]

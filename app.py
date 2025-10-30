@@ -62,9 +62,6 @@ try:
         progress.update(2, "Fetching available voices")
         st.session_state["voices"] = fetch_voices(ELEVENLABS_API_KEY)
 
-    if "seed" not in st.session_state:
-        progress.update(3, "Initializing session")
-        st.session_state["seed"] = "None"
 
     if "generated_audio" not in st.session_state:
         st.session_state["generated_audio"] = []
@@ -82,22 +79,7 @@ except Exception as e:
     handle_error(e)
     st.stop()
 
-# Sidebar
-sidebar = st.sidebar
-with sidebar:
-    st.title("Seed Settings")
-    seed_type = st.radio("Seed Type", ["Random", "Fixed"])
-
-    if seed_type == "Fixed":
-        fixed_seed = sidebar.text_input(
-            "Fixed Seed", help="Set a fixed seed to improve reproducibility."
-        )
-        st.caption(
-            """Setting a fixed seed will ensure that the audio generated is consistent across runs.
-            For example when using variables in the script."""
-        )
-    else:
-        st.caption("A random seed will be generated for the audio file.")
+# Sidebar - seed settings removed
 
 # Main content
 st.title("ElevenTools")
@@ -281,16 +263,6 @@ if st.button("Generate Audio"):
     else:
         progress = ProgressManager()
         try:
-            # Determine seed for this generation
-            if seed_type == "Fixed":
-                if not fixed_seed or not fixed_seed.isdigit():
-                    raise ValidationError(
-                        "Invalid fixed seed", "Fixed seed must be a valid integer."
-                    )
-                seed = int(fixed_seed)
-            else:
-                seed = random.randint(0, 9999999999)
-
             # Prepare output directory and filename for single outputs
             single_output_dir = os.path.join(os.getcwd(), "outputs", "single")
             os.makedirs(single_output_dir, exist_ok=True)
@@ -299,12 +271,12 @@ if st.button("Generate Audio"):
             date_str = datetime.now().strftime("%Y%m%d")
             unique_id = str(uuid.uuid4())[:8]
             temp_filename = (
-                f"{language}_{selected_voice_name}_{date_str}_{unique_id}_{seed}.mp3"
+                f"{language}_{selected_voice_name}_{date_str}_{unique_id}.mp3"
             )
             output_path = os.path.join(single_output_dir, temp_filename)
 
             progress.update(25, "Initializing audio generation")
-            success, response_seed = generate_audio(
+            success = generate_audio(
                 st.session_state["ELEVENLABS_API_KEY"],
                 voice_stability,
                 selected_model_id,
@@ -314,7 +286,6 @@ if st.button("Generate Audio"):
                 selected_voice_id,
                 script_to_use,
                 output_path,
-                seed=seed,
                 speed=(
                     voice_speed
                     if selected_model_id == "eleven_multilingual_v2"
@@ -324,13 +295,10 @@ if st.button("Generate Audio"):
 
             if success:
                 progress.complete()
-                st.success(
-                    f"✅ Audio generated successfully with seed {response_seed if response_seed else seed}"
-                )
+                st.success("✅ Audio generated successfully")
                 st.session_state["generated_audio"].append(
                     {
                         "filename": temp_filename,
-                        "seed": response_seed if response_seed else seed,
                         "voice": selected_voice_name,
                         "text": script_to_use,
                         "path": output_path,

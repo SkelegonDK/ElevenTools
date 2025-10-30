@@ -8,7 +8,6 @@ import os
 import json
 import logging
 import re
-import random
 from typing import Tuple, List, Dict, Optional, Any, Union, BinaryIO
 
 try:
@@ -103,10 +102,9 @@ def generate_audio(
     voice_id: str,
     text_to_speak: str,
     output_path: str = "output.mp3",
-    seed: Optional[int] = None,
     language_code: Optional[str] = None,
     speed: Optional[float] = None,
-) -> Tuple[bool, Optional[str]]:
+) -> bool:
     """Generate audio using ElevenLabs Text-to-Speech API.
 
     Args:
@@ -119,12 +117,11 @@ def generate_audio(
         voice_id (str): ID of the voice to use.
         text_to_speak (str): Text to convert to speech.
         output_path (str, optional): Path to save the audio file. Defaults to "output.mp3".
-        seed (Optional[int], optional): Seed for reproducible generation. Defaults to None.
         language_code (Optional[str], optional): Language code for multilingual models. Defaults to None.
         speed (Optional[float], optional): Speed multiplier between 0.5 and 2.0. Only for multilingual v2 model. Defaults to None.
 
     Returns:
-        Tuple[bool, Optional[str]]: Tuple containing (success status, generation seed if successful).
+        bool: Success status of the audio generation.
 
     Raises:
         ValidationError: If any of the input parameters are invalid.
@@ -162,8 +159,6 @@ def generate_audio(
 
     if speed is not None and model_id == "eleven_multilingual_v2":
         payload["voice_settings"]["speed"] = speed
-    if seed is not None:
-        payload["seed"] = seed
     if language_code:
         payload["language_code"] = language_code
 
@@ -179,10 +174,9 @@ def generate_audio(
         with open(output_path, "wb") as f:
             f.write(response.content)
 
-        response_seed = response.headers.get("x-seed")
-        logging.info("Audio generated successfully with seed: %s", response_seed)
+        logging.info("Audio generated successfully")
 
-        return True, response_seed
+        return True
 
     except requests.exceptions.RequestException as e:
         raise APIError("Failed to generate audio", str(e))
@@ -315,8 +309,6 @@ def bulk_generate_audio(
     csv_file: BinaryIO,
     output_dir: str,
     voice_settings: Dict[str, Any],
-    seed_type: str,
-    seed: Optional[int] = None,
 ) -> Tuple[bool, str]:
     """Generate audio in bulk from CSV file.
 
@@ -327,8 +319,6 @@ def bulk_generate_audio(
         csv_file (BinaryIO): CSV file object containing text and filename columns.
         output_dir (str): Directory to save generated audio files.
         voice_settings (Dict[str, Any]): Dictionary containing voice generation settings.
-        seed_type (str): Type of seed to use for generation.
-        seed (Optional[int], optional): Fixed seed value. Defaults to None.
 
     Returns:
         Tuple[bool, str]: Tuple containing:
@@ -385,10 +375,6 @@ def bulk_generate_audio(
             final_filename_mp3 = f"{sanitized_filename_base}.mp3"
             output_path = os.path.join(output_dir, final_filename_mp3)
 
-            current_seed = (
-                random.randint(0, 9999999999) if seed_type == "Random" else seed
-            )
-
             # Cast voice settings to correct types
             stability = float(voice_settings["stability"])
             similarity_boost = float(voice_settings["similarity_boost"])
@@ -399,7 +385,7 @@ def bulk_generate_audio(
             if speed_value is not None:
                 speed_value = float(speed_value)
 
-            success, response_seed = generate_audio(
+            success = generate_audio(
                 api_key,
                 stability,
                 model_id,
@@ -409,7 +395,6 @@ def bulk_generate_audio(
                 voice_id,
                 processed_text,  # Use processed text
                 output_path,
-                seed=current_seed,
                 speed=speed_value,  # Pass speed here
             )
 
