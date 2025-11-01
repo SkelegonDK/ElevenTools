@@ -43,6 +43,20 @@ def test_translate_script_calls_api_once(mock_post):
     assert mock_post.call_count == 1
 
 
+def test_translate_script_with_custom_model(mock_post):
+    """Test translation with custom model parameter."""
+    mock_post.return_value = MagicMock(
+        status_code=200,
+        json=lambda: {"choices": [{"message": {"content": "mocked response"}}]},
+    )
+    result = orf.translate_script_with_openrouter("hello", "fr", model="custom-model")
+    assert result == "mocked response"
+    assert mock_post.call_count == 1
+    # Verify model was passed
+    call_data = mock_post.call_args[1]["json"]
+    assert call_data["model"] == "custom-model"
+
+
 def test_phonetic_conversion_calls_api_once(mock_post):
     result = orf.convert_word_to_phonetic_openrouter(
         "hello", "French", "eleven_monolingual_v1"
