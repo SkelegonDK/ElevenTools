@@ -171,16 +171,17 @@ def test_bulk_generate_audio_with_empty_csv(mocker):
 
 
 def test_bulk_generate_audio_with_random_seed(mocker):
-    df = pd.DataFrame(
-        {
-            "filename": ["greeting_{name}.mp3"],
-            "text": ["Hello {name}"],
-            "success": [True],
-        }
-    )
-    mocker.patch(
-        "tests.test_api.test_elevenlabs_functions.bulk_generate_audio", return_value=df
-    )
+    # Mock the HTTP request to generate_audio
+    mock_post = mocker.patch("scripts.Elevenlabs_functions.requests.post")
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.content = b"fake_audio_content"
+    mock_post.return_value = mock_response
+    
+    # Mock file operations
+    mocker.patch("scripts.Elevenlabs_functions.open", mock_open())
+    mocker.patch("os.makedirs")
+    
     csv_content = "text,filename\nHello {name},greeting_{name}"
     csv_file = StringIO(csv_content)
     voice_settings = {
@@ -189,7 +190,7 @@ def test_bulk_generate_audio_with_random_seed(mocker):
         "style": 0.5,
         "use_speaker_boost": True,
     }
-    result_df = bulk_generate_audio(
+    success, message = bulk_generate_audio(
         "fake_api_key",
         "model1",
         "voice1",
@@ -197,10 +198,9 @@ def test_bulk_generate_audio_with_random_seed(mocker):
         "output_dir",
         voice_settings,
     )
-    assert len(result_df) == 1
-    assert result_df[0]["filename"] == "greeting_{name}.mp3"
-    assert result_df[0]["text"] == "Hello {name}"
-    assert result_df[0]["success"] == True
+    assert success is True
+    assert "completed successfully" in message
+    assert mock_post.called
 
 
 def test_generate_audio_with_speed(mocker):

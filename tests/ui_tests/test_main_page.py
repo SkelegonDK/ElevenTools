@@ -25,10 +25,16 @@ class TestMainPage:
         
         # Wait for page to load
         configured_page.wait_for_load_state("networkidle")
+        configured_page.wait_for_timeout(2000)  # Wait for API calls to complete
         
-        # Check for model selectbox (Streamlit renders as select)
-        model_select = configured_page.locator('select').first
-        expect(model_select).to_be_visible()
+        # Check for model selectbox - Streamlit renders selectboxes with data-testid
+        # Try multiple selectors to handle different Streamlit versions
+        model_select = (
+            configured_page.locator('[data-testid="stSelectbox"]').first
+            if configured_page.locator('[data-testid="stSelectbox"]').count() > 0
+            else configured_page.locator('select').first
+        )
+        expect(model_select).to_be_visible(timeout=10000)
 
     def test_voice_selection_present(self, configured_page: Page, streamlit_server: str):
         """Test that voice selection dropdown is present."""
@@ -36,10 +42,13 @@ class TestMainPage:
         
         # Wait for page to load
         configured_page.wait_for_load_state("networkidle")
+        configured_page.wait_for_timeout(2000)  # Wait for API calls to complete
         
-        # Check for voice selectbox (Streamlit renders as select)
-        selects = configured_page.locator('select')
-        expect(selects).to_have_count(2, timeout=10000)  # Model and Voice
+        # Check for voice selectbox - try Streamlit test IDs first, then fallback to select
+        selectboxes = configured_page.locator('[data-testid="stSelectbox"]')
+        if selectboxes.count() == 0:
+            selectboxes = configured_page.locator('select')
+        expect(selectboxes).to_have_count(2, timeout=10000)  # Model and Voice
 
     def test_text_area_present(self, configured_page: Page, streamlit_server: str):
         """Test that text input area is present."""
@@ -54,10 +63,20 @@ class TestMainPage:
         """Test that voice settings expander is present."""
         configured_page.goto(streamlit_server)
         configured_page.wait_for_load_state("networkidle")
+        configured_page.wait_for_timeout(2000)  # Wait for content to load
         
-        # Look for voice settings label or slider
-        # Streamlit renders sliders with specific structure
-        sliders = configured_page.locator('input[type="range"]')
+        # Look for voice settings - check for expander first, then sliders
+        # Streamlit renders expanders with data-testid="stExpander"
+        expander = configured_page.locator('[data-testid="stExpander"]').first
+        if expander.count() > 0:
+            # Click expander to reveal sliders
+            expander.click()
+            configured_page.wait_for_timeout(500)
+        
+        # Look for sliders - Streamlit renders sliders with data-testid="stSlider"
+        sliders = configured_page.locator('[data-testid="stSlider"]')
+        if sliders.count() == 0:
+            sliders = configured_page.locator('input[type="range"]')
         expect(sliders.first).to_be_visible(timeout=10000)  # At least one slider should be visible
 
     def test_generate_button_present(self, configured_page: Page, streamlit_server: str):

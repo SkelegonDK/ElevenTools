@@ -1,4 +1,4 @@
-# ElevenTools Alpha v0.1.0
+# ElevenTools v0.3.0
 
 ElevenTools is a comprehensive toolbox for ElevenLabs, providing a user-friendly interface for text-to-speech generation with advanced features and bulk processing capabilities.
 
@@ -12,6 +12,9 @@ ElevenTools is a comprehensive toolbox for ElevenLabs, providing a user-friendly
 - CSV support for batch processing
 - Review and playback of generated audio
 - Ollama integration for local language model processing
+- OpenRouter integration for translations and language processing
+- **OpenRouter model selection with fuzzy search** - Discover and select from available OpenRouter models with intelligent search
+- **Free model filtering** - Filter to show only zero-cost models for cost-effective translations
 
 ## Installation
 
@@ -37,11 +40,16 @@ ElevenTools is a comprehensive toolbox for ElevenLabs, providing a user-friendly
 
 ## Configuration
 
-1. Create a `.streamlit/secrets.toml` file in the root directory with your API key:
+1. Create a `.streamlit/secrets.toml` file in the root directory with your API keys:
 
    ```toml
    ELEVENLABS_API_KEY = "your_elevenlabs_api_key"
+   OPENROUTER_API_KEY = "your_openrouter_api_key"
    ```
+
+   Both API keys are required for full functionality:
+   - **ELEVENLABS_API_KEY**: Required for text-to-speech generation
+   - **OPENROUTER_API_KEY**: Required for translations and OpenRouter model selection features
 
 2. (Optional) Create a `.streamlit/config.toml` file to customize Streamlit's appearance and behavior.
 
@@ -93,153 +101,108 @@ Navigate to the provided local URL to access the ElevenTools interface.
 
 ## Testing
 
-ElevenTools uses pytest for testing. The test suite is organized into separate files for each main component of the application:
+ElevenTools uses pytest for unit testing and Playwright for UI testing. The test suite is comprehensively organized to cover all major components:
 
-- `test_functions.py`: Tests for utility functions in `functions.py`
-- `test_elevenlabs_functions.py`: Tests for ElevenLabs API interactions in `Elevenlabs_functions.py`
-- `test_ollama_functions.py`: Tests for Ollama integration in `ollama_functions.py`
-- `test_streamlit_pages.py`: Tests for Streamlit pages (Home.py and Bulk_Generation.py)
+### Test Organization
 
-To run the tests:
+**Unit Tests** (`tests/test_api/`, `tests/test_utils/`, `tests/test_web/`):
 
-1. Ensure dev dependencies are installed:
+- `test_elevenlabs_functions.py`: Tests for ElevenLabs API interactions
+- `test_openrouter_functions.py`: Tests for OpenRouter API integration
+- `test_openrouter_model_functions.py`: Tests for model fetching, filtering, and fuzzy search
+- `test_functions.py`: Tests for utility functions
+- `test_streamlit_pages.py`: Tests for Streamlit page components
+- `test_file_explorer.py`: Tests for file management functionality
+
+**UI Tests** (`tests/ui_tests/`):
+
+- `test_main_page.py`: Playwright tests for main TTS interface
+- `test_translation_page.py`: Playwright tests for translation page with model selection
+- `test_bulk_generation_page.py`: Playwright tests for bulk generation
+- `test_file_explorer_page.py`: Playwright tests for file explorer
+- `test_api_management_page.py`: Playwright tests for API management
+
+### Running Tests
+
+1. Ensure dev dependencies are installed (includes Playwright):
 
    ```bash
    uv sync --extra dev
    ```
 
-2. Run all tests:
+2. Install Playwright browsers (first time only):
 
    ```bash
-   uv run -- pytest
+   uv run playwright install
    ```
 
-3. To run tests for a specific file:
+3. Run all tests:
 
    ```bash
-   uv run -- pytest test_functions.py
+   uv run pytest
    ```
 
-4. To run tests with more detailed output:
+4. Run only unit tests:
 
    ```bash
-   uv run -- pytest -v
+   uv run pytest tests/test_api/ tests/test_utils/ tests/test_web/
    ```
 
-5. To run tests and see print statements:
+5. Run only UI tests:
 
    ```bash
-   uv run -- pytest -s
+   uv run pytest tests/ui_tests/
    ```
 
-When contributing new features or making changes, please add or update the relevant tests to ensure code quality and prevent regressions.
+6. Run tests for a specific file:
 
-# TODO List for Eleven Tools
+   ```bash
+   uv run pytest tests/test_api/test_openrouter_model_functions.py
+   ```
 
-## High Priority
+7. Run tests with verbose output:
 
-1. ~~Implement automated testing~~
-   - [x] Unit tests for core functions
-   - [x] Integration tests for API interactions
-   - [x] End-to-end tests for user workflows
+   ```bash
+   uv run pytest -v
+   ```
 
-2. Integrate OLLAMA
-   - [x] Implement OLLAMA integration in the codebase
-   - [x] Create tests for OLLAMA integration
-   - [ ] Test and improve enhancing process
+8. Run UI tests with headed browser (see what's happening):
 
-3. Enhance UI/UX
-   - [ ] Implement progress bars for audio generation
-   - [ ] Improve error messaging and user feedback
-   - [ ] Create a more intuitive layout for voice settings
+   ```bash
+   uv run pytest tests/ui_tests/ --headed
+   ```
 
-4. Optimize performance
-   - [ ] Implement caching for frequently used data
-   - [ ] Optimize bulk generation for large datasets
+When contributing new features or making changes, please add or update the relevant tests to ensure code quality and prevent regressions. All new features should include both unit tests and UI tests where applicable.
 
-5. Security enhancements
-   - [ ] Implement proper API key management
-   - [ ] Add user authentication for multi-user support
+## Project Management
 
-## Medium Priority
+ElevenTools uses **OpenSpec** for task management and spec-driven development. All change proposals, specifications, and tasks are tracked in the `openspec/` directory.
 
-6. Improve data management
-   - [ ] Implement a database for storing generation history
-   - [ ] Create export options for generated audio metadata
-   - [ ] Develop a pronunciation memory system
+## Current Development Status
 
-7. Expand features
-   - [ ] Add search functionality for voice IDs
+### Recently Completed Features
 
-8. Documentation
-   - [ ] Create comprehensive API documentation
-   - [ ] Develop a user guide with examples and best practices
+- ✅ **Comprehensive testing suite** - Unit tests and Playwright UI tests covering all major components
+- ✅ **Ollama integration** - Local language model processing for voice design enhancements
+- ✅ **OpenRouter model selection** - Fuzzy search and free model filtering for translation customization
+- ✅ **API response caching** - Model fetching and other API calls use Streamlit caching for performance
 
-## Lower Priority
+### Active Development
 
-9. Enhance Voice-to-Voice functionality
-   - [ ] Add voice cleanup features
+Current change proposals and specifications can be viewed with:
 
-10. UI/UX improvements (continued)
-    - [ ] Implement a dark mode option
+```bash
+openspec list
+openspec list --specs
+```
 
-## Grouped by Feature Area
+To view details of a specific change:
 
-### Testing and Quality Assurance
+```bash
+openspec show <change-id>
+```
 
-- ~~Implement automated testing~~
-  - [x] Unit tests for core functions
-  - [x] Integration tests for API interactions
-  - [x] End-to-end tests for user workflows
-
-### OLLAMA Integration
-
-- Integrate OLLAMA
-  - [x] Research OLLAMA API and integration requirements
-  - [x] Design integration architecture
-  - [x] Implement OLLAMA integration in the codebase
-  - [x] Create tests for OLLAMA integration
-  - [ ] Test and improve enhancing process
-
-### User Interface and Experience
-
-- Enhance UI/UX
-  - [ ] Implement progress bars for audio generation
-  - [ ] Improve error messaging and user feedback
-  - [ ] Create a more intuitive layout for voice settings
-  - [ ] Implement a dark mode option
-
-### Performance and Optimization
-
-- Optimize performance
-  - [ ] Implement caching for frequently used data
-  - [ ] Optimize bulk generation for large datasets
-
-### Security
-
-- Security enhancements
-  - [ ] Implement proper API key management
-  - [ ] Add user authentication for multi-user support
-
-### Data Management and Persistence
-
-- Improve data management
-  - [ ] Implement a database for storing generation history
-  - [ ] Create export options for generated audio metadata
-  - [ ] Develop a pronunciation memory system
-
-### Feature Expansion
-
-- Expand features
-  - [ ] Add search functionality for voice IDs
-- Enhance Voice-to-Voice functionality
-  - [ ] Add voice cleanup features
-
-### Documentation
-
-- Documentation
-  - [ ] Create comprehensive API documentation
-  - [ ] Develop a user guide with examples and best practices
+For more information about OpenSpec and the project structure, see `openspec/AGENTS.md`.
 
 ## License
 
@@ -276,10 +239,21 @@ The following voice settings can be adjusted:
 
 ## Models
 
-The following models are available:
+### ElevenLabs Models
+
+The following ElevenLabs models are available:
 
 - **Monolingual v1**: English-only model optimized for speed
 - **Multilingual v2**: Advanced model supporting multiple languages and speed control
+
+### OpenRouter Models
+
+For translation and language processing, ElevenTools integrates with OpenRouter, providing access to a wide variety of language models:
+
+- **Model Selection**: Browse and search through available OpenRouter models with fuzzy search
+- **Free Model Filtering**: Filter to show only zero-cost models for cost-effective translations
+- **Real-time Search**: Search models by name with support for partial matches and typos
+- **Default Model**: Uses "openrouter/auto" by default, but you can select any available model
 
 ## Branching Model
 
@@ -288,5 +262,6 @@ The following models are available:
 - **cloud**: Experimental or cloud-specific features branch, based on develop.
 
 **Recent update:**
+
 - `main` was updated to match `develop` (June 2024).
 - `cloud` branch created from `develop` for cloud-specific work.
