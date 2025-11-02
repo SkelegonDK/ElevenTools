@@ -21,6 +21,7 @@ import streamlit as st
 
 from utils.error_handling import APIError, ValidationError, handle_error
 from utils.caching import st_cache
+from utils.model_capabilities import supports_speed
 
 
 @st_cache(ttl_minutes=60)
@@ -118,7 +119,7 @@ def generate_audio(
         text_to_speak (str): Text to convert to speech.
         output_path (str, optional): Path to save the audio file. Defaults to "output.mp3".
         language_code (Optional[str], optional): Language code for multilingual models. Defaults to None.
-        speed (Optional[float], optional): Speed multiplier between 0.5 and 2.0. Only for multilingual v2 model. Defaults to None.
+        speed (Optional[float], optional): Speed multiplier between 0.5 and 2.0. Available for models that support speed control (multilingual and turbo/flash v2+ models). Defaults to None.
 
     Returns:
         bool: Success status of the audio generation.
@@ -136,9 +137,10 @@ def generate_audio(
         raise ValidationError("Style must be between 0 and 1")
     if not text_to_speak:
         raise ValidationError("Text to speak cannot be empty")
-    if speed is not None and model_id != "eleven_multilingual_v2":
+    if speed is not None and not supports_speed(model_id):
         raise ValidationError(
-            "Speed parameter is only supported for multilingual v2 model"
+            f"Speed parameter is not supported for model '{model_id}'. "
+            "Speed control is available for multilingual and turbo/flash v2+ models."
         )
     if speed is not None and not (0.5 <= speed <= 2.0):
         raise ValidationError("Speed must be between 0.5 and 2.0")
@@ -157,7 +159,7 @@ def generate_audio(
         },
     }
 
-    if speed is not None and model_id == "eleven_multilingual_v2":
+    if speed is not None and supports_speed(model_id):
         payload["voice_settings"]["speed"] = speed
     if language_code:
         payload["language_code"] = language_code

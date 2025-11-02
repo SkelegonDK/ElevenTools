@@ -23,6 +23,7 @@ from utils.error_handling import (
     APIError,
     ValidationError,
 )
+from utils.model_capabilities import supports_speed, supports_audio_tags
 
 
 # Configure logging
@@ -106,8 +107,15 @@ try:
     selected_voice_id = get_voice_id(st.session_state["voices"], selected_voice_name)
 
     # Store selected model and voice IDs in session state
+    # Clear speed setting if model changed and new model doesn't support speed
+    previous_model_id = st.session_state.get("selected_model_id")
     st.session_state["selected_model_id"] = selected_model_id
     st.session_state["selected_voice_id"] = selected_voice_id
+    
+    # Clear speed from voice_settings if model changed to one that doesn't support speed
+    if previous_model_id != selected_model_id:
+        if not supports_speed(selected_model_id) and "voice_settings" in st.session_state:
+            st.session_state["voice_settings"].pop("speed", None)
 
 except Exception as e:
     handle_error(e)
@@ -132,10 +140,21 @@ if script != st.session_state["original_script"]:
     )
 
 # New prompt input for script enhancement
+# Show v3-specific help text if v3 model is selected
+selected_model_id_for_help = st.session_state.get("selected_model_id", "")
+is_v3_model = supports_audio_tags(selected_model_id_for_help) if selected_model_id_for_help else False
+
+enhancement_help_text = (
+    "Provide a prompt to guide the script enhancement process."
+    if not is_v3_model
+    else "Provide a prompt to guide the script enhancement process. "
+    "Using v3 Audio Tags enhancement: tags like [excited], [whispers], [sighs] will be used."
+)
+
 enhancement_prompt = st.text_input(
     "Enhancement prompt (optional)",
     "",
-    help="Provide a prompt to guide the script enhancement process.",
+    help=enhancement_help_text,
 )
 
 # Script enhancement with progress tracking
@@ -145,12 +164,19 @@ if st.button("Enhance script"):
     else:
         progress = ProgressManager()
         try:
+            # Get selected model ID for enhancement routing
+            selected_model_id = st.session_state.get("selected_model_id")
+            is_v3 = supports_audio_tags(selected_model_id) if selected_model_id else False
+            
+            # Show indicator if using v3 enhancement
+            if is_v3:
+                st.info("🎙️ Using v3 Audio Tags enhancement for expressive speech generation")
 
             def update_progress(prog):
                 progress.update(int(prog * 100), "Enhancing script")
 
             success, result = enhance_script_with_openrouter(
-                script, enhancement_prompt, update_progress
+                script, enhancement_prompt, update_progress, model_id=selected_model_id
             )
 
             if success:
@@ -228,16 +254,19 @@ if script_to_use:
 # Voice settings
 voice_settings = st.expander("Advanced voice settings", expanded=True)
 with voice_settings:
-    # Add speed slider for multilingual v2 model
+    # Add speed slider dynamically based on model capabilities
+    # Use model_id in key to ensure widget resets when model changes
     voice_speed = None
-    if selected_model_id == "eleven_multilingual_v2":
+    if supports_speed(selected_model_id):
+        # Reset to default 1.0 when model changes (key includes model_id, so Streamlit will reset automatically)
         voice_speed = st.slider(
             "Voice speed",
             min_value=0.5,
             max_value=2.0,
             value=1.0,
             step=0.1,
-            help="Adjust the speaking speed (only available for multilingual v2 model)",
+            key=f"voice_speed_{selected_model_id}",  # Key includes model_id to reset on model change
+            help="Adjust the speaking speed (available for multilingual and turbo/flash v2+ models)",
         )
     voice_stability = st.slider("Voice stability", 0.0, 1.0, 0.5)
     voice_similarity = st.slider("Voice similarity", 0.0, 1.0, 0.5)
@@ -253,7 +282,7 @@ st.session_state["voice_settings"] = {
     "use_speaker_boost": use_speaker_boost,
 }
 
-if selected_model_id == "eleven_multilingual_v2":
+if supports_speed(selected_model_id) and voice_speed is not None:
     st.session_state["voice_settings"]["speed"] = voice_speed
 
 # Generate audio with progress tracking
@@ -286,11 +315,7 @@ if st.button("Generate Audio"):
                 selected_voice_id,
                 script_to_use,
                 output_path,
-                speed=(
-                    voice_speed
-                    if selected_model_id == "eleven_multilingual_v2"
-                    else None
-                ),
+                speed=voice_speed if supports_speed(selected_model_id) else None,
             )
 
             if success:

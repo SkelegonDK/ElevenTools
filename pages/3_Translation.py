@@ -65,9 +65,9 @@ filtered_models = all_models.copy()
 if show_free_only:
     filtered_models = filter_free_models(filtered_models, show_free_only=True)
 
-# Apply fuzzy search
-if search_query:
-    filtered_models = search_models_fuzzy(filtered_models, search_query)
+# Apply fuzzy search (strip whitespace to handle whitespace-only queries)
+if search_query and search_query.strip():
+    filtered_models = search_models_fuzzy(filtered_models, search_query.strip())
 
 # Create model options for selectbox
 if filtered_models:
@@ -104,10 +104,15 @@ if filtered_models:
             with col1:
                 st.info(f"**Selected:** {st.session_state.selected_model}")
             with col2:
+                model_id = selected_model_data.get("id", "")
                 pricing = selected_model_data.get("pricing", {})
                 prompt_price = pricing.get("prompt", "N/A")
                 completion_price = pricing.get("completion", "N/A")
-                if prompt_price == 0 and completion_price == 0:
+                
+                # Check if model is free (ends with :free or has zero pricing)
+                is_free = model_id.endswith(":free") or (prompt_price == 0 and completion_price == 0)
+                
+                if is_free:
                     st.success("🆓 Free model")
                 else:
                     st.caption(f"Prompt: ${prompt_price}, Completion: ${completion_price}")

@@ -7,6 +7,7 @@ from scripts.Elevenlabs_functions import (
     fetch_voices,
     get_voice_id,
 )
+from utils.model_capabilities import supports_speed
 
 
 def main():
@@ -53,19 +54,31 @@ def main():
     )
     selected_voice_id = get_voice_id(st.session_state["voices"], selected_voice_name)
 
+    # Clear speed setting if model changed and new model doesn't support speed
+    previous_model_id = st.session_state.get("selected_model_id")
+    st.session_state["selected_model_id"] = selected_model_id
+    
+    if previous_model_id != selected_model_id:
+        if not supports_speed(selected_model_id):
+            # Clear any speed-related session state
+            if "voice_speed" in st.session_state:
+                del st.session_state["voice_speed"]
+
     # Voice settings
     voice_settings = st.expander("Voice settings", expanded=True)
     with voice_settings:
-        # Add speed slider for multilingual v2 model
+        # Add speed slider dynamically based on model capabilities
+        # Use model_id in key to ensure widget resets when model changes
         voice_speed = None
-        if selected_model_id == "eleven_multilingual_v2":
+        if supports_speed(selected_model_id):
             voice_speed = st.slider(
                 "Voice speed",
                 min_value=0.5,
                 max_value=2.0,
                 value=1.0,
                 step=0.1,
-                help="Adjust the speaking speed (only available for multilingual v2 model)",
+                key=f"bulk_voice_speed_{selected_model_id}",  # Key includes model_id to reset on model change
+                help="Adjust the speaking speed (available for multilingual and turbo/flash v2+ models)",
             )
         voice_stability = st.slider("Voice stability", 0.0, 1.0, 0.5)
         voice_similarity = st.slider("Voice similarity", 0.0, 1.0, 0.5)
@@ -79,7 +92,7 @@ def main():
         "use_speaker_boost": speaker_boost,
     }
 
-    if selected_model_id == "eleven_multilingual_v2":
+    if supports_speed(selected_model_id) and voice_speed is not None:
         voice_settings_dict["speed"] = voice_speed
 
     st.write(

@@ -83,3 +83,79 @@ def test_no_api_key(monkeypatch):
 
 
 # Note: If/when caching is implemented, add tests to ensure repeated identical calls do not trigger new requests.
+
+
+def test_enhance_script_routes_to_v3_when_v3_model():
+    """Test that enhancement routes to v3-specific function when v3 model is detected."""
+    with patch("scripts.openrouter_functions.supports_audio_tags", return_value=True):
+        with patch("scripts.openrouter_functions.enhance_script_for_v3") as mock_v3:
+            mock_v3.return_value = (True, "v3 enhanced script")
+            
+            success, result = orf.enhance_script_with_openrouter(
+                "test script", model_id="eleven_v3"
+            )
+            
+            assert success
+            assert result == "v3 enhanced script"
+            mock_v3.assert_called_once_with("test script", "", None)
+
+
+def test_enhance_script_routes_to_traditional_when_non_v3_model():
+    """Test that enhancement uses traditional method when non-v3 model is detected."""
+    with patch("scripts.openrouter_functions.supports_audio_tags", return_value=False):
+        with patch("scripts.openrouter_functions.requests.post") as mock_post:
+            mock_post.return_value = MagicMock(
+                status_code=200,
+                json=lambda: {"choices": [{"message": {"content": "traditional enhanced"}}]},
+            )
+            
+            success, result = orf.enhance_script_with_openrouter(
+                "test script", model_id="eleven_multilingual_v2"
+            )
+            
+            assert success
+            assert result == "traditional enhanced"
+            mock_post.assert_called_once()
+
+
+def test_enhance_script_routes_to_traditional_when_no_model_id():
+    """Test that enhancement uses traditional method when no model_id is provided."""
+    with patch("scripts.openrouter_functions.requests.post") as mock_post:
+        mock_post.return_value = MagicMock(
+            status_code=200,
+            json=lambda: {"choices": [{"message": {"content": "traditional enhanced"}}]},
+        )
+        
+        success, result = orf.enhance_script_with_openrouter("test script")
+        
+        assert success
+        assert result == "traditional enhanced"
+        mock_post.assert_called_once()
+
+
+def test_enhance_script_for_v3_includes_audio_tags_prompt(mock_post):
+    """Test that v3 enhancement function uses Audio Tags prompt."""
+    success, result = orf.enhance_script_for_v3("test script")
+    
+    assert success
+    assert mock_post.call_count == 1
+    
+    # Verify the prompt contains Audio Tags references
+    call_data = mock_post.call_args[1]["json"]
+    user_message = call_data["messages"][1]["content"]
+    
+    assert "[excited]" in user_message or "Audio Tags" in user_message
+    assert "square brackets" in user_message.lower() or "[tag]" in user_message.lower()
+    assert "v3" in user_message.lower() or "Audio Tags" in user_message
+
+
+def test_enhance_script_for_v3_passes_enhancement_prompt(mock_post):
+    """Test that v3 enhancement function passes custom enhancement prompt."""
+    custom_prompt = "Make it more dramatic"
+    success, result = orf.enhance_script_for_v3("test script", enhancement_prompt=custom_prompt)
+    
+    assert success
+    call_data = mock_post.call_args[1]["json"]
+    user_message = call_data["messages"][1]["content"]
+    
+    assert custom_prompt in user_message

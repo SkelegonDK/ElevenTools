@@ -164,13 +164,22 @@ def test_identify_free_models(sample_models):
             "id": "model4",
             "pricing": {"prompt": 0.001, "completion": 0},
         },
+        {
+            "id": "minimax/minimax-m2:free",
+            "pricing": {"prompt": 0.001, "completion": 0.002},  # :free suffix makes it free
+        },
     ]
 
     free_models = orf.identify_free_models(models)
 
-    assert len(free_models) == 2
-    assert free_models[0]["id"] == "model1"
-    assert free_models[1]["id"] == "model3"
+    # Should identify 3 free models: model1, model3, and the :free model
+    assert len(free_models) == 3
+    free_ids = [m["id"] for m in free_models]
+    assert "model1" in free_ids
+    assert "model3" in free_ids
+    assert "minimax/minimax-m2:free" in free_ids
+    assert "model2" not in free_ids
+    assert "model4" not in free_ids
 
 
 def test_identify_free_models_mixed_pricing():
@@ -182,13 +191,18 @@ def test_identify_free_models_mixed_pricing():
         {"id": "partial1", "pricing": {"prompt": 0, "completion": 0.01}},
         {"id": "partial2", "pricing": {"prompt": 0.01, "completion": 0}},
         {"id": "missing_pricing", "pricing": {}},
+        {"id": "minimax/minimax-m2:free", "pricing": {"prompt": 0.001, "completion": 0.002}},  # :free suffix makes it free
     ]
 
     free_models = orf.identify_free_models(models)
 
-    assert len(free_models) == 2
-    assert free_models[0]["id"] == "free1"
-    assert free_models[1]["id"] == "free2"
+    # Should identify 3 free models: free1, free2, and the :free model
+    assert len(free_models) == 3
+    free_ids = [m["id"] for m in free_models]
+    assert "free1" in free_ids
+    assert "free2" in free_ids
+    assert "minimax/minimax-m2:free" in free_ids
+    assert "paid1" not in free_ids
 
 
 def test_filter_free_models():
@@ -281,6 +295,30 @@ def test_combined_fuzzy_search_and_free_filter(sample_models):
     # Should find at least the model with "One" in the name
     assert len(result) >= 1
     assert any("one" in m.get("name", "").lower() or "model-1" in m.get("id", "") for m in result)
+
+
+def test_search_with_whitespace_only_query():
+    """Test that whitespace-only queries don't filter out all models (bug fix)."""
+    models = [
+        {"id": "free-model-1", "name": "Free Model One", "pricing": {"prompt": 0, "completion": 0}},
+        {"id": "free-model-2", "name": "Free Model Two", "pricing": {"prompt": 0, "completion": 0}},
+    ]
+    
+    # Filter to free models first
+    free_models = orf.filter_free_models(models, show_free_only=True)
+    assert len(free_models) == 2
+    
+    # Search with whitespace-only query should return all models (not filter them out)
+    result = orf.search_models_fuzzy(free_models, "   ")
+    assert len(result) == 2, "Whitespace-only query should return all models, not filter them out"
+    
+    # Test with empty string
+    result2 = orf.search_models_fuzzy(free_models, "")
+    assert len(result2) == 2
+    
+    # Test with tab/newline whitespace
+    result3 = orf.search_models_fuzzy(free_models, "\t\n")
+    assert len(result3) == 2
 
 
 def test_session_state_initialization():

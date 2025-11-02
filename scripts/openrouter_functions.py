@@ -4,6 +4,7 @@ import streamlit as st
 from typing import Optional, Tuple, List, Dict, Any
 from difflib import SequenceMatcher
 from utils.error_handling import APIError
+from utils.model_capabilities import supports_audio_tags
 
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models"
@@ -17,16 +18,122 @@ def get_openrouter_api_key() -> Optional[str]:
     )
 
 
-def enhance_script_with_openrouter(
+def enhance_script_for_v3(
     script: str, enhancement_prompt: str = "", progress_callback=None
 ) -> Tuple[bool, str]:
     """
-    Enhance the given script using OpenRouter's LLM.
+    Enhance the given script specifically for ElevenLabs v3 models using Audio Tags.
+    
+    Audio Tags are square-bracketed tags that provide expressive control:
+    - Emotions: [excited], [sad], [angry], [happily], [sorrowful]
+    - Delivery: [whispers], [shouts], [x accent]
+    - Human reactions: [laughs], [clears throat], [sighs]
+    - Sound effects: [gunshot], [clapping], [explosion] (when contextually appropriate)
+    
     :param script: The script to enhance
     :param enhancement_prompt: Optional prompt for enhancement guidance
     :param progress_callback: Optional callback function to update progress
     :return: Tuple (success, result)
     """
+    api_key = get_openrouter_api_key()
+    if not api_key:
+        return False, "OpenRouter API key not found. Please set it in API Management."
+
+    prompt = f"""
+# Enhance the following script for ElevenLabs v3 Text-to-Speech using Audio Tags.
+
+ElevenLabs v3 models support Audio Tags - square-bracketed tags that control emotion, delivery, and natural speech patterns. Use Audio Tags instead of traditional XML tags.
+
+## Apply the following Audio Tags techniques:
+
+### 1. **Emotions** - Set emotional tone:
+   - [excited], [sad], [angry], [happily], [sorrowful], [fearful], [confident]
+   - Use combinations when appropriate: [excited] then [whispers] for dramatic effect
+
+### 2. **Delivery Direction** - Control tone and performance:
+   - [whispers] - For quiet, intimate moments
+   - [shouts] - For emphasis or urgency
+   - [x accent] - For character voices (e.g., [French accent], [British accent], [American accent])
+   - [monotone] - For flat delivery when needed
+
+### 3. **Human Reactions** - Add natural speech patterns:
+   - [laughs], [chuckles], [giggles]
+   - [clears throat] - For natural pauses or transitions
+   - [sighs] - For exhaustion, relief, or contemplation
+   - [gasps] - For surprise or shock
+
+### 4. **Sound Effects** - Add contextual audio (use sparingly and only when appropriate):
+   - [gunshot], [clapping], [explosion] - Only if the script context requires it
+   - These should enhance the narrative, not distract
+
+## Guidelines:
+- Place Audio Tags immediately before the text they modify
+- Use tags naturally - don't overuse them
+- Combine tags when appropriate for nuanced delivery
+- Maintain the original meaning and flow of the script
+- Audio Tags use square brackets: [tag] not <tag>
+- Focus on natural, expressive speech that matches the script's intent
+
+{html.unescape(enhancement_prompt) if enhancement_prompt else 'Use the existing context to improve the script, keeping in mind the Audio Tags techniques and examples provided above.'}
+
+Script to enhance:
+{html.unescape(script)}
+
+IMPORTANT: Provide ONLY the enhanced script as your response. Do not include any explanations, notes, or additional text. The enhanced script should use Audio Tags in square brackets [like this] and be ready for ElevenLabs v3 text-to-speech synthesis. Maintain the overall flow and coherence of the original text.
+"""
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+    data = {
+        "model": DEFAULT_MODEL,
+        "messages": [
+            {
+                "role": "system",
+                "content": "You are a helpful assistant specializing in ElevenLabs v3 Audio Tags script enhancement. You understand how to use Audio Tags to create expressive, natural-sounding speech.",
+            },
+            {"role": "user", "content": prompt},
+        ],
+        "max_tokens": 1024,
+        "temperature": 0.7,
+    }
+    try:
+        if progress_callback:
+            progress_callback(0.0)
+        response = requests.post(
+            OPENROUTER_API_URL, headers=headers, json=data, timeout=60
+        )
+        if progress_callback:
+            progress_callback(0.99)
+        response.raise_for_status()
+        result = response.json()
+        enhanced_script = result["choices"][0]["message"]["content"].strip()
+        return True, enhanced_script
+    except Exception as e:
+        return False, f"OpenRouter API error: {str(e)}"
+
+
+def enhance_script_with_openrouter(
+    script: str, enhancement_prompt: str = "", progress_callback=None, model_id: Optional[str] = None
+) -> Tuple[bool, str]:
+    """
+    Enhance the given script using OpenRouter's LLM.
+    
+    Routes to v3-specific enhancement (Audio Tags) when a v3 model is detected,
+    otherwise uses traditional enhancement techniques.
+    
+    :param script: The script to enhance
+    :param enhancement_prompt: Optional prompt for enhancement guidance
+    :param progress_callback: Optional callback function to update progress
+    :param model_id: Optional model ID to determine enhancement strategy
+    :return: Tuple (success, result)
+    """
+    # Route to v3-specific enhancement if model supports Audio Tags
+    if model_id and supports_audio_tags(model_id):
+        return enhance_script_for_v3(script, enhancement_prompt, progress_callback)
+    
+    # Use traditional enhancement for non-v3 models
     api_key = get_openrouter_api_key()
     if not api_key:
         return False, "OpenRouter API key not found. Please set it in API Management."
@@ -172,7 +279,9 @@ def identify_free_models(models: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
     Identify free models from a list of models.
     
-    A model is considered free if both pricing.prompt and pricing.completion are 0.
+    A model is considered free if:
+    1. Model ID ends with ":free" (e.g., "minimax/minimax-m2:free"), OR
+    2. Both pricing.prompt and pricing.completion are 0
     
     Args:
         models: List of model dictionaries from OpenRouter API.
@@ -182,6 +291,14 @@ def identify_free_models(models: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
     free_models = []
     for model in models:
+        model_id = model.get("id", "")
+        
+        # Check if model ID ends with ":free" (most reliable indicator)
+        if model_id.endswith(":free"):
+            free_models.append(model)
+            continue
+        
+        # Fallback: Check pricing (some free models may not have :free suffix)
         pricing = model.get("pricing", {})
         prompt_price = pricing.get("prompt", None)
         completion_price = pricing.get("completion", None)
@@ -251,8 +368,12 @@ def search_models_fuzzy(models: List[Dict[str, Any]], query: str, min_score: flo
     Returns:
         List of matching models sorted by relevance (highest score first).
     """
-    if not query:
+    # Strip whitespace and treat empty/whitespace-only queries as no search
+    if not query or not query.strip():
         return models
+    
+    # Use stripped query for matching
+    query = query.strip()
     
     # Calculate scores for each model
     scored_models = []
