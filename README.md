@@ -40,18 +40,55 @@ ElevenTools is a comprehensive toolbox for ElevenLabs, providing a user-friendly
 
 ## Configuration
 
-1. Create a `.streamlit/secrets.toml` file in the root directory with your API keys:
+ElevenTools supports multiple methods for providing API keys, making it flexible for both local development and cloud deployment:
+
+### API Key Management
+
+#### Method 1: Session-Based Storage (Recommended for Cloud Deployment)
+
+- Navigate to the **API Management** page in the sidebar
+- Enter your API keys directly in the interface
+- Keys are stored only in your browser session (never saved to disk or shared between users)
+- Perfect for multi-user cloud deployments without requiring authentication layers
+- Keys persist across page navigations within the same browser session
+
+#### Method 2: Streamlit Secrets (For Streamlit Cloud)
+
+- Configure secrets in your Streamlit Cloud app settings
+- See [Streamlit Cloud Secrets Documentation](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/secrets-management)
+- Secrets are shared across all users of the deployed app
+
+#### Method 3: Local secrets.toml (For Local Development)
+
+- Create a `.streamlit/secrets.toml` file in the root directory:
 
    ```toml
    ELEVENLABS_API_KEY = "your_elevenlabs_api_key"
    OPENROUTER_API_KEY = "your_openrouter_api_key"
    ```
 
-   Both API keys are required for full functionality:
-   - **ELEVENLABS_API_KEY**: Required for text-to-speech generation
-   - **OPENROUTER_API_KEY**: Required for translations and OpenRouter model selection features
+#### Priority Order
 
-2. (Optional) Create a `.streamlit/config.toml` file to customize Streamlit's appearance and behavior.
+1. Session state (user-entered keys via API Management page)
+2. Streamlit secrets (cloud dashboard or local secrets.toml)
+
+Both API keys are required for full functionality:
+
+- **ELEVENLABS_API_KEY**: Required for text-to-speech generation
+- **OPENROUTER_API_KEY**: Required for translations and OpenRouter model selection features
+
+### Additional Configuration
+
+(Optional) Create a `.streamlit/config.toml` file to customize Streamlit's appearance and behavior.
+
+### Streamlit Cloud Deployment
+
+When deploying to Streamlit Cloud:
+
+1. **Option A**: Configure secrets via the Streamlit Cloud dashboard (shared across all users)
+2. **Option B**: Users can enter their own API keys via the API Management page (per-user keys)
+
+The session-based approach allows each user to provide their own API keys without requiring a full authentication layer, making it ideal for prototype and multi-user scenarios.
 
 ## Ollama Setup
 

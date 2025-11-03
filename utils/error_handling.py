@@ -76,7 +76,7 @@ def validate_api_key(api_key: Optional[str], service_name: str) -> None:
 
     Args:
         api_key: The API key to validate
-        service_name: Name of the service (e.g., 'ElevenLabs', 'OpenAI')
+        service_name: Name of the service (e.g., 'ElevenLabs', 'OpenRouter')
 
     Raises:
         ConfigurationError: If API key is invalid
@@ -84,12 +84,12 @@ def validate_api_key(api_key: Optional[str], service_name: str) -> None:
     if not api_key:
         raise ConfigurationError(
             f"{service_name} API key not found",
-            f"Please add your {service_name} API key to .streamlit/secrets.toml",
+            f"Please add your {service_name} API key via the API Management page or configure it in Streamlit secrets.",
         )
     if api_key.startswith("sk-dummy"):
         raise ConfigurationError(
             f"Invalid {service_name} API key",
-            f"Please replace the dummy {service_name} API key with a valid one",
+            f"Please replace the dummy {service_name} API key with a valid one via the API Management page.",
         )
 
 

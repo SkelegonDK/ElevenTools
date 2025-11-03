@@ -8,6 +8,8 @@ from scripts.Elevenlabs_functions import (
     get_voice_id,
 )
 from utils.model_capabilities import supports_speed
+from utils.api_keys import get_elevenlabs_api_key
+from utils.error_handling import handle_error, validate_api_key, ConfigurationError
 
 
 def main():
@@ -19,20 +21,50 @@ def main():
     with open("custom_style.css", encoding="utf-8") as css:
         st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
 
-    # Initialize session state
-    if "ELEVENLABS_API_KEY" not in st.session_state:
-        st.session_state["ELEVENLABS_API_KEY"] = st.secrets["ELEVENLABS_API_KEY"]
+    # Initialize API key
+    ELEVENLABS_API_KEY = get_elevenlabs_api_key()
+
+    if not ELEVENLABS_API_KEY:
+        st.error("🔑 **ElevenLabs API Key Required**")
+        st.markdown(
+            """
+            No ElevenLabs API key found. Please provide your API key using one of the following methods:
+            
+            1. **Via API Management Page** (Recommended for cloud deployment):
+               - Navigate to the **API Management** page in the sidebar
+               - Enter your API key (stored only in your browser session)
+            
+            2. **Via Streamlit Secrets** (For Streamlit Cloud):
+               - Configure secrets in your Streamlit Cloud app settings
+               - See [Streamlit Cloud Secrets Documentation](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/secrets-management)
+            
+            3. **Via Local secrets.toml** (For local development):
+               - Add your key to `.streamlit/secrets.toml`:
+               ```toml
+               ELEVENLABS_API_KEY = "your-api-key-here"
+               ```
+            """
+        )
+        st.info("💡 **Tip**: API keys entered via the API Management page are stored only in your browser session and are never saved to disk or shared between users.")
+        st.stop()
+
+    # Validate API key format
+    try:
+        validate_api_key(ELEVENLABS_API_KEY, "ElevenLabs")
+    except ConfigurationError as e:
+        handle_error(e)
+        st.markdown(
+            "💡 **Need help?** Visit the **API Management** page to update your API key."
+        )
+        st.stop()
+
     # Sidebar - seed settings removed
 
     # Fetch models and voices
     if "models" not in st.session_state:
-        st.session_state["models"] = fetch_models(
-            st.session_state["ELEVENLABS_API_KEY"]
-        )
+        st.session_state["models"] = fetch_models(ELEVENLABS_API_KEY)
     if "voices" not in st.session_state:
-        st.session_state["voices"] = fetch_voices(
-            st.session_state["ELEVENLABS_API_KEY"]
-        )
+        st.session_state["voices"] = fetch_voices(ELEVENLABS_API_KEY)
 
     # Model selection
     selected_model_name = st.selectbox(
@@ -124,7 +156,7 @@ def main():
                 os.makedirs(output_dir, exist_ok=True)
 
                 success, message = bulk_generate_audio(
-                    st.session_state["ELEVENLABS_API_KEY"],
+                    ELEVENLABS_API_KEY,
                     selected_model_id,
                     selected_voice_id,
                     uploaded_file,

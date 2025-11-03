@@ -22,8 +22,10 @@ from utils.error_handling import (
     ProgressManager,
     APIError,
     ValidationError,
+    ConfigurationError,
 )
 from utils.model_capabilities import supports_speed, supports_audio_tags
+from utils.api_keys import get_elevenlabs_api_key
 
 
 # Configure logging
@@ -39,18 +41,41 @@ except Exception as e:
     handle_error(e)
 
 # Initialize API keys
-try:
-    ELEVENLABS_API_KEY = st.secrets["ELEVENLABS_API_KEY"]
-    # Removed OpenAI_API key initialization
-    # Validate API key
-    validate_api_key(ELEVENLABS_API_KEY, "ElevenLabs")
-except Exception as e:
-    handle_error(e)
+ELEVENLABS_API_KEY = get_elevenlabs_api_key()
+
+if not ELEVENLABS_API_KEY:
+    st.error("🔑 **ElevenLabs API Key Required**")
+    st.markdown(
+        """
+        No ElevenLabs API key found. Please provide your API key using one of the following methods:
+        
+        1. **Via API Management Page** (Recommended for cloud deployment):
+           - Navigate to the **API Management** page in the sidebar
+           - Enter your API key (stored only in your browser session)
+        
+        2. **Via Streamlit Secrets** (For Streamlit Cloud):
+           - Configure secrets in your Streamlit Cloud app settings
+           - See [Streamlit Cloud Secrets Documentation](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/secrets-management)
+        
+        3. **Via Local secrets.toml** (For local development):
+           - Add your key to `.streamlit/secrets.toml`:
+           ```toml
+           ELEVENLABS_API_KEY = "your-api-key-here"
+           ```
+        """
+    )
+    st.info("💡 **Tip**: API keys entered via the API Management page are stored only in your browser session and are never saved to disk or shared between users.")
     st.stop()
 
-# Ensure necessary variables are in session state for use across pages
-if "ELEVENLABS_API_KEY" not in st.session_state:
-    st.session_state["ELEVENLABS_API_KEY"] = ELEVENLABS_API_KEY
+# Validate API key format
+try:
+    validate_api_key(ELEVENLABS_API_KEY, "ElevenLabs")
+except ConfigurationError as e:
+    handle_error(e)
+    st.markdown(
+        "💡 **Need help?** Visit the **API Management** page to update your API key."
+    )
+    st.stop()
 
 # Initialize session state with progress tracking
 progress = ProgressManager(total_steps=4)

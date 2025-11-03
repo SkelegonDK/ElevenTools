@@ -20,7 +20,7 @@ def main():
         This page shows the status of all API keys and secrets used by ElevenTools.\n\n"
         "API keys are stored in your browser session for privacy and per-user security.\n"
         "They are never written to disk or shared between users.\n"
-        "If you do not enter a key here, the app will use the key from `.streamlit/secrets.toml` if available."
+        "If you do not enter a key here, the app will use the key from Streamlit secrets (configured via Streamlit Cloud dashboard or local `.streamlit/secrets.toml`) if available."
         """
     )
 
@@ -70,7 +70,7 @@ def main():
     st.markdown(
         """
         Enter your API keys below. These will be stored **only in your browser session** and are never saved to disk or shared.\n\n"
-        "If you leave a field blank, the app will use the key from `.streamlit/secrets.toml` if available.\n\n"
+        "If you leave a field blank, the app will use the key from Streamlit secrets (configured via Streamlit Cloud dashboard or local `.streamlit/secrets.toml`) if available.\n\n"
         "To clear a key for this session, enter an empty value and click 'Save'.\n"
         """
     )
@@ -108,9 +108,11 @@ def main():
     st.header("Troubleshooting & Documentation")
     st.markdown(
         """
-        - If you see a ❌ status, check that your key is present and valid in this session or in `.streamlit/secrets.toml`.
-        - For more help, see the [README.md](../README.md) or [Streamlit secrets documentation](https://docs.streamlit.io/streamlit-community-cloud/develop-and-deploy/app-secrets).
-        - For key rotation and environment support, see your team or deployment documentation.
+        - If you see a ❌ status, check that your key is present and valid in this session or in Streamlit secrets.
+        - **Session keys** (entered here) take priority over Streamlit secrets.
+        - For local development, add keys to `.streamlit/secrets.toml`.
+        - For Streamlit Cloud, configure secrets via the app settings dashboard.
+        - For more help, see the [README.md](../README.md) or [Streamlit secrets documentation](https://docs.streamlit.io/streamlit-community-cloud/deploy-your-app/secrets-management).
         """
     )
 

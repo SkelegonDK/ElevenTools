@@ -5,17 +5,11 @@ from typing import Optional, Tuple, List, Dict, Any
 from difflib import SequenceMatcher
 from utils.error_handling import APIError
 from utils.model_capabilities import supports_audio_tags
+from utils.api_keys import get_openrouter_api_key
 
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models"
 DEFAULT_MODEL = "openrouter/auto"  # Use a free model or specify as needed
-
-
-def get_openrouter_api_key() -> Optional[str]:
-    """Get the OpenRouter API key from session state or secrets."""
-    return st.session_state.get("OPENROUTER_API_KEY") or st.secrets.get(
-        "OPENROUTER_API_KEY"
-    )
 
 
 def enhance_script_for_v3(
