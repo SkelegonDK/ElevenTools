@@ -46,7 +46,7 @@ ElevenTools supports multiple methods for providing API keys, making it flexible
 
 #### Method 1: Session-Based Storage (Recommended for Cloud Deployment)
 
-- Navigate to the **API Management** page in the sidebar
+- Navigate to the **Settings** page in the sidebar
 - Enter your API keys directly in the interface
 - Keys are stored only in your browser session (never saved to disk or shared between users)
 - Perfect for multi-user cloud deployments without requiring authentication layers
@@ -69,7 +69,7 @@ ElevenTools supports multiple methods for providing API keys, making it flexible
 
 #### Priority Order
 
-1. Session state (user-entered keys via API Management page)
+1. Session state (user-entered keys via Settings page)
 2. Streamlit secrets (cloud dashboard or local secrets.toml)
 
 Both API keys are required for full functionality:
@@ -86,7 +86,7 @@ Both API keys are required for full functionality:
 When deploying to Streamlit Cloud:
 
 1. **Option A**: Configure secrets via the Streamlit Cloud dashboard (shared across all users)
-2. **Option B**: Users can enter their own API keys via the API Management page (per-user keys)
+2. **Option B**: Users can enter their own API keys via the Settings page (per-user keys)
 
 The session-based approach allows each user to provide their own API keys without requiring a full authentication layer, making it ideal for prototype and multi-user scenarios.
 
@@ -157,7 +157,7 @@ ElevenTools uses pytest for unit testing and Playwright for UI testing. The test
 - `test_translation_page.py`: Playwright tests for translation page with model selection
 - `test_bulk_generation_page.py`: Playwright tests for bulk generation
 - `test_file_explorer_page.py`: Playwright tests for file explorer
-- `test_api_management_page.py`: Playwright tests for API management
+- `test_settings_page.py`: Playwright tests for Settings page
 
 ### Running Tests
 

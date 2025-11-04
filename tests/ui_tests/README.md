@@ -43,7 +43,7 @@ uv run pytest tests/ui_tests/ --headed --slowmo=1000
 - `test_bulk_generation_page.py` - Tests for Bulk Generation page
 - `test_file_explorer_page.py` - Tests for File Explorer page
 - `test_translation_page.py` - Tests for Translation page
-- `test_api_management_page.py` - Tests for API Management page
+- `test_settings_page.py` - Tests for Settings page
 
 ## Prerequisites
 

@@ -5,19 +5,26 @@ from scripts.openrouter_functions import (
     fetch_openrouter_models,
     search_models_fuzzy,
     filter_free_models,
+    get_default_translation_model,
 )
 from utils.error_handling import handle_error
 
 with open("custom_style.css", encoding="utf-8") as css:
     st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
 
-st.title("Script Translation")
+# Title with settings gear icon
+col_title, col_settings = st.columns([10, 1])
+with col_title:
+    st.title("Script Translation")
+with col_settings:
+    if st.button("⚙️", help="Open Settings to configure default translation model", key="translation_settings_btn"):
+        st.switch_page("pages/Settings.py")
 
 # Check if OpenRouter API key is available
 api_key = get_openrouter_api_key()
 if not api_key:
     st.error(
-        "OpenRouter API key not found. Please set your OpenRouter API key in the API Management page."
+        "OpenRouter API key not found. Please set your OpenRouter API key in the Settings page."
     )
     st.stop()
 
@@ -116,6 +123,10 @@ if filtered_models:
                     st.success("🆓 Free model")
                 else:
                     st.caption(f"Prompt: ${prompt_price}, Completion: ${completion_price}")
+    else:
+        # Show default model info if no page-specific selection
+        default_model = get_default_translation_model()
+        st.info(f"ℹ️ Using default model from Settings: **{default_model}** (click ⚙️ to change)")
 else:
     if search_query or show_free_only:
         st.warning("No models match your search criteria. Try adjusting your filters.")
@@ -152,8 +163,22 @@ language = st.selectbox(
 
 # Generate translation
 if st.button("Translate") and text:
+    # Determine which model to use
+    model_to_use = st.session_state.selected_model if st.session_state.selected_model else None
+    
+    # Show warning if no model is configured (neither page-specific nor default)
+    if not model_to_use:
+        default_model = get_default_translation_model()
+        if not default_model:
+            st.warning(
+                "⚠️ No translation model configured. Please select a model above or configure a default model in Settings (⚙️)."
+            )
+            st.stop()
+        else:
+            model_to_use = default_model
+            st.info(f"ℹ️ Using default model: **{model_to_use}** (configure in Settings ⚙️)")
+    
     with st.spinner("Translating..."):
-        model_to_use = st.session_state.selected_model if st.session_state.selected_model else None
         translation = translate_script(text, language, model=model_to_use)
         st.write("Translation:")
         st.write(translation)

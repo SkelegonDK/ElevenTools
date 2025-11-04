@@ -14,6 +14,7 @@ from scripts.Elevenlabs_functions import (
 from scripts.openrouter_functions import (
     enhance_script_with_openrouter,
     convert_word_to_phonetic_openrouter,
+    get_default_enhancement_model,
 )
 
 from utils.error_handling import (
@@ -49,8 +50,8 @@ if not ELEVENLABS_API_KEY:
         """
         No ElevenLabs API key found. Please provide your API key using one of the following methods:
         
-        1. **Via API Management Page** (Recommended for cloud deployment):
-           - Navigate to the **API Management** page in the sidebar
+        1. **Via Settings Page** (Recommended for cloud deployment):
+           - Navigate to the **Settings** page in the sidebar
            - Enter your API key (stored only in your browser session)
         
         2. **Via Streamlit Secrets** (For Streamlit Cloud):
@@ -64,7 +65,7 @@ if not ELEVENLABS_API_KEY:
            ```
         """
     )
-    st.info("💡 **Tip**: API keys entered via the API Management page are stored only in your browser session and are never saved to disk or shared between users.")
+    st.info("💡 **Tip**: API keys entered via the Settings page are stored only in your browser session and are never saved to disk or shared between users.")
     st.stop()
 
 # Validate API key format
@@ -73,7 +74,7 @@ try:
 except ConfigurationError as e:
     handle_error(e)
     st.markdown(
-        "💡 **Need help?** Visit the **API Management** page to update your API key."
+        "💡 **Need help?** Visit the **Settings** page to update your API key."
     )
     st.stop()
 
@@ -164,6 +165,15 @@ if script != st.session_state["original_script"]:
         ""  # Clear enhanced script when original changes
     )
 
+# Script enhancement section with settings gear icon
+st.subheader("Script Enhancement")
+col_enhance_title, col_enhance_settings = st.columns([10, 1])
+with col_enhance_title:
+    st.markdown("Configure script enhancement settings below.")
+with col_enhance_settings:
+    if st.button("⚙️", help="Open Settings to configure default enhancement model", key="enhancement_settings_btn"):
+        st.switch_page("pages/Settings.py")
+
 # New prompt input for script enhancement
 # Show v3-specific help text if v3 model is selected
 selected_model_id_for_help = st.session_state.get("selected_model_id", "")
@@ -189,9 +199,22 @@ if st.button("Enhance script"):
     else:
         progress = ProgressManager()
         try:
-            # Get selected model ID for enhancement routing
-            selected_model_id = st.session_state.get("selected_model_id")
-            is_v3 = supports_audio_tags(selected_model_id) if selected_model_id else False
+            # Get selected ElevenLabs model ID for v3 routing logic
+            selected_elevenlabs_model_id = st.session_state.get("selected_model_id")
+            
+            # Get default enhancement model for OpenRouter API call
+            default_enhancement = get_default_enhancement_model()
+            if not default_enhancement:
+                st.warning(
+                    "⚠️ No enhancement model configured. Please configure a default model in Settings (⚙️)."
+                )
+                st.stop()
+            
+            st.info(f"ℹ️ Using default enhancement model: **{default_enhancement}** (configure in Settings ⚙️)")
+            
+            # Check if selected ElevenLabs model supports v3 Audio Tags for routing
+            # Pass ElevenLabs model ID for routing logic, but OpenRouter uses default enhancement model
+            is_v3 = supports_audio_tags(selected_elevenlabs_model_id) if selected_elevenlabs_model_id else False
             
             # Show indicator if using v3 enhancement
             if is_v3:
@@ -200,8 +223,9 @@ if st.button("Enhance script"):
             def update_progress(prog):
                 progress.update(int(prog * 100), "Enhancing script")
 
+            # Pass ElevenLabs model ID for routing (v3 vs traditional), function will use default for OpenRouter API
             success, result = enhance_script_with_openrouter(
-                script, enhancement_prompt, update_progress, model_id=selected_model_id
+                script, enhancement_prompt, update_progress, model_id=selected_elevenlabs_model_id
             )
 
             if success:

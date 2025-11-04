@@ -30,8 +30,8 @@ def main():
             """
             No ElevenLabs API key found. Please provide your API key using one of the following methods:
             
-            1. **Via API Management Page** (Recommended for cloud deployment):
-               - Navigate to the **API Management** page in the sidebar
+            1. **Via Settings Page** (Recommended for cloud deployment):
+               - Navigate to the **Settings** page in the sidebar
                - Enter your API key (stored only in your browser session)
             
             2. **Via Streamlit Secrets** (For Streamlit Cloud):
@@ -45,7 +45,7 @@ def main():
                ```
             """
         )
-        st.info("💡 **Tip**: API keys entered via the API Management page are stored only in your browser session and are never saved to disk or shared between users.")
+        st.info("💡 **Tip**: API keys entered via the Settings page are stored only in your browser session and are never saved to disk or shared between users.")
         st.stop()
 
     # Validate API key format
@@ -54,7 +54,7 @@ def main():
     except ConfigurationError as e:
         handle_error(e)
         st.markdown(
-            "💡 **Need help?** Visit the **API Management** page to update your API key."
+            "💡 **Need help?** Visit the **Settings** page to update your API key."
         )
         st.stop()
 

@@ -347,17 +347,21 @@ def test_translate_with_custom_model(mock_post):
     assert call_data["model"] == "anthropic/claude-3-opus"
 
 
-def test_translate_with_default_model(mock_post):
-    """Test backward compatibility - translation without model uses default."""
+def test_translate_with_default_model(mock_post, monkeypatch):
+    """Test backward compatibility - translation without model uses default from settings."""
     mock_post.return_value = MagicMock(
         status_code=200,
         json=lambda: {"choices": [{"message": {"content": "Hola"}}]},
     )
+    
+    # Mock session state to return default translation model
+    import streamlit as st
+    monkeypatch.setattr(st.session_state, "get", lambda key, default=None: orf.DEFAULT_TRANSLATION_MODEL if key == "default_translation_model" else default)
 
     result = orf.translate_script_with_openrouter("Hello", "Spanish")
 
     assert result == "Hola"
-    # Verify default model was used
+    # Verify default translation model was used
     call_data = mock_post.call_args[1]["json"]
-    assert call_data["model"] == orf.DEFAULT_MODEL
+    assert call_data["model"] == orf.DEFAULT_TRANSLATION_MODEL
 

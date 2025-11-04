@@ -48,7 +48,7 @@ ElevenTools is a comprehensive interface for ElevenLabs' text-to-speech API, des
   - Voice Design page: Voice creation and customization
   - Bulk Generation page: Batch processing of audio files
   - Translation page: Script translation capabilities
-  - API Management page: Secure API key management
+  - Settings page: Secure API key management and default model configuration
   - File Explorer page: Generated audio management
 - Business logic in `scripts/` directory organized by domain
   - `Elevenlabs_functions.py` - ElevenLabs API integration

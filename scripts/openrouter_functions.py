@@ -10,6 +10,8 @@ from utils.api_keys import get_openrouter_api_key
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models"
 DEFAULT_MODEL = "openrouter/auto"  # Use a free model or specify as needed
+DEFAULT_TRANSLATION_MODEL = "minimax/minimax-m2:free"
+DEFAULT_ENHANCEMENT_MODEL = "minimax/minimax-m2:free"
 
 
 def enhance_script_for_v3(
@@ -31,7 +33,7 @@ def enhance_script_for_v3(
     """
     api_key = get_openrouter_api_key()
     if not api_key:
-        return False, "OpenRouter API key not found. Please set it in API Management."
+        return False, "OpenRouter API key not found. Please set it in Settings."
 
     prompt = f"""
 # Enhance the following script for ElevenLabs v3 Text-to-Speech using Audio Tags.
@@ -130,7 +132,11 @@ def enhance_script_with_openrouter(
     # Use traditional enhancement for non-v3 models
     api_key = get_openrouter_api_key()
     if not api_key:
-        return False, "OpenRouter API key not found. Please set it in API Management."
+        return False, "OpenRouter API key not found. Please set it in Settings."
+    
+    # Always use default enhancement model for OpenRouter API call
+    # (model_id parameter is only for ElevenLabs v3 routing logic)
+    openrouter_model_id = get_default_enhancement_model()
 
     prompt = f"""
 # Enhance the following script for text-to-speech purposes, focusing on creating a natural and expressive output.
@@ -157,7 +163,7 @@ IMPORTANT: Provide ONLY the enhanced script as your response. Do not include any
         "Content-Type": "application/json",
     }
     data = {
-        "model": DEFAULT_MODEL,
+        "model": openrouter_model_id,
         "messages": [
             {
                 "role": "system",
@@ -188,7 +194,7 @@ def get_openrouter_response(prompt: str, model: Optional[str] = None) -> str:
     """Get a response from OpenRouter using the specified model or default."""
     api_key = get_openrouter_api_key()
     if not api_key:
-        return "OpenRouter API key not found. Please set it in API Management."
+        return "OpenRouter API key not found. Please set it in Settings."
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
@@ -219,11 +225,15 @@ def translate_script_with_openrouter(text: str, language: str, model: Optional[s
     Args:
         text: Text to translate.
         language: Target language.
-        model: Optional model to use. If None, uses default model.
+        model: Optional model to use. If None, uses default model from settings.
         
     Returns:
         Translated text.
     """
+    # Use default translation model if no model provided
+    if model is None:
+        model = get_default_translation_model()
+    
     prompt = f"Translate the following text to {language}:\n\n{text}"
     return get_openrouter_response(prompt, model=model)
 
@@ -253,7 +263,7 @@ def fetch_openrouter_models() -> List[Dict[str, Any]]:
     """
     api_key = get_openrouter_api_key()
     if not api_key:
-        raise APIError("OpenRouter API key not found. Please set it in API Management.")
+        raise APIError("OpenRouter API key not found. Please set it in Settings.")
     
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -389,3 +399,23 @@ def search_models_fuzzy(models: List[Dict[str, Any]], query: str, min_score: flo
     # Sort by score (descending) and return models
     scored_models.sort(key=lambda x: x[0], reverse=True)
     return [model for _, model in scored_models]
+
+
+def get_default_translation_model() -> str:
+    """
+    Get the default translation model from session state or fallback to hardcoded default.
+    
+    Returns:
+        Model ID string for translation.
+    """
+    return st.session_state.get("default_translation_model", DEFAULT_TRANSLATION_MODEL)
+
+
+def get_default_enhancement_model() -> str:
+    """
+    Get the default enhancement model from session state or fallback to hardcoded default.
+    
+    Returns:
+        Model ID string for script enhancement.
+    """
+    return st.session_state.get("default_enhancement_model", DEFAULT_ENHANCEMENT_MODEL)
