@@ -90,6 +90,40 @@ class Cache:
             if file.endswith(".json"):
                 os.remove(os.path.join(self.cache_dir, file))
 
+    def cleanup_expired(self) -> int:
+        """Remove expired cache files.
+        
+        Returns:
+            Number of expired files removed
+        """
+        removed_count = 0
+        if not os.path.exists(self.cache_dir):
+            return 0
+        
+        try:
+            for file in os.listdir(self.cache_dir):
+                if file.endswith(".json"):
+                    cache_path = os.path.join(self.cache_dir, file)
+                    try:
+                        with open(cache_path, "r") as f:
+                            data = json.load(f)
+                        
+                        # Check if expired
+                        if time.time() - data["timestamp"] > self.ttl:
+                            os.remove(cache_path)
+                            removed_count += 1
+                    except Exception:
+                        # If file is corrupted or unreadable, remove it
+                        try:
+                            os.remove(cache_path)
+                            removed_count += 1
+                        except Exception:
+                            pass  # Ignore errors during cleanup
+        except Exception:
+            pass  # Ignore errors during cleanup
+        
+        return removed_count
+
 
 def cached(ttl_seconds: int = 3600) -> Callable:
     """Decorator for caching function results.

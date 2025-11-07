@@ -27,6 +27,8 @@ from utils.error_handling import (
 )
 from utils.model_capabilities import supports_speed, supports_audio_tags
 from utils.api_keys import get_elevenlabs_api_key
+from utils.security import validate_text_length, escape_html_content
+from utils.caching import Cache
 
 
 # Configure logging
@@ -81,6 +83,10 @@ except ConfigurationError as e:
 # Initialize session state with progress tracking
 progress = ProgressManager(total_steps=4)
 try:
+    # Cleanup expired cache files on startup
+    cache = Cache()
+    cache.cleanup_expired()
+    
     if "models" not in st.session_state:
         progress.update(1, "Fetching available models")
         st.session_state["models"] = fetch_models(ELEVENLABS_API_KEY)
@@ -92,6 +98,11 @@ try:
 
     if "generated_audio" not in st.session_state:
         st.session_state["generated_audio"] = []
+    
+    # Enforce maximum size limit for generated_audio list (100 entries)
+    MAX_GENERATED_AUDIO_HISTORY = 100
+    if len(st.session_state["generated_audio"]) > MAX_GENERATED_AUDIO_HISTORY:
+        st.session_state["generated_audio"] = st.session_state["generated_audio"][-MAX_GENERATED_AUDIO_HISTORY:]
 
     if "original_script" not in st.session_state:
         st.session_state["original_script"] = ""
@@ -190,12 +201,15 @@ enhancement_prompt = st.text_input(
     "Enhancement prompt (optional)",
     "",
     help=enhancement_help_text,
+    max_chars=1000,  # Limit prompt length
 )
 
 # Script enhancement with progress tracking
 if st.button("Enhance script"):
     if not script:
         st.warning("⚠️ Please enter some text to enhance.")
+    elif not validate_text_length(script):
+        st.error(f"⚠️ Script is too long. Maximum length is {10000} characters.")
     else:
         progress = ProgressManager()
         try:
@@ -231,6 +245,8 @@ if st.button("Enhance script"):
             if success:
                 st.session_state["enhanced_script"] = result
                 progress.complete()
+                # Escape content before display to prevent XSS
+                escaped_script = escape_html_content(st.session_state["enhanced_script"])
                 st.text_area(
                     "Enhanced script",
                     value=st.session_state["enhanced_script"],
@@ -370,6 +386,11 @@ if st.button("Generate Audio"):
             if success:
                 progress.complete()
                 st.success("✅ Audio generated successfully")
+                # Enforce maximum size limit before appending
+                MAX_GENERATED_AUDIO_HISTORY = 100
+                if len(st.session_state["generated_audio"]) >= MAX_GENERATED_AUDIO_HISTORY:
+                    st.session_state["generated_audio"] = st.session_state["generated_audio"][-MAX_GENERATED_AUDIO_HISTORY+1:]
+                
                 st.session_state["generated_audio"].append(
                     {
                         "filename": temp_filename,
@@ -390,5 +411,8 @@ if st.button("Generate Audio"):
 Generated_audio = st.expander("Generated audio history", expanded=True)
 with Generated_audio:
     for audio in st.session_state["generated_audio"]:
-        st.write(audio)
+        # Escape user-controlled content before display
+        safe_filename = escape_html_content(audio["filename"])
+        safe_voice = escape_html_content(audio["voice"])
+        st.write(f"**Filename:** {safe_filename}, **Voice:** {safe_voice}")
         st.audio(audio["path"], format="audio/mp3")

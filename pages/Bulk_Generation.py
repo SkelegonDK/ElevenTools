@@ -9,7 +9,16 @@ from scripts.Elevenlabs_functions import (
 )
 from utils.model_capabilities import supports_speed
 from utils.api_keys import get_elevenlabs_api_key
-from utils.error_handling import handle_error, validate_api_key, ConfigurationError
+from utils.error_handling import handle_error, validate_api_key, ConfigurationError, ValidationError
+from utils.security import (
+    sanitize_path_component,
+    validate_path_within_base,
+    validate_csv_file_size,
+    validate_dataframe_rows,
+    validate_column_name,
+    MAX_CSV_SIZE,
+    MAX_DF_ROWS,
+)
 
 
 def main():
@@ -146,13 +155,55 @@ def main():
 
     if uploaded_file is not None:
         try:
+            # Validate file size
+            if not validate_csv_file_size(uploaded_file.size):
+                st.error(
+                    f"⚠️ File size ({uploaded_file.size / (1024*1024):.2f} MB) exceeds maximum allowed size "
+                    f"({MAX_CSV_SIZE / (1024*1024):.2f} MB). Please use a smaller file."
+                )
+                st.stop()
+            
             df = pd.read_csv(uploaded_file)
+            
+            # Validate DataFrame row count
+            if not validate_dataframe_rows(len(df)):
+                st.error(
+                    f"⚠️ CSV file contains {len(df)} rows, which exceeds the maximum allowed ({MAX_DF_ROWS} rows). "
+                    f"Please split your file into smaller batches."
+                )
+                st.stop()
+            
+            # Validate column names
+            invalid_columns = [col for col in df.columns if not validate_column_name(str(col))]
+            if invalid_columns:
+                st.error(
+                    f"⚠️ Invalid column names detected: {', '.join(invalid_columns)}. "
+                    "Column names must contain only alphanumeric characters and underscores."
+                )
+                st.stop()
+            
+            # Validate required 'text' column exists
+            if "text" not in df.columns:
+                st.error("⚠️ CSV file must contain a 'text' column.")
+                st.stop()
+            
             st.write("CSV file uploaded successfully. Preview:")
             st.write(df.head())
 
             if st.button("Generate Bulk Audio"):
-                csv_filename = uploaded_file.name.split(".")[0]
-                output_dir = os.path.join(os.getcwd(), "outputs", csv_filename)
+                # Sanitize CSV filename to prevent path traversal
+                raw_filename = uploaded_file.name.split(".")[0]
+                sanitized_filename = sanitize_path_component(raw_filename)
+                
+                # Construct output directory path
+                outputs_base = os.path.join(os.getcwd(), "outputs")
+                output_dir = os.path.join(outputs_base, sanitized_filename)
+                
+                # Validate that output directory is within outputs base directory
+                if not validate_path_within_base(output_dir, outputs_base):
+                    st.error("⚠️ Invalid output directory path. Path traversal detected.")
+                    st.stop()
+                
                 os.makedirs(output_dir, exist_ok=True)
 
                 success, message = bulk_generate_audio(

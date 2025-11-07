@@ -22,6 +22,7 @@ import streamlit as st
 from utils.error_handling import APIError, ValidationError, handle_error
 from utils.caching import st_cache
 from utils.model_capabilities import supports_speed
+from utils.security import sanitize_filename, validate_path_within_base
 
 
 @st_cache(ttl_minutes=60)
@@ -341,6 +342,15 @@ def bulk_generate_audio(
                 "Please ensure your CSV file has a column named 'text'",
             )
 
+        # Validate output directory path to prevent traversal
+        outputs_base = os.path.abspath(os.path.join(os.getcwd(), "outputs"))
+        abs_output_dir = os.path.abspath(output_dir)
+        if not validate_path_within_base(abs_output_dir, outputs_base):
+            raise ValidationError(
+                "Invalid output directory path",
+                "Output directory must be within the outputs directory",
+            )
+
         os.makedirs(output_dir, exist_ok=True)
 
         for index, row in df.iterrows():
@@ -367,15 +377,16 @@ def bulk_generate_audio(
                     )
 
             # Sanitize filename to prevent path issues and ensure it's valid
-            # Remove or replace characters that are problematic in filenames
-            sanitized_filename_base = re.sub(
-                r"[\\/:*?\"<>|]", "_", processed_filename_base
-            )
-            # Prevent excessively long filenames (e.g., limit to 100 chars before extension)
-            sanitized_filename_base = sanitized_filename_base[:100]
+            sanitized_filename = sanitize_filename(processed_filename_base)
 
-            final_filename_mp3 = f"{sanitized_filename_base}.mp3"
-            output_path = os.path.join(output_dir, final_filename_mp3)
+            output_path = os.path.join(output_dir, sanitized_filename)
+            
+            # Validate final output path is within output directory
+            if not validate_path_within_base(output_path, abs_output_dir):
+                raise ValidationError(
+                    f"Invalid filename for row {index}",
+                    "Filename contains invalid characters or path traversal",
+                )
 
             # Cast voice settings to correct types
             stability = float(voice_settings["stability"])

@@ -8,6 +8,7 @@ from scripts.openrouter_functions import (
     get_default_translation_model,
 )
 from utils.error_handling import handle_error
+from utils.security import escape_html_content, validate_text_length, MAX_TEXT_LENGTH
 
 with open("custom_style.css", encoding="utf-8") as css:
     st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
@@ -142,7 +143,7 @@ if st.button("🔄 Refresh Model List"):
 st.divider()
 
 # Input text
-text = st.text_area("Enter text to translate")
+text = st.text_area("Enter text to translate", max_chars=MAX_TEXT_LENGTH)
 
 # Select language
 language = st.selectbox(
@@ -163,6 +164,11 @@ language = st.selectbox(
 
 # Generate translation
 if st.button("Translate") and text:
+    # Validate text length
+    if not validate_text_length(text):
+        st.error(f"⚠️ Text is too long. Maximum length is {MAX_TEXT_LENGTH} characters.")
+        st.stop()
+    
     # Determine which model to use
     model_to_use = st.session_state.selected_model if st.session_state.selected_model else None
     
@@ -181,4 +187,6 @@ if st.button("Translate") and text:
     with st.spinner("Translating..."):
         translation = translate_script(text, language, model=model_to_use)
         st.write("Translation:")
-        st.write(translation)
+        # Escape translation content before display to prevent XSS
+        safe_translation = escape_html_content(translation)
+        st.write(safe_translation)
