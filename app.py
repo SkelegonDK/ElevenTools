@@ -29,6 +29,7 @@ from utils.model_capabilities import supports_speed, supports_audio_tags
 from utils.api_keys import get_elevenlabs_api_key
 from utils.security import validate_text_length, escape_html_content
 from utils.caching import Cache
+from utils.session_manager import get_session_single_dir, cleanup_old_sessions
 
 
 # Configure logging
@@ -86,6 +87,9 @@ try:
     # Cleanup expired cache files on startup
     cache = Cache()
     cache.cleanup_expired()
+    
+    # Cleanup old session directories on startup
+    cleanup_old_sessions()
     
     if "models" not in st.session_state:
         progress.update(1, "Fetching available models")
@@ -357,9 +361,8 @@ if st.button("Generate Audio"):
     else:
         progress = ProgressManager()
         try:
-            # Prepare output directory and filename for single outputs
-            single_output_dir = os.path.join(os.getcwd(), "outputs", "single")
-            os.makedirs(single_output_dir, exist_ok=True)
+            # Prepare output directory and filename for single outputs (session-based)
+            single_output_dir = get_session_single_dir()
             # Use 'unknown' as language for now (extend if language selection is added)
             language = "unknown"
             date_str = datetime.now().strftime("%Y%m%d")
@@ -410,9 +413,28 @@ if st.button("Generate Audio"):
 # Display generated audio history
 Generated_audio = st.expander("Generated audio history", expanded=True)
 with Generated_audio:
-    for audio in st.session_state["generated_audio"]:
+    for idx, audio in enumerate(st.session_state["generated_audio"]):
         # Escape user-controlled content before display
         safe_filename = escape_html_content(audio["filename"])
         safe_voice = escape_html_content(audio["voice"])
-        st.write(f"**Filename:** {safe_filename}, **Voice:** {safe_voice}")
-        st.audio(audio["path"], format="audio/mp3")
+        
+        col1, col2, col3 = st.columns([3, 4, 1])
+        with col1:
+            st.audio(audio["path"], format="audio/mp3")
+        with col2:
+            st.write(f"**Filename:** {safe_filename}")
+            st.write(f"**Voice:** {safe_voice}")
+        with col3:
+            # Download button
+            if os.path.exists(audio["path"]):
+                try:
+                    with open(audio["path"], "rb") as f:
+                        st.download_button(
+                            label="⬇️",
+                            data=f.read(),
+                            file_name=audio["filename"],
+                            mime="audio/mpeg",
+                            key=f"download_{idx}_{audio['filename']}"
+                        )
+                except Exception:
+                    st.caption("Download unavailable")

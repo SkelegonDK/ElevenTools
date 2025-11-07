@@ -19,6 +19,7 @@ from utils.security import (
     MAX_CSV_SIZE,
     MAX_DF_ROWS,
 )
+from utils.session_manager import get_session_bulk_dir, cleanup_old_sessions
 
 
 def main():
@@ -26,6 +27,9 @@ def main():
 
     st.title("ElevenTools")
     st.subheader("Bulk Audio Generation")
+
+    # Cleanup old sessions on page load
+    cleanup_old_sessions()
 
     with open("custom_style.css", encoding="utf-8") as css:
         st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
@@ -195,16 +199,14 @@ def main():
                 raw_filename = uploaded_file.name.split(".")[0]
                 sanitized_filename = sanitize_path_component(raw_filename)
                 
-                # Construct output directory path
-                outputs_base = os.path.join(os.getcwd(), "outputs")
-                output_dir = os.path.join(outputs_base, sanitized_filename)
+                # Use session-based bulk directory
+                output_dir = get_session_bulk_dir(sanitized_filename)
                 
-                # Validate that output directory is within outputs base directory
+                # Validate that output directory is within session outputs
+                outputs_base = os.path.join(os.getcwd(), "outputs")
                 if not validate_path_within_base(output_dir, outputs_base):
                     st.error("⚠️ Invalid output directory path. Path traversal detected.")
                     st.stop()
-                
-                os.makedirs(output_dir, exist_ok=True)
 
                 success, message = bulk_generate_audio(
                     ELEVENLABS_API_KEY,
