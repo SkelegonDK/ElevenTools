@@ -1,5 +1,5 @@
 ## 1. Settings Page Implementation
-- [ ] 1.1 Rename `pages/API_Management.py` to `pages/Settings.py`
+- [x] 1.1 Rename `pages/API_Management.py` to `pages/Settings.py`
 - [ ] 1.2 Update page title and icon to reflect Settings page (keep API management section)
 - [ ] 1.3 Create reusable model selection component function that matches Translation page UI (fuzzy search, free filter, model display)
 - [ ] 1.4 Add "Default Translation Model" section to Settings page using model selection component

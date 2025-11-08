@@ -8,8 +8,11 @@ import os
 import uuid
 import time
 import shutil
+import logging
 import streamlit as st
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 
 def get_session_id() -> str:
@@ -75,11 +78,14 @@ def cleanup_old_sessions(max_age_hours: int = 24) -> int:
     """
     outputs_dir = os.path.join(os.getcwd(), "outputs")
     if not os.path.exists(outputs_dir):
+        logger.debug("Outputs directory does not exist, skipping cleanup")
         return 0
     
     removed_count = 0
     current_time = time.time()
     max_age_seconds = max_age_hours * 3600
+    
+    logger.info(f"Starting cleanup of session directories older than {max_age_hours} hours")
     
     try:
         for entry in os.listdir(outputs_dir):
@@ -93,15 +99,25 @@ def cleanup_old_sessions(max_age_hours: int = 24) -> int:
                 try:
                     dir_mtime = os.path.getmtime(session_dir)
                     dir_age = current_time - dir_mtime
+                    dir_age_hours = dir_age / 3600
                     
                     if dir_age > max_age_seconds:
+                        logger.info(f"Removing old session directory: {entry} (age: {dir_age_hours:.1f} hours)")
                         shutil.rmtree(session_dir)
                         removed_count += 1
-                except (OSError, PermissionError):
+                    else:
+                        logger.debug(f"Preserving session directory: {entry} (age: {dir_age_hours:.1f} hours)")
+                except (OSError, PermissionError) as e:
                     # Skip directories we can't access
+                    logger.warning(f"Could not access session directory {entry}: {e}")
                     continue
-    except (OSError, PermissionError):
-        pass
+    except (OSError, PermissionError) as e:
+        logger.error(f"Error during cleanup of session directories: {e}")
+    
+    if removed_count > 0:
+        logger.info(f"Cleanup completed: removed {removed_count} old session directory(ies)")
+    else:
+        logger.debug("Cleanup completed: no old session directories found")
     
     return removed_count
 

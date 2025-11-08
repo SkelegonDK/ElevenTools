@@ -15,6 +15,7 @@ ElevenTools is a comprehensive toolbox for ElevenLabs, providing a user-friendly
 - OpenRouter integration for translations and language processing
 - **OpenRouter model selection with fuzzy search** - Discover and select from available OpenRouter models with intelligent search
 - **Free model filtering** - Filter to show only zero-cost models for cost-effective translations
+- **Dynamic model capability detection** - Automatically detects which voice settings each ElevenLabs model supports, adapting UI controls and validation dynamically
 
 ## Installation
 
@@ -136,32 +137,59 @@ Navigate to the provided local URL to access the ElevenTools interface.
 2. Use the Bulk Generation page to upload your CSV and generate multiple audio files.
 3. Choose between random or fixed seed generation for consistent results.
 
+## File Management
+
+ElevenTools uses **session-based file organization** to ensure privacy and isolation between users, especially important for multi-user cloud deployments.
+
+### Session-Based Storage
+
+- **Session Isolation**: Each user session gets a unique directory (`outputs/{session_id}/`) for their generated files
+- **Privacy**: Files from other users' sessions are not accessible
+- **Persistence**: Your session ID persists across page navigations within the same browser session
+- **Organization**: Files are organized into `single/` and `bulk/` subdirectories within your session directory
+
+### Download Functionality
+
+- **Individual Downloads**: Download any generated audio file directly from the File Explorer or main page audio history
+- **Bulk Downloads**: Download all files from your session as a ZIP archive
+- **File Explorer**: Browse and download files organized by generation type (single vs bulk)
+
+### Automatic Cleanup
+
+- **Session Timeout**: Session directories older than 24 hours are automatically cleaned up
+- **Storage Management**: Prevents storage accumulation in cloud deployments
+- **Configurable**: Cleanup timeout can be configured via environment variables
+- **Logging**: Cleanup operations are logged for debugging and monitoring
+
+### Migration Notes
+
+If you're upgrading from an older version that used shared `outputs/single/` and `outputs/bulk/` directories:
+
+- **Existing Files**: Old files in the shared directories will remain accessible but won't be automatically migrated
+- **New Files**: All new files will be stored in session-specific directories
+- **Cleanup**: Old shared directories can be manually removed after verifying no important files remain
+
 ## Testing
 
-ElevenTools uses pytest for unit testing and Playwright for UI testing. The test suite is comprehensively organized to cover all major components:
+ElevenTools uses a **curated pytest core suite** (capped below 100 tests) plus optional extended/legacy tests. Core coverage focuses on high-impact API flows, utilities, and Streamlit pages; extended suites include legacy unit coverage and Playwright UI automation. See `docs/testing-core-suite.md` for the scenario catalog and guardrails.
 
 ### Test Organization
 
-**Unit Tests** (`tests/test_api/`, `tests/test_utils/`, `tests/test_web/`):
+**Core Suite** (`@pytest.mark.core_suite`)
 
-- `test_elevenlabs_functions.py`: Tests for ElevenLabs API interactions
-- `test_openrouter_functions.py`: Tests for OpenRouter API integration
-- `test_openrouter_model_functions.py`: Tests for model fetching, filtering, and fuzzy search
-- `test_functions.py`: Tests for utility functions
-- `test_streamlit_pages.py`: Tests for Streamlit page components
-- `test_file_explorer.py`: Tests for file management functionality
+- `tests/test_api/test_elevenlabs_core.py`
+- `tests/test_api/test_openrouter_core.py`
+- `tests/test_utils/test_core_utilities.py`
+- `tests/test_web/test_pages_core.py`
 
-**UI Tests** (`tests/ui_tests/`):
+**Extended Tests**
 
-- `test_main_page.py`: Playwright tests for main TTS interface
-- `test_translation_page.py`: Playwright tests for translation page with model selection
-- `test_bulk_generation_page.py`: Playwright tests for bulk generation
-- `test_file_explorer_page.py`: Playwright tests for file explorer
-- `test_settings_page.py`: Playwright tests for Settings page
+- Legacy pytest modules under `tests/test_api/`, `tests/test_utils/`, and `tests/test_web/` (no `core_suite` marker)
+- Playwright UI tests under `tests/ui_tests/`
 
 ### Running Tests
 
-1. Ensure dev dependencies are installed (includes Playwright):
+1. Ensure dev dependencies are installed (includes Playwright tooling if you need UI tests):
 
    ```bash
    uv sync --extra dev
@@ -173,43 +201,115 @@ ElevenTools uses pytest for unit testing and Playwright for UI testing. The test
    uv run playwright install
    ```
 
-3. Run all tests:
+3. Run the curated core suite (default behaviour):
 
    ```bash
    uv run pytest
    ```
 
-4. Run only unit tests:
+4. Enforce the `<100` core-suite guardrail (CI must run this):
 
    ```bash
-   uv run pytest tests/test_api/ tests/test_utils/ tests/test_web/
+   uv run python scripts/check_core_suite.py
    ```
 
-5. Run only UI tests:
+5. Run extended pytest suites (legacy + core):
+
+   ```bash
+   uv run pytest -m "core_suite or extended"
+   ```
+
+6. Run a specific core test file:
+
+   ```bash
+   uv run pytest tests/test_api/test_elevenlabs_core.py
+   ```
+
+7. Run UI automation (Playwright):
 
    ```bash
    uv run pytest tests/ui_tests/
    ```
 
-6. Run tests for a specific file:
-
-   ```bash
-   uv run pytest tests/test_api/test_openrouter_model_functions.py
-   ```
-
-7. Run tests with verbose output:
+8. Run any pytest command with verbose output:
 
    ```bash
    uv run pytest -v
    ```
 
-8. Run UI tests with headed browser (see what's happening):
+### Testing Standards
 
-   ```bash
-   uv run pytest tests/ui_tests/ --headed
-   ```
+When contributing new features or making changes, please follow these testing standards:
 
-When contributing new features or making changes, please add or update the relevant tests to ensure code quality and prevent regressions. All new features should include both unit tests and UI tests where applicable.
+#### Test Requirements
+
+- **All new features must include tests** - Both unit tests and UI tests where applicable
+- **Test coverage** - Aim for comprehensive coverage of core functionality
+- **Test isolation** - Each test should be independent and not rely on execution order
+- **Mock external dependencies** - Use `pytest-mock` for mocking API calls and external services
+
+#### Test Patterns
+
+**Unit Tests:**
+- Use descriptive test names: `test_<function_name>_<scenario>()`
+- Follow Arrange-Act-Assert pattern
+- Test one thing per test function
+- Use fixtures for reusable setup (`conftest.py`)
+- Mock external dependencies (APIs, file system, etc.)
+
+**UI Tests:**
+- Use Playwright for end-to-end UI testing
+- Test user workflows, not just page loads
+- Use explicit waits instead of fixed sleeps
+- Test error states and edge cases
+
+**Example Test Structure:**
+```python
+def test_function_name_scenario(mocker):
+    """Test description explaining what is being tested."""
+    # Arrange: Set up test data and mocks
+    mock_response = MagicMock()
+    mock_response.json.return_value = {"result": "success"}
+    
+    # Act: Execute the function being tested
+    result = function_under_test(mock_response)
+    
+    # Assert: Verify the results
+    assert result == "success"
+```
+
+#### Test Organization
+
+- **One test file per module** - `test_<module_name>.py` for `utils/<module_name>.py`
+- **Group related tests** - Use test classes for related functionality
+- **Use fixtures** - Create reusable fixtures in `conftest.py`
+- **Document tests** - Add docstrings explaining test purpose
+
+#### Mocking Standards
+
+- **Use `pytest-mock`** - Standardize on `mocker` fixture for all tests
+- **Mock external APIs** - Never make real API calls in tests
+- **Use fixtures for mock data** - Create reusable mock response fixtures
+- **Test error paths** - Mock error scenarios (network errors, API errors)
+
+#### Coverage Priorities
+
+1. **P0 (Critical):** Security-critical functions, error handling, core API functions
+2. **P1 (High):** User-facing features, core workflows, utility functions
+3. **P2 (Medium):** Edge cases, performance optimizations, integration tests
+4. **P3 (Low):** Nice-to-have features, accessibility tests, cross-browser tests
+
+For detailed testing patterns and best practices, see `openspec/changes/review-test-suite/TEST_PATTERNS_GUIDE.md`.
+
+### Test Coverage Status
+
+Current test coverage includes:
+- ✅ API function tests (ElevenLabs, OpenRouter)
+- ✅ Utility function tests (security, session management, API keys)
+- ✅ UI tests for major pages (main, translation, bulk generation, file explorer, settings)
+- ⚠️ Some areas need additional coverage (see `openspec/changes/review-test-suite/` for detailed analysis)
+
+When adding new tests, refer to existing test files for patterns and conventions.
 
 ## Project Management
 
@@ -269,10 +369,11 @@ The following voice settings can be adjusted:
 - **Similarity Boost** (0.0-1.0): Controls how closely the voice matches the reference audio.
 - **Style** (0.0-1.0): Controls the expressiveness of the voice.
 - **Speaker Boost**: Enhances the clarity and presence of the speaker's voice.
-- **Speed** (0.5-2.0): Controls the speaking speed (only available with multilingual v2 model)
+- **Speed** (0.5-2.0): Controls the speaking speed (automatically shown/hidden based on selected model capabilities)
   - 0.5: Half speed
   - 1.0: Normal speed (default)
   - 2.0: Double speed
+  - The speed control is dynamically displayed only for models that support speed adjustment (e.g., multilingual v2, turbo v2.5, flash v2.5, v3)
 
 ## Models
 
@@ -282,6 +383,11 @@ The following ElevenLabs models are available:
 
 - **Monolingual v1**: English-only model optimized for speed
 - **Multilingual v2**: Advanced model supporting multiple languages and speed control
+- **Turbo v2.5**: Fast multilingual model with speed control support
+- **Flash v2.5**: Ultra-fast multilingual model with speed control support
+- **v3**: Latest generation model with enhanced capabilities
+
+**Dynamic Capability Detection**: ElevenTools automatically detects which voice settings each model supports. The UI adapts dynamically - for example, the speed slider only appears for models that support speed adjustment. This ensures compatibility with new models without requiring code updates.
 
 ### OpenRouter Models
 

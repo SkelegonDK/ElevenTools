@@ -33,7 +33,7 @@
 - [x] 5.2 Add configurable session timeout (default: 24 hours)
 - [x] 5.3 Run cleanup on app startup
 - [x] 5.4 Add cleanup on file operations (optional, to prevent accumulation)
-- [ ] 5.5 Log cleanup operations for debugging
+- [x] 5.5 Log cleanup operations for debugging
 
 ## 6. Testing & Documentation
 
@@ -41,6 +41,6 @@
 - [x] 6.2 Write tests for session-based file paths
 - [x] 6.3 Write tests for download functionality
 - [x] 6.4 Write tests for cleanup mechanism
-- [ ] 6.5 Update documentation with session-based file management
-- [ ] 6.6 Add migration notes for existing deployments
+- [x] 6.5 Update documentation with session-based file management
+- [x] 6.6 Add migration notes for existing deployments
 

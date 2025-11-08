@@ -28,5 +28,5 @@
 ## 5. Documentation
 - [x] 5.1 Update function docstrings to reference capability system
 - [x] 5.2 Add inline comments explaining capability detection logic
-- [ ] 5.3 Update README.md to mention dynamic model capability detection
+- [x] 5.3 Update README.md to mention dynamic model capability detection
 

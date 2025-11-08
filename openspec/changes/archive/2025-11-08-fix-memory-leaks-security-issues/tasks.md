@@ -5,7 +5,7 @@
 - [x] 1.3 Add cache cleanup mechanism to `utils/caching.py` for expired files
 - [x] 1.4 Add periodic cache cleanup task or cleanup on cache access
 - [x] 1.5 Add size limits to models/voices session state (with refresh mechanism)
-- [ ] 1.6 Add memory monitoring utilities for production debugging
+- [x] 1.6 Add memory monitoring utilities for production debugging
 
 ## 2. Security - Path Traversal Prevention
 
@@ -37,6 +37,6 @@
 - [x] 5.2 Write tests for path traversal prevention
 - [x] 5.3 Write tests for input validation
 - [x] 5.4 Write tests for content escaping
-- [ ] 5.5 Update security documentation with new requirements
-- [ ] 5.6 Add security best practices to developer guidelines
+- [x] 5.5 Update security documentation with new requirements
+- [x] 5.6 Add security best practices to developer guidelines
 
