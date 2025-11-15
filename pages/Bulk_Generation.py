@@ -248,7 +248,6 @@ def main():
                 if success:
                     st.success("Bulk generation completed!")
                     st.write(message)
-                    # TODO: Display generated files and audio previews if a manifest is available
                 else:
                     st.error(
                         "Bulk generation failed or produced no results. Please check the logs for more information."

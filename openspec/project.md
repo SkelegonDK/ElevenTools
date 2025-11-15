@@ -202,16 +202,20 @@ uv run pytest -v
 - Run `uv audit` regularly for security
 
 ### Task Management
-- All tasks tracked in `docs/todo.md` with unique IDs (T1, T2, etc.)
-- **READ-ONLY**: Never delete tasks without permission
-- Mark completed tasks with ✅
+- All tasks tracked using OpenSpec change proposals in `openspec/changes/`
+- Each change proposal includes `tasks.md` with implementation checklist
+- Use unique verb-led change IDs (e.g., `add-feature-name`, `fix-issue-name`)
+- Mark completed tasks with `[x]` in `tasks.md`
 - Break tasks with complexity > 5/10 into subtasks
 - Explicitly list task dependencies
+- See `openspec/AGENTS.md` for OpenSpec workflow guidelines
 
 ### Design Alignment
-- All features must align with `docs/design.md`
-- **PERMISSION REQUIRED**: Never modify design.md without explicit approval
-- Propose design changes separately before implementation
+- All features must align with OpenSpec specifications in `openspec/specs/`
+- Specifications define requirements and scenarios for each capability
+- **PERMISSION REQUIRED**: Never modify specs without going through OpenSpec change proposal process
+- Create change proposals in `openspec/changes/<change-id>/` for spec modifications
+- Include `design.md` in change proposals for architectural decisions or complex changes
 - For ambiguities, ask for clarification before coding
 
 ## External Dependencies

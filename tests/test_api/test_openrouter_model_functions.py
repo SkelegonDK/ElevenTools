@@ -393,18 +393,16 @@ def test_translate_with_default_model(mock_post, monkeypatch):
         status_code=200,
         json=lambda: {"choices": [{"message": {"content": "Hola"}}]},
     )
+    
+    # Update the FakeSession to return default translation model
+    orf.st.session_state["default_translation_model"] = orf.DEFAULT_TRANSLATION_MODEL
 
-    # Mock session state to return default translation model
-    import streamlit as st
+    result = orf.translate_script_with_openrouter("Hello", "Spanish")
 
-    monkeypatch.setattr(
-        st.session_state,
-        "get",
-        lambda key, default=None: (
-            orf.DEFAULT_TRANSLATION_MODEL
-            if key == "default_translation_model"
-            else default
-        ),
+    assert result == "Hola"
+    # Verify default translation model was used
+    call_data = mock_post.call_args[1]["json"]
+    assert call_data["model"] == orf.DEFAULT_TRANSLATION_MODEL
     )
 
     result = orf.translate_script_with_openrouter("Hello", "Spanish")

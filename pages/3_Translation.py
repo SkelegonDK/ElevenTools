@@ -11,8 +11,14 @@ from scripts.Translation_functions import translate_script
 from utils.error_handling import handle_error
 from utils.security import MAX_TEXT_LENGTH, escape_html_content, validate_text_length
 
-with open("custom_style.css", encoding="utf-8") as css:
-    st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
+try:
+    with open("custom_style.css", encoding="utf-8") as css:
+        css_content = css.read()
+        st.markdown(f"<style>{css_content}</style>", unsafe_allow_html=True)
+except (FileNotFoundError, PermissionError) as e:
+    st.warning(
+        "⚠️ Could not load custom styles: CSS file missing or unreadable. Page will continue without custom styling."
+    )
 
 # Title with settings gear icon
 col_title, col_settings = st.columns([10, 1])
@@ -123,14 +129,16 @@ if filtered_models:
                 pricing = selected_model_data.get("pricing", {})
                 prompt_price = pricing.get("prompt", "N/A")
                 completion_price = pricing.get("completion", "N/A")
-
+                
                 # Check if model is free (ends with :free or has zero pricing)
                 is_free = model_id.endswith(":free") or (
-                    prompt_price == 0 and completion_price == 0
+                    str(prompt_price) == "0" and str(completion_price) == "0"
                 )
-
+                
                 if is_free:
                     st.success("🆓 Free model")
+                else:
+                    st.caption(f"Prompt: ${prompt_price}, Completion: ${completion_price}")
                 else:
                     st.caption(
                         f"Prompt: ${prompt_price}, Completion: ${completion_price}"

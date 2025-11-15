@@ -167,8 +167,11 @@ def function_name(param1: str, param2: int) -> bool:
 ### Running Tests
 
 ```bash
-# Run core test suite (default)
+# Run all tests (default)
 uv run pytest
+
+# Run core test suite only
+uv run pytest -m core_suite
 
 # Run all tests including extended
 uv run pytest -m "core_suite or extended"

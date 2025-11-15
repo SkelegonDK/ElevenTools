@@ -162,14 +162,14 @@ def test_create_voice_from_preview_validation_error():
 
 
 @pytest.mark.core_suite
-def test_bulk_generate_audio_scenarios(mocker, tmp_path, monkeypatch):
+def test_bulk_generate_audio_success(mocker, tmp_path, monkeypatch):
     # Arrange
     csv_content = (
         "text,filename\nHello {name},greeting_{name}\nWorld {name},world_{name}"
     )
     csv_file = io.BytesIO(csv_content.encode("utf-8"))
 
-    def fake_generate_audio(api_key: str, *args: Any, **kwargs: Any) -> bool:
+    def fake_generate_audio(_api_key: str, *_args: Any, **_kwargs: Any) -> bool:
         return True
 
     mocker.patch(
@@ -195,8 +195,7 @@ def test_bulk_generate_audio_scenarios(mocker, tmp_path, monkeypatch):
             {"text": "World {name}", "filename": "world_{name}", "name": "Bob"},
         ]
     )
-    df_invalid = pd.DataFrame([{"name": "Alice"}])
-    mocker.patch("pandas.read_csv", side_effect=[df_success, df_invalid])
+    mocker.patch("pandas.read_csv", return_value=df_success)
 
     success, message = bulk_generate_audio(
         api_key="sk-test",
@@ -215,7 +214,22 @@ def test_bulk_generate_audio_scenarios(mocker, tmp_path, monkeypatch):
     assert success is True
     assert "completed" in message.lower()
 
-    # Missing text column
+
+@pytest.mark.core_suite
+def test_bulk_generate_audio_missing_columns(mocker, tmp_path, monkeypatch):
+    # Arrange
+    mocker.patch(
+        "scripts.Elevenlabs_functions.validate_path_within_base",
+        return_value=True,
+    )
+
+    outputs_dir = tmp_path / "outputs"
+    outputs_dir.mkdir()
+    monkeypatch.chdir(tmp_path)
+
+    df_invalid = pd.DataFrame([{"name": "Alice"}])
+    mocker.patch("pandas.read_csv", return_value=df_invalid)
+
     invalid_csv = io.BytesIO(b"name\nAlice")
     with pytest.raises(APIError):
         bulk_generate_audio(
@@ -232,12 +246,40 @@ def test_bulk_generate_audio_scenarios(mocker, tmp_path, monkeypatch):
             },
         )
 
-    # File system / downstream failure surfaces as APIError
+
+@pytest.mark.core_suite
+def test_bulk_generate_audio_downstream_error(mocker, tmp_path, monkeypatch):
+    # Arrange
+    csv_content = (
+        "text,filename\nHello {name},greeting_{name}\nWorld {name},world_{name}"
+    )
+    csv_file_error = io.BytesIO(csv_content.encode("utf-8"))
+
     mocker.patch(
         "scripts.Elevenlabs_functions.generate_audio",
         side_effect=APIError("Failed", "Disk full"),
     )
-    csv_file_error = io.BytesIO(csv_content.encode("utf-8"))
+    mocker.patch(
+        "scripts.Elevenlabs_functions.validate_path_within_base",
+        return_value=True,
+    )
+    mocker.patch(
+        "scripts.Elevenlabs_functions.sanitize_filename",
+        side_effect=lambda value: value + ".mp3",
+    )
+
+    outputs_dir = tmp_path / "outputs"
+    outputs_dir.mkdir()
+    monkeypatch.chdir(tmp_path)
+
+    df_success = pd.DataFrame(
+        [
+            {"text": "Hello {name}", "filename": "greeting_{name}", "name": "Alice"},
+            {"text": "World {name}", "filename": "world_{name}", "name": "Bob"},
+        ]
+    )
+    mocker.patch("pandas.read_csv", return_value=df_success)
+
     with pytest.raises(APIError) as exc:
         bulk_generate_audio(
             api_key="sk-test",

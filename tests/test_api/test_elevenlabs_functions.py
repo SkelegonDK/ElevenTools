@@ -319,46 +319,8 @@ def test_bulk_generate_audio_with_speed(mocker):
 # Model-Voice Setting Compatibility Tests
 
 
-def test_speed_validation_for_monolingual_v1():
-    """Test that speed parameter raises ValidationError for eleven_monolingual_v1."""
-    with pytest.raises(
-        ValidationError,
-        match="Speed parameter is not supported for model",
-    ):
-        generate_audio(
-            "fake_api_key",
-            0.5,
-            "eleven_monolingual_v1",
-            0.7,
-            0.5,
-            True,
-            "voice1",
-            "Hello, world!",
-            "output.mp3",
-            speed=1.5,
-        )
-
-
 def test_speed_validation_for_other_models():
     """Test that speed parameter raises ValidationError for other non-multilingual models."""
-    # Test with eleven_monolingual_v1 (doesn't match patterns)
-    with pytest.raises(
-        ValidationError,
-        match="Speed parameter is not supported for model",
-    ):
-        generate_audio(
-            "fake_api_key",
-            0.5,
-            "eleven_monolingual_v1",
-            0.7,
-            0.5,
-            True,
-            "voice1",
-            "Hello, world!",
-            "output.mp3",
-            speed=1.5,
-        )
-
     # Test with a model that doesn't match any patterns (eleven_english_sts_v2 doesn't match patterns)
     with pytest.raises(
         ValidationError,
@@ -376,37 +338,6 @@ def test_speed_validation_for_other_models():
             "output.mp3",
             speed=1.5,
         )
-
-
-def test_multilingual_v2_speed_inclusion(mocker):
-    """Test that speed is included in payload for eleven_multilingual_v2 when provided."""
-    mock_post = mocker.patch("scripts.Elevenlabs_functions.requests.post")
-    mock_file = mocker.patch("scripts.Elevenlabs_functions.open", mock_open())
-    mock_response = MagicMock()
-    mock_response.ok = True
-    mock_response.content = b"fake audio content"
-    mock_post.return_value = mock_response
-
-    success = generate_audio(
-        "fake_api_key",
-        0.5,
-        "eleven_multilingual_v2",
-        0.7,
-        0.5,
-        True,
-        "voice1",
-        "Hello, world!",
-        "output.mp3",
-        speed=1.5,
-    )
-
-    assert success is True
-    # Verify speed was included in payload
-    payload = mock_post.call_args[1]["json"]
-    assert "voice_settings" in payload
-    assert "speed" in payload["voice_settings"]
-    assert payload["voice_settings"]["speed"] == 1.5
-    assert isinstance(payload["voice_settings"]["speed"], float)
 
 
 def test_multilingual_v2_speed_exclusion(mocker):

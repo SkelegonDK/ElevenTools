@@ -1,5 +1,6 @@
 # ElevenTools v0.3.0
 
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://eleventools.streamlit.app)
 [![License](https://img.shields.io/badge/license-Custom-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![Streamlit](https://img.shields.io/badge/streamlit-1.32+-red.svg)](https://streamlit.io/)
@@ -23,26 +24,6 @@ ElevenTools is a comprehensive toolbox for ElevenLabs, providing a user-friendly
 - **OpenRouter model selection with fuzzy search** - Discover and select from available OpenRouter models with intelligent search
 - **Free model filtering** - Filter to show only zero-cost models for cost-effective translations
 - **Dynamic model capability detection** - Automatically detects which voice settings each ElevenLabs model supports, adapting UI controls and validation dynamically
-
-## Screenshots
-
-### Main Interface
-![Main Interface](docs/screenshots/main-interface.png)
-*The main text-to-speech generation interface with voice and model selection*
-
-### Bulk Generation
-![Bulk Generation](docs/screenshots/bulk-generation.png)
-*CSV-based bulk audio generation with variable replacement*
-
-### Settings Page
-![Settings](docs/screenshots/settings.png)
-*Secure API key management and configuration*
-
-### File Explorer
-![File Explorer](docs/screenshots/file-explorer.png)
-*Browse and download generated audio files organized by session*
-
-> **Note**: Screenshots are placeholders. Add actual screenshots to `docs/screenshots/` directory.
 
 ## Installation
 
@@ -226,7 +207,7 @@ ElevenTools integrates with Ollama for local language model processing. To use t
    ollama pull llama3.2:3b
    ```
 
-   This will download the small and efficient Llama 3.1:8b model, which is currently used by ElevenTools.
+   This will download the small and efficient Llama 3.2:3b model, which is currently used by ElevenTools.
 
 3. Ensure Ollama is running:
    Ollama should start automatically after installation. If it's not running, you can start it manually:
@@ -315,37 +296,43 @@ ElevenTools uses a **curated pytest core suite** (capped below 100 tests) plus o
    uv run playwright install
    ```
 
-3. Run the curated core suite (default behaviour):
+3. Run all tests (default behaviour):
 
    ```bash
    uv run pytest
    ```
 
-4. Enforce the `<100` core-suite guardrail:
+4. Run the curated core suite only:
+
+   ```bash
+   uv run pytest -m core_suite
+   ```
+
+5. Enforce the `<100` core-suite guardrail:
 
    ```bash
    uv run python scripts/check_core_suite.py
    ```
 
-5. Run extended pytest suites (legacy + core):
+6. Run extended pytest suites (legacy + core):
 
    ```bash
    uv run pytest -m "core_suite or extended"
    ```
 
-6. Run a specific core test file:
+7. Run a specific core test file:
 
    ```bash
    uv run pytest tests/test_api/test_elevenlabs_core.py
    ```
 
-7. Run UI automation (Playwright):
+8. Run UI automation (Playwright):
 
    ```bash
    uv run pytest tests/ui_tests/
    ```
 
-8. Run any pytest command with verbose output:
+9. Run any pytest command with verbose output:
 
    ```bash
    uv run pytest -v

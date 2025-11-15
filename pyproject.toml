@@ -5,7 +5,7 @@ description = "A comprehensive toolbox for ElevenLabs, providing a user-friendly
 readme = "README.md"
 requires-python = ">=3.12"
 authors = [
-    {name = "Manuel Thomsen", email = "manuel@example.com"}
+    {name = "Manuel Thomsen", email = "manuel@manuelito.tech"}
 ]
 keywords = [
     "elevenlabs",
@@ -21,7 +21,7 @@ keywords = [
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved",
+    "License :: Other/Proprietary License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
     "Topic :: Multimedia :: Sound/Audio :: Speech",
@@ -67,7 +67,7 @@ markers = [
     "extended: optional coverage executed outside the core suite",
     "no_api_key: tests covering missing API key scenarios",
 ]
-addopts = "-m core_suite"
+addopts = "--strict-markers"
 
 [tool.black]
 line-length = 88

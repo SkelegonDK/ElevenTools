@@ -1,7 +1,7 @@
 ## Core Suite Overview
 
 - **Scope:** High-value regression scenarios covering ElevenLabs APIs, OpenRouter integrations, critical utilities, and Streamlit pages (`app.py`, `Bulk_Generation`, `File_Explorer`, `3_Translation`, `Settings`, Voice Design workflow proxy).
-- **Execution:** Default `pytest` invocation runs only `@pytest.mark.core_suite` tests (configured via `addopts = "-m core_suite"`).
+- **Execution:** Run core suite tests explicitly with `pytest -m core_suite`. CI and dev scripts should pass `-m core_suite` when they need only the curated subset. Default `pytest` runs all tests.
 - **Guardrail:** `scripts/check_core_suite.py` enforces `< 100` collected core tests; CI must run this script.
 
 ## Scenario Catalog

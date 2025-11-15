@@ -54,6 +54,7 @@ def test_handle_error_routes_messages(mocker):
         for call in error_placeholder.call_args_list
     )
     assert not info_placeholder.called
+    assert not warn_placeholder.called
 
 
 @pytest.mark.core_suite

@@ -22,13 +22,16 @@ SECRETS_PATH = os.path.join(
 )
 
 
+from typing import Optional
+
+
 def render_model_selection(
     all_models: list,
     session_state_key: str,
     default_model_key: str,
     title: str,
     help_text: str = "",
-) -> str:
+) -> Optional[str]:
     """
     Render a reusable model selection UI component matching Translation page.
 
@@ -144,8 +147,25 @@ def render_model_selection(
                     prompt_price = pricing.get("prompt", "N/A")
                     completion_price = pricing.get("completion", "N/A")
 
+                    # Convert pricing to float for comparison (OpenRouter returns strings)
+                    # Handle missing or non-numeric values as non-zero (not free)
+                    try:
+                        prompt_price_num = (
+                            float(prompt_price)
+                            if prompt_price != "N/A"
+                            else float("inf")
+                        )
+                        completion_price_num = (
+                            float(completion_price)
+                            if completion_price != "N/A"
+                            else float("inf")
+                        )
+                    except (ValueError, TypeError):
+                        prompt_price_num = float("inf")
+                        completion_price_num = float("inf")
+
                     is_free = model_id.endswith(":free") or (
-                        prompt_price == 0 and completion_price == 0
+                        prompt_price_num == 0 and completion_price_num == 0
                     )
 
                     if is_free:
@@ -171,7 +191,7 @@ def main():
     st.info(
         """
         Configure your ElevenTools preferences including API keys and default model selections.\n\n
-        API keys are stored in your browser session for privacy and per-user security.\n
+        value = st.session_state.get(env_key, st.secrets.get(env_key, None))
         They are never written to disk or shared between users.\n
         If you do not enter a key here, the app will use the key from Streamlit secrets (configured via Streamlit Cloud dashboard or local `.streamlit/secrets.toml`) if available.
         """
