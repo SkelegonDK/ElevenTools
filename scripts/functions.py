@@ -1,8 +1,7 @@
 import re
-from typing import List, Tuple
 
 
-def detect_string_variables(text: str) -> List[str]:
+def detect_string_variables(text: str) -> list[str]:
     """Detects string variables in a given text enclosed in curly braces.
 
     Args:
@@ -15,7 +14,7 @@ def detect_string_variables(text: str) -> List[str]:
     return re.findall(r"\{([^}]+)\}", text)
 
 
-def detect_phonetic_variables(text: str) -> List[str]:
+def detect_phonetic_variables(text: str) -> list[str]:
     """Detects phonetic variables in a given text enclosed in double square brackets.
 
     Args:
@@ -28,7 +27,7 @@ def detect_phonetic_variables(text: str) -> List[str]:
     return re.findall(r"\[\[([^]]+)\]\]", text)
 
 
-def detect_phonetic_conversion(script: str) -> List[Tuple[str, str]]:
+def detect_phonetic_conversion(script: str) -> list[tuple[str, str]]:
     """Detects phonetic conversion strings in the format [[language:word]].
 
     Args:

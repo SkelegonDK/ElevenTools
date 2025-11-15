@@ -4,11 +4,11 @@ This module provides functions for interacting with the ElevenLabs Text-to-Speec
 including voice management, audio generation, and voice preview functionality.
 """
 
-import os
 import json
 import logging
+import os
 import re
-from typing import Tuple, List, Dict, Optional, Any, Union, BinaryIO
+from typing import Any, BinaryIO
 
 try:
     import pandas as pd  # type: ignore
@@ -17,16 +17,15 @@ except ImportError:
     pass  # Handle missing dependencies gracefully
 
 import base64
-import streamlit as st
 
-from utils.error_handling import APIError, ValidationError, handle_error
 from utils.caching import st_cache
+from utils.error_handling import APIError, ValidationError
 from utils.model_capabilities import supports_speed
 from utils.security import sanitize_filename, validate_path_within_base
 
 
 @st_cache(ttl_minutes=60)
-def fetch_models(api_key: str) -> List[Tuple[str, str]]:
+def fetch_models(api_key: str) -> list[tuple[str, str]]:
     """Fetch available models from ElevenLabs API.
 
     Args:
@@ -47,11 +46,11 @@ def fetch_models(api_key: str) -> List[Tuple[str, str]]:
         models = response.json()
         return [(model["model_id"], model["name"]) for model in models]
     except requests.exceptions.RequestException as e:
-        raise APIError(f"Failed to fetch models", str(e))
+        raise APIError("Failed to fetch models", str(e))
 
 
 @st_cache(ttl_minutes=60)
-def fetch_voices(api_key: str) -> List[Tuple[str, str]]:
+def fetch_voices(api_key: str) -> list[tuple[str, str]]:
     """Fetch available voices from ElevenLabs API.
 
     Args:
@@ -72,13 +71,13 @@ def fetch_voices(api_key: str) -> List[Tuple[str, str]]:
         voices = response.json()["voices"]
         return [(voice["voice_id"], voice["name"]) for voice in voices]
     except requests.exceptions.RequestException as e:
-        raise APIError(f"Failed to fetch voices", str(e))
+        raise APIError("Failed to fetch voices", str(e))
 
 
 @st_cache(ttl_minutes=60)
 def get_voice_id(
-    voices: List[Tuple[str, str]], selected_voice_name: str
-) -> Optional[str]:
+    voices: list[tuple[str, str]], selected_voice_name: str
+) -> str | None:
     """Get voice ID for selected voice name.
 
     Args:
@@ -104,8 +103,8 @@ def generate_audio(
     voice_id: str,
     text_to_speak: str,
     output_path: str = "output.mp3",
-    language_code: Optional[str] = None,
-    speed: Optional[float] = None,
+    language_code: str | None = None,
+    speed: float | None = None,
 ) -> bool:
     """Generate audio using ElevenLabs Text-to-Speech API.
 
@@ -149,7 +148,7 @@ def generate_audio(
     tts_url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
     headers = {"xi-api-key": xi_api_key, "Content-Type": "application/json"}
 
-    payload: Dict[str, Union[str, int, Dict[str, Union[float, bool]]]] = {
+    payload: dict[str, str | int | dict[str, float | bool]] = {
         "text": text_to_speak,
         "model_id": model_id,
         "voice_settings": {
@@ -187,7 +186,7 @@ def generate_audio(
 
 def generate_voice_previews(
     api_key: str, voice_description: str
-) -> Optional[Dict[str, Any]]:
+) -> dict[str, Any] | None:
     """Generate voice previews from description.
 
     Args:
@@ -246,8 +245,8 @@ def create_voice_from_preview(
     voice_name: str,
     voice_description: str,
     generated_voice_id: str,
-    played_ids: Optional[List[str]] = None,
-) -> Optional[Dict[str, Any]]:
+    played_ids: list[str] | None = None,
+) -> dict[str, Any] | None:
     """Create voice from preview.
 
     Args:
@@ -289,7 +288,7 @@ def create_voice_from_preview(
         raise APIError("Failed to create voice from preview", str(e))
 
 
-def process_text(text: str) -> Tuple[str, List[str]]:
+def process_text(text: str) -> tuple[str, list[str]]:
     """Process text to handle variables and preserve formatting.
 
     Args:
@@ -311,8 +310,8 @@ def bulk_generate_audio(
     voice_id: str,
     csv_file: BinaryIO,
     output_dir: str,
-    voice_settings: Dict[str, Any],
-) -> Tuple[bool, str]:
+    voice_settings: dict[str, Any],
+) -> tuple[bool, str]:
     """Generate audio in bulk from CSV file.
 
     Args:
@@ -380,7 +379,7 @@ def bulk_generate_audio(
             sanitized_filename = sanitize_filename(processed_filename_base)
 
             output_path = os.path.join(output_dir, sanitized_filename)
-            
+
             # Validate final output path is within output directory
             if not validate_path_within_base(output_path, abs_output_dir):
                 raise ValidationError(

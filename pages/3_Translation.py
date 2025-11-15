@@ -1,14 +1,15 @@
 import streamlit as st
-from scripts.Translation_functions import translate_script
+
 from scripts.openrouter_functions import (
-    get_openrouter_api_key,
     fetch_openrouter_models,
-    search_models_fuzzy,
     filter_free_models,
     get_default_translation_model,
+    get_openrouter_api_key,
+    search_models_fuzzy,
 )
+from scripts.Translation_functions import translate_script
 from utils.error_handling import handle_error
-from utils.security import escape_html_content, validate_text_length, MAX_TEXT_LENGTH
+from utils.security import MAX_TEXT_LENGTH, escape_html_content, validate_text_length
 
 with open("custom_style.css", encoding="utf-8") as css:
     st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
@@ -18,7 +19,11 @@ col_title, col_settings = st.columns([10, 1])
 with col_title:
     st.title("Script Translation")
 with col_settings:
-    if st.button("⚙️", help="Open Settings to configure default translation model", key="translation_settings_btn"):
+    if st.button(
+        "⚙️",
+        help="Open Settings to configure default translation model",
+        key="translation_settings_btn",
+    ):
         st.switch_page("pages/Settings.py")
 
 # Check if OpenRouter API key is available
@@ -85,10 +90,12 @@ if filtered_models:
         model_id = model.get("id", "")
         model_name = model.get("name", model_id)
         # Format: "name (id)" or just "id" if no name
-        display_name = f"{model_name} ({model_id})" if model_name != model_id else model_id
+        display_name = (
+            f"{model_name} ({model_id})" if model_name != model_id else model_id
+        )
         model_options.append(display_name)
         model_dict[display_name] = model_id
-    
+
     # Model selection dropdown
     selected_display = st.selectbox(
         "Select model",
@@ -97,10 +104,10 @@ if filtered_models:
         key="model_selectbox",
         help="Select a model for translation. Use search and filters above to narrow options.",
     )
-    
+
     if selected_display:
         st.session_state.selected_model = model_dict.get(selected_display)
-    
+
     # Show selected model info
     if st.session_state.selected_model:
         selected_model_data = next(
@@ -116,18 +123,24 @@ if filtered_models:
                 pricing = selected_model_data.get("pricing", {})
                 prompt_price = pricing.get("prompt", "N/A")
                 completion_price = pricing.get("completion", "N/A")
-                
+
                 # Check if model is free (ends with :free or has zero pricing)
-                is_free = model_id.endswith(":free") or (prompt_price == 0 and completion_price == 0)
-                
+                is_free = model_id.endswith(":free") or (
+                    prompt_price == 0 and completion_price == 0
+                )
+
                 if is_free:
                     st.success("🆓 Free model")
                 else:
-                    st.caption(f"Prompt: ${prompt_price}, Completion: ${completion_price}")
+                    st.caption(
+                        f"Prompt: ${prompt_price}, Completion: ${completion_price}"
+                    )
     else:
         # Show default model info if no page-specific selection
         default_model = get_default_translation_model()
-        st.info(f"ℹ️ Using default model from Settings: **{default_model}** (click ⚙️ to change)")
+        st.info(
+            f"ℹ️ Using default model from Settings: **{default_model}** (click ⚙️ to change)"
+        )
 else:
     if search_query or show_free_only:
         st.warning("No models match your search criteria. Try adjusting your filters.")
@@ -168,10 +181,12 @@ if st.button("Translate") and text:
     if not validate_text_length(text):
         st.error(f"⚠️ Text is too long. Maximum length is {MAX_TEXT_LENGTH} characters.")
         st.stop()
-    
+
     # Determine which model to use
-    model_to_use = st.session_state.selected_model if st.session_state.selected_model else None
-    
+    model_to_use = (
+        st.session_state.selected_model if st.session_state.selected_model else None
+    )
+
     # Show warning if no model is configured (neither page-specific nor default)
     if not model_to_use:
         default_model = get_default_translation_model()
@@ -182,8 +197,10 @@ if st.button("Translate") and text:
             st.stop()
         else:
             model_to_use = default_model
-            st.info(f"ℹ️ Using default model: **{model_to_use}** (configure in Settings ⚙️)")
-    
+            st.info(
+                f"ℹ️ Using default model: **{model_to_use}** (configure in Settings ⚙️)"
+            )
+
     with st.spinner("Translating..."):
         translation = translate_script(text, language, model=model_to_use)
         st.write("Translation:")

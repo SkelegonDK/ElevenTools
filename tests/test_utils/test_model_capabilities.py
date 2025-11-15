@@ -1,10 +1,9 @@
 """Tests for model capabilities detection."""
 
-import pytest
 from utils.model_capabilities import (
-    supports_speed,
-    supports_audio_tags,
     get_model_capabilities,
+    supports_audio_tags,
+    supports_speed,
 )
 
 
@@ -24,12 +23,12 @@ def test_supports_speed_with_pattern_matching():
     assert supports_speed("eleven_multilingual_v3") is True
     assert supports_speed("eleven_multilingual_v4") is True
     assert supports_speed("custom_multilingual_model") is True
-    
+
     # Test pattern matching for turbo v2+ models (pattern matches "turbo_v2")
     assert supports_speed("eleven_turbo_v2_6") is True
     # Note: "turbo_v3" doesn't match "turbo_v2" pattern, which is expected
     # If v3 supports speed, it should be added to allow-list
-    
+
     # Test pattern matching for flash v2+ models (pattern matches "flash_v2")
     assert supports_speed("eleven_flash_v2_6") is True
     # Note: "flash_v3" doesn't match "flash_v2" pattern, which is expected
@@ -54,7 +53,7 @@ def test_get_model_capabilities():
     # Test with speed-supporting model
     capabilities = get_model_capabilities("eleven_multilingual_v2")
     assert capabilities["speed"] is True
-    
+
     # Test with non-speed-supporting model
     capabilities = get_model_capabilities("eleven_monolingual_v1")
     assert capabilities["speed"] is False
@@ -111,12 +110,12 @@ def test_get_model_capabilities_includes_audio_tags():
     capabilities = get_model_capabilities("eleven_v3")
     assert capabilities["speed"] is True
     assert capabilities["audio_tags"] is True
-    
+
     # Test with non-v3 model (supports speed but not audio_tags)
     capabilities = get_model_capabilities("eleven_multilingual_v2")
     assert capabilities["speed"] is True
     assert capabilities["audio_tags"] is False
-    
+
     # Test with model that supports neither
     capabilities = get_model_capabilities("eleven_monolingual_v1")
     assert capabilities["speed"] is False
@@ -129,4 +128,3 @@ def test_get_model_capabilities_extensibility_with_audio_tags():
     assert isinstance(capabilities, dict)
     assert "speed" in capabilities
     assert "audio_tags" in capabilities
-

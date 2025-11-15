@@ -1,7 +1,7 @@
 """Unit tests for API key management utilities."""
 
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 from utils.api_keys import get_elevenlabs_api_key, get_openrouter_api_key
 
 
@@ -10,7 +10,7 @@ def test_get_elevenlabs_api_key_from_session_state():
     with patch("utils.api_keys.st") as mock_st:
         mock_st.session_state = {"ELEVENLABS_API_KEY": "session-key-123"}
         mock_st.secrets = {}
-        
+
         result = get_elevenlabs_api_key()
         assert result == "session-key-123"
 
@@ -20,7 +20,7 @@ def test_get_elevenlabs_api_key_from_secrets_fallback():
     with patch("utils.api_keys.st") as mock_st:
         mock_st.session_state = {}
         mock_st.secrets = {"ELEVENLABS_API_KEY": "secrets-key-456"}
-        
+
         result = get_elevenlabs_api_key()
         assert result == "secrets-key-456"
 
@@ -30,7 +30,7 @@ def test_get_elevenlabs_api_key_session_state_priority():
     with patch("utils.api_keys.st") as mock_st:
         mock_st.session_state = {"ELEVENLABS_API_KEY": "session-key-789"}
         mock_st.secrets = {"ELEVENLABS_API_KEY": "secrets-key-999"}
-        
+
         result = get_elevenlabs_api_key()
         assert result == "session-key-789"
 
@@ -40,7 +40,7 @@ def test_get_elevenlabs_api_key_missing():
     with patch("utils.api_keys.st") as mock_st:
         mock_st.session_state = {}
         mock_st.secrets = {}
-        
+
         result = get_elevenlabs_api_key()
         assert result is None
 
@@ -53,7 +53,7 @@ def test_get_elevenlabs_api_key_secrets_get_method():
         mock_secrets = MagicMock()
         mock_secrets.get.return_value = "secrets-key-from-get"
         mock_st.secrets = mock_secrets
-        
+
         result = get_elevenlabs_api_key()
         assert result == "secrets-key-from-get"
         mock_secrets.get.assert_called_once_with("ELEVENLABS_API_KEY")
@@ -64,7 +64,7 @@ def test_get_openrouter_api_key_from_session_state():
     with patch("utils.api_keys.st") as mock_st:
         mock_st.session_state = {"OPENROUTER_API_KEY": "session-key-123"}
         mock_st.secrets = {}
-        
+
         result = get_openrouter_api_key()
         assert result == "session-key-123"
 
@@ -74,7 +74,7 @@ def test_get_openrouter_api_key_from_secrets_fallback():
     with patch("utils.api_keys.st") as mock_st:
         mock_st.session_state = {}
         mock_st.secrets = {"OPENROUTER_API_KEY": "secrets-key-456"}
-        
+
         result = get_openrouter_api_key()
         assert result == "secrets-key-456"
 
@@ -84,7 +84,7 @@ def test_get_openrouter_api_key_session_state_priority():
     with patch("utils.api_keys.st") as mock_st:
         mock_st.session_state = {"OPENROUTER_API_KEY": "session-key-789"}
         mock_st.secrets = {"OPENROUTER_API_KEY": "secrets-key-999"}
-        
+
         result = get_openrouter_api_key()
         assert result == "session-key-789"
 
@@ -94,7 +94,6 @@ def test_get_openrouter_api_key_missing():
     with patch("utils.api_keys.st") as mock_st:
         mock_st.session_state = {}
         mock_st.secrets = {}
-        
+
         result = get_openrouter_api_key()
         assert result is None
-

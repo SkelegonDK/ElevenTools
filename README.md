@@ -1,6 +1,15 @@
 # ElevenTools v0.3.0
 
+[![CI/CD Pipeline](https://github.com/SkelegonDK/ElevenTools/actions/workflows/ci.yml/badge.svg)](https://github.com/SkelegonDK/ElevenTools/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/SkelegonDK/ElevenTools/branch/main/graph/badge.svg)](https://codecov.io/gh/SkelegonDK/ElevenTools)
+[![License](https://img.shields.io/badge/license-Custom-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![Streamlit](https://img.shields.io/badge/streamlit-1.32+-red.svg)](https://streamlit.io/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 ElevenTools is a comprehensive toolbox for ElevenLabs, providing a user-friendly interface for text-to-speech generation with advanced features and bulk processing capabilities.
+
+> 📝 **Note**: See [CHANGELOG.md](CHANGELOG.md) for version history and recent updates.
 
 ## Features
 
@@ -16,6 +25,26 @@ ElevenTools is a comprehensive toolbox for ElevenLabs, providing a user-friendly
 - **OpenRouter model selection with fuzzy search** - Discover and select from available OpenRouter models with intelligent search
 - **Free model filtering** - Filter to show only zero-cost models for cost-effective translations
 - **Dynamic model capability detection** - Automatically detects which voice settings each ElevenLabs model supports, adapting UI controls and validation dynamically
+
+## Screenshots
+
+### Main Interface
+![Main Interface](docs/screenshots/main-interface.png)
+*The main text-to-speech generation interface with voice and model selection*
+
+### Bulk Generation
+![Bulk Generation](docs/screenshots/bulk-generation.png)
+*CSV-based bulk audio generation with variable replacement*
+
+### Settings Page
+![Settings](docs/screenshots/settings.png)
+*Secure API key management and configuration*
+
+### File Explorer
+![File Explorer](docs/screenshots/file-explorer.png)
+*Browse and download generated audio files organized by session*
+
+> **Note**: Screenshots are placeholders. Add actual screenshots to `docs/screenshots/` directory.
 
 ## Installation
 
@@ -82,14 +111,99 @@ Both API keys are required for full functionality:
 
 (Optional) Create a `.streamlit/config.toml` file to customize Streamlit's appearance and behavior.
 
+## Deployment
+
+ElevenTools can be deployed in several ways depending on your needs:
+
 ### Streamlit Cloud Deployment
 
-When deploying to Streamlit Cloud:
+Streamlit Cloud is the easiest way to deploy ElevenTools:
 
-1. **Option A**: Configure secrets via the Streamlit Cloud dashboard (shared across all users)
-2. **Option B**: Users can enter their own API keys via the Settings page (per-user keys)
+1. **Connect your repository** to [Streamlit Cloud](https://streamlit.io/cloud)
+2. **Configure secrets** (optional):
+   - Go to your app settings in Streamlit Cloud
+   - Add secrets via the dashboard (shared across all users)
+   - See [Streamlit Cloud Secrets Documentation](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/secrets-management)
+3. **Deploy**: Streamlit Cloud will automatically detect and deploy your app
+
+**API Key Options:**
+- **Option A**: Configure secrets via the Streamlit Cloud dashboard (shared across all users)
+- **Option B**: Users can enter their own API keys via the Settings page (per-user keys)
 
 The session-based approach allows each user to provide their own API keys without requiring a full authentication layer, making it ideal for prototype and multi-user scenarios.
+
+### Docker Deployment
+
+#### Using Docker Compose (Recommended)
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/SkelegonDK/ElevenTools.git
+   cd ElevenTools
+   ```
+
+2. **Build and run**:
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **Access the application**:
+   - Open http://localhost:8501 in your browser
+
+4. **View logs**:
+   ```bash
+   docker-compose logs -f
+   ```
+
+5. **Stop the application**:
+   ```bash
+   docker-compose down
+   ```
+
+#### Using Docker directly
+
+1. **Build the image**:
+   ```bash
+   docker build -t eleventools .
+   ```
+
+2. **Run the container**:
+   ```bash
+   docker run -d \
+     -p 8501:8501 \
+     -v $(pwd)/outputs:/app/outputs \
+     --name eleventools \
+     eleventools
+   ```
+
+3. **Access the application**:
+   - Open http://localhost:8501 in your browser
+
+### Environment Variables
+
+The following environment variables can be configured:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `STREAMLIT_SERVER_PORT` | Port for Streamlit server | `8501` |
+| `STREAMLIT_SERVER_ADDRESS` | Address to bind to | `0.0.0.0` |
+| `SESSION_CLEANUP_TIMEOUT_HOURS` | Hours before session cleanup | `24` |
+
+### Health Checks
+
+The application includes health check endpoints:
+
+- **Health endpoint**: `http://localhost:8501/_stcore/health`
+- Docker health checks are configured automatically
+- Use this endpoint for load balancer health checks
+
+### Production Considerations
+
+- **API Keys**: Use session-based storage or Streamlit secrets for secure key management
+- **File Storage**: Mount persistent volumes for `outputs/` directory in Docker deployments
+- **Session Cleanup**: Configure `SESSION_CLEANUP_TIMEOUT_HOURS` based on your usage patterns
+- **Resource Limits**: Set appropriate memory and CPU limits for Docker containers
+- **Reverse Proxy**: Use nginx or similar for SSL termination and domain routing
 
 ## Ollama Setup
 
@@ -351,11 +465,13 @@ ElevenTools is open-source software released under a custom license.
 
 Please see the [full license](LICENSE) for all terms and conditions.
 
-For commercial licensing inquiries, please contact [your contact information].
+For commercial licensing inquiries, please contact [@SkelegonDK](https://github.com/SkelegonDK) or open an issue in this repository.
 
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+For detailed guidelines on contributing, including development setup, code style, and testing requirements, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Support
 

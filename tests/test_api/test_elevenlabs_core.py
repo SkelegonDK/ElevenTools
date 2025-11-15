@@ -164,7 +164,9 @@ def test_create_voice_from_preview_validation_error():
 @pytest.mark.core_suite
 def test_bulk_generate_audio_scenarios(mocker, tmp_path, monkeypatch):
     # Arrange
-    csv_content = "text,filename\nHello {name},greeting_{name}\nWorld {name},world_{name}"
+    csv_content = (
+        "text,filename\nHello {name},greeting_{name}\nWorld {name},world_{name}"
+    )
     csv_file = io.BytesIO(csv_content.encode("utf-8"))
 
     def fake_generate_audio(api_key: str, *args: Any, **kwargs: Any) -> bool:
@@ -252,4 +254,3 @@ def test_bulk_generate_audio_scenarios(mocker, tmp_path, monkeypatch):
         )
 
     assert "Failed to process bulk generation" in str(exc.value)
-

@@ -149,7 +149,7 @@ This document outlines the security measures implemented in ElevenTools to prote
 
 If you discover a security vulnerability, please:
 1. **Do not** open a public issue
-2. Email security concerns to [your contact information]
+2. Contact [@SkelegonDK](https://github.com/SkelegonDK) via GitHub or open a private security advisory
 3. Include details about the vulnerability and steps to reproduce
 
 ## Security Testing

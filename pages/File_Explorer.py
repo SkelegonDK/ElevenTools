@@ -1,11 +1,16 @@
-import streamlit as st
+import io
 import os
 import re
 import zipfile
-import io
-from datetime import datetime
-from utils.security import validate_path_within_base, escape_html_content
-from utils.session_manager import get_session_id, get_session_output_dir, cleanup_old_sessions
+
+import streamlit as st
+
+from utils.security import escape_html_content, validate_path_within_base
+from utils.session_manager import (
+    cleanup_old_sessions,
+    get_session_id,
+    get_session_output_dir,
+)
 
 # Cleanup old sessions on page load
 cleanup_old_sessions()
@@ -17,11 +22,16 @@ session_single_dir = os.path.join(session_output_dir, "single")
 session_bulk_dir = os.path.join(session_output_dir, "bulk")
 
 st.title("File Explorer: Generated Audio")
-st.info(f"📁 **Session ID:** `{session_id[:8]}...` (Your files are private to this session)")
+st.info(
+    f"📁 **Session ID:** `{session_id[:8]}...` (Your files are private to this session)"
+)
 
 if not os.path.exists(session_output_dir):
-    st.info("No generated audio found for this session. Generate some audio to see it here!")
+    st.info(
+        "No generated audio found for this session. Generate some audio to see it here!"
+    )
     st.stop()
+
 
 # Helper functions
 def parse_single_filename(filename):
@@ -32,28 +42,31 @@ def parse_single_filename(filename):
         return match.groupdict()
     return None
 
+
 def parse_bulk_filename(filename):
     """Parse bulk output filename."""
     return {"filename": filename}
 
+
 def create_zip_archive(file_paths, zip_filename):
     """Create a ZIP archive from file paths.
-    
+
     Args:
         file_paths: List of file paths to include in ZIP
         zip_filename: Name for the ZIP file
-        
+
     Returns:
         BytesIO buffer containing ZIP file data
     """
     zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
         for file_path in file_paths:
             if os.path.exists(file_path):
                 arcname = os.path.basename(file_path)
                 zip_file.write(file_path, arcname)
     zip_buffer.seek(0)
     return zip_buffer.read()
+
 
 # --- Bulk Outputs ---
 st.header("Bulk Outputs")
@@ -62,15 +75,15 @@ if os.path.exists(session_bulk_dir):
     abs_bulk_dir = os.path.abspath(session_bulk_dir)
     for entry in os.listdir(session_bulk_dir):
         # Validate entry is safe (not a traversal attempt)
-        if entry in ('.', '..') or '/' in entry or '\\' in entry:
+        if entry in (".", "..") or "/" in entry or "\\" in entry:
             continue
-        
+
         group_path = os.path.join(session_bulk_dir, entry)
-        
+
         # Validate path is within bulk directory
         if not validate_path_within_base(os.path.abspath(group_path), abs_bulk_dir):
             continue
-        
+
         if os.path.isdir(group_path):
             # Each subfolder is a bulk group named after the CSV file
             try:
@@ -79,7 +92,9 @@ if os.path.exists(session_bulk_dir):
                 safe_group_files = []
                 for f in group_files:
                     file_path = os.path.join(group_path, f)
-                    if validate_path_within_base(os.path.abspath(file_path), os.path.abspath(group_path)):
+                    if validate_path_within_base(
+                        os.path.abspath(file_path), os.path.abspath(group_path)
+                    ):
                         safe_group_files.append(f)
                 if safe_group_files:
                     bulk_groups.append((entry, group_path, safe_group_files))
@@ -95,7 +110,7 @@ else:
     for _, group_path, group_files in bulk_groups:
         for f in group_files:
             all_bulk_files.append(os.path.join(group_path, f))
-    
+
     if all_bulk_files:
         try:
             zip_data = create_zip_archive(all_bulk_files, f"bulk_{session_id[:8]}.zip")
@@ -104,11 +119,11 @@ else:
                 data=zip_data,
                 file_name=f"bulk_{session_id[:8]}.zip",
                 mime="application/zip",
-                key="download_all_bulk"
+                key="download_all_bulk",
             )
         except Exception as e:
             st.warning(f"Could not create bulk download: {str(e)}")
-    
+
     for group_name, group_path, group_files in bulk_groups:
         # Escape group name before display
         safe_group_name = escape_html_content(group_name)
@@ -117,17 +132,19 @@ else:
             group_files_full = [os.path.join(group_path, f) for f in group_files]
             if group_files_full:
                 try:
-                    group_zip = create_zip_archive(group_files_full, f"{safe_group_name}.zip")
+                    group_zip = create_zip_archive(
+                        group_files_full, f"{safe_group_name}.zip"
+                    )
                     st.download_button(
                         label=f"📦 Download {safe_group_name}",
                         data=group_zip,
                         file_name=f"{safe_group_name}.zip",
                         mime="application/zip",
-                        key=f"bulk_dl_{group_name}"
+                        key=f"bulk_dl_{group_name}",
                     )
                 except Exception as e:
                     st.caption(f"Download unavailable: {str(e)}")
-            
+
             for audio_file in group_files:
                 file_path = os.path.join(group_path, audio_file)
                 meta = parse_bulk_filename(audio_file)
@@ -148,7 +165,7 @@ else:
                                     data=f.read(),
                                     file_name=audio_file,
                                     mime="audio/mpeg",
-                                    key=f"dl_{group_name}_{audio_file}"
+                                    key=f"dl_{group_name}_{audio_file}",
                                 )
                         except Exception:
                             st.caption("Download unavailable")
@@ -164,7 +181,9 @@ if os.path.exists(session_single_dir):
             if f.endswith(".mp3"):
                 file_path = os.path.join(session_single_dir, f)
                 # Validate file path is within single directory
-                if validate_path_within_base(os.path.abspath(file_path), abs_single_dir):
+                if validate_path_within_base(
+                    os.path.abspath(file_path), abs_single_dir
+                ):
                     single_files.append(f)
     except (OSError, PermissionError):
         pass
@@ -176,17 +195,19 @@ else:
     all_single_paths = [os.path.join(session_single_dir, f) for f in single_files]
     if all_single_paths:
         try:
-            zip_data = create_zip_archive(all_single_paths, f"single_{session_id[:8]}.zip")
+            zip_data = create_zip_archive(
+                all_single_paths, f"single_{session_id[:8]}.zip"
+            )
             st.download_button(
                 label="📦 Download All Single Files",
                 data=zip_data,
                 file_name=f"single_{session_id[:8]}.zip",
                 mime="application/zip",
-                key="download_all_single"
+                key="download_all_single",
             )
         except Exception as e:
             st.warning(f"Could not create single files download: {str(e)}")
-    
+
     for audio_file in single_files:
         file_path = os.path.join(session_single_dir, audio_file)
         meta = parse_single_filename(audio_file)
@@ -213,7 +234,7 @@ else:
                             data=f.read(),
                             file_name=audio_file,
                             mime="audio/mpeg",
-                            key=f"dl_single_{audio_file}"
+                            key=f"dl_single_{audio_file}",
                         )
                 except Exception:
                     st.caption("Download unavailable")

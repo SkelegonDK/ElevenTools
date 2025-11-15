@@ -1,17 +1,17 @@
-from unittest.mock import MagicMock, mock_open
-import pytest
 from io import StringIO
+from unittest.mock import MagicMock, mock_open
+
 import pandas as pd
-from typing import cast
-from pandas import DataFrame
+import pytest
+
 from scripts.Elevenlabs_functions import (
+    ValidationError,
+    bulk_generate_audio,
     fetch_models,
     fetch_voices,
-    get_voice_id,
     generate_audio,
+    get_voice_id,
     process_text,
-    bulk_generate_audio,
-    ValidationError,
 )
 
 
@@ -177,11 +177,11 @@ def test_bulk_generate_audio_with_random_seed(mocker):
     mock_response.status_code = 200
     mock_response.content = b"fake_audio_content"
     mock_post.return_value = mock_response
-    
+
     # Mock file operations
     mocker.patch("scripts.Elevenlabs_functions.open", mock_open())
     mocker.patch("os.makedirs")
-    
+
     csv_content = "text,filename\nHello {name},greeting_{name}"
     csv_file = StringIO(csv_content)
     voice_settings = {
@@ -317,6 +317,7 @@ def test_bulk_generate_audio_with_speed(mocker):
 
 
 # Model-Voice Setting Compatibility Tests
+
 
 def test_speed_validation_for_monolingual_v1():
     """Test that speed parameter raises ValidationError for eleven_monolingual_v1."""
@@ -486,7 +487,7 @@ def test_common_settings_all_models(mocker):
     for model_id in models_to_test:
         # Reset mock to capture each call separately
         mock_post.reset_mock()
-        
+
         success = generate_audio(
             "fake_api_key",
             0.5,  # stability
@@ -518,7 +519,7 @@ def test_common_settings_all_models(mocker):
         assert "use_speaker_boost" in payload["voice_settings"]
         assert payload["voice_settings"]["use_speaker_boost"] is True
         assert isinstance(payload["voice_settings"]["use_speaker_boost"], bool)
-        
+
         # Verify model_id is correct
         assert payload["model_id"] == model_id
 
@@ -550,7 +551,9 @@ def test_payload_structure_per_model(mocker):
     assert payload["model_id"] == "eleven_monolingual_v1"
     assert "voice_settings" in payload
     assert "speed" not in payload["voice_settings"]
-    assert len(payload["voice_settings"]) == 4  # stability, similarity_boost, style, use_speaker_boost
+    assert (
+        len(payload["voice_settings"]) == 4
+    )  # stability, similarity_boost, style, use_speaker_boost
 
     # Reset mock
     mock_post.reset_mock()
@@ -643,6 +646,7 @@ def test_bulk_generation_model_compatibility(mocker):
 
     # Test bulk generation with speed for monolingual v1 - should raise APIError wrapping ValidationError
     from utils.error_handling import APIError
+
     with pytest.raises(APIError) as exc_info:
         bulk_generate_audio(
             "fake_api_key",

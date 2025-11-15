@@ -1,4 +1,3 @@
-from typing import Dict, List
 
 import pytest
 
@@ -12,7 +11,9 @@ def test_enhance_script_with_openrouter_routes_v3(mocker):
         "scripts.openrouter_functions.enhance_script_for_v3",
         return_value=(True, "[excited] Hello!"),
     )
-    mocker.patch("scripts.openrouter_functions.get_openrouter_api_key", return_value="sk")
+    mocker.patch(
+        "scripts.openrouter_functions.get_openrouter_api_key", return_value="sk"
+    )
 
     success, result = orf.enhance_script_with_openrouter(
         "Hello", enhancement_prompt="Add energy", model_id="eleven_v3"
@@ -26,7 +27,9 @@ def test_enhance_script_with_openrouter_routes_v3(mocker):
 @pytest.mark.core_suite
 def test_enhance_script_with_openrouter_missing_api_key(mocker):
     mocker.patch("scripts.openrouter_functions.supports_audio_tags", return_value=False)
-    mocker.patch("scripts.openrouter_functions.get_openrouter_api_key", return_value=None)
+    mocker.patch(
+        "scripts.openrouter_functions.get_openrouter_api_key", return_value=None
+    )
 
     success, message = orf.enhance_script_with_openrouter("Hello there")
 
@@ -41,7 +44,9 @@ def test_get_openrouter_response_success(mocker):
     mock_response.json.return_value = {
         "choices": [{"message": {"content": "Processed answer"}}]
     }
-    mocker.patch("scripts.openrouter_functions.get_openrouter_api_key", return_value="sk")
+    mocker.patch(
+        "scripts.openrouter_functions.get_openrouter_api_key", return_value="sk"
+    )
     mocker.patch(
         "scripts.openrouter_functions.requests.post",
         return_value=mock_response,
@@ -54,7 +59,9 @@ def test_get_openrouter_response_success(mocker):
 
 @pytest.mark.core_suite
 def test_get_openrouter_response_error(mocker):
-    mocker.patch("scripts.openrouter_functions.get_openrouter_api_key", return_value="sk")
+    mocker.patch(
+        "scripts.openrouter_functions.get_openrouter_api_key", return_value="sk"
+    )
     mocker.patch(
         "scripts.openrouter_functions.requests.post",
         side_effect=Exception("Timeout"),
@@ -86,9 +93,12 @@ def test_translate_script_with_openrouter_uses_default_model(mocker):
 
 @pytest.mark.core_suite
 def test_identify_and_filter_free_models():
-    models: List[Dict[str, object]] = [
+    models: list[dict[str, object]] = [
         {"id": "minimax/minimax-m2:free", "pricing": {"prompt": 0, "completion": 0}},
-        {"id": "provider/model-paid", "pricing": {"prompt": 0.001, "completion": 0.001}},
+        {
+            "id": "provider/model-paid",
+            "pricing": {"prompt": 0.001, "completion": 0.001},
+        },
         {"id": "provider/alt", "pricing": {"prompt": 0, "completion": 0}},
     ]
 
@@ -98,4 +108,3 @@ def test_identify_and_filter_free_models():
 
     filtered = orf.filter_free_models(models, show_free_only=True)
     assert filtered == free
-

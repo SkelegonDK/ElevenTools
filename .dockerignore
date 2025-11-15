@@ -1,0 +1,52 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info
+dist
+build
+
+# Virtual environments
+.venv
+venv
+env
+ENV
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Testing
+.pytest_cache
+.coverage
+htmlcov
+.tox
+
+# Documentation
+docs/_build
+
+# Project specific
+eleventools/
+outputs/
+*.mp3
+output.mp3
+
+# Secrets
+.streamlit/secrets.toml
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# OpenSpec (internal)
+openspec/
+

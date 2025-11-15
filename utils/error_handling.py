@@ -1,15 +1,15 @@
 """Error handling utilities for ElevenTools."""
 
-from typing import Optional, Any, Tuple
 import logging
 import traceback
+
 import streamlit as st
 
 
 class ElevenToolsError(Exception):
     """Base exception for ElevenTools."""
 
-    def __init__(self, message: str, details: Optional[str] = None):
+    def __init__(self, message: str, details: str | None = None):
         self.message = message
         self.details = details
         super().__init__(self.message)
@@ -38,7 +38,7 @@ class ConfigurationError(ElevenToolsError):
     pass
 
 
-def handle_error(error: Exception, show_traceback: bool = False) -> Tuple[bool, str]:
+def handle_error(error: Exception, show_traceback: bool = False) -> tuple[bool, str]:
     """Handle exceptions and return appropriate error messages.
 
     Args:
@@ -71,7 +71,7 @@ def handle_error(error: Exception, show_traceback: bool = False) -> Tuple[bool, 
     return False, str(error)
 
 
-def validate_api_key(api_key: Optional[str], service_name: str) -> None:
+def validate_api_key(api_key: str | None, service_name: str) -> None:
     """Validate API key presence and format.
 
     Args:

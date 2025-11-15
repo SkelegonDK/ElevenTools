@@ -1,11 +1,13 @@
-import requests
 import html
-import streamlit as st
-from typing import Optional, Tuple, List, Dict, Any
 from difflib import SequenceMatcher
+from typing import Any
+
+import requests
+import streamlit as st
+
+from utils.api_keys import get_openrouter_api_key
 from utils.error_handling import APIError
 from utils.model_capabilities import supports_audio_tags
-from utils.api_keys import get_openrouter_api_key
 
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models"
@@ -16,16 +18,16 @@ DEFAULT_ENHANCEMENT_MODEL = "minimax/minimax-m2:free"
 
 def enhance_script_for_v3(
     script: str, enhancement_prompt: str = "", progress_callback=None
-) -> Tuple[bool, str]:
+) -> tuple[bool, str]:
     """
     Enhance the given script specifically for ElevenLabs v3 models using Audio Tags.
-    
+
     Audio Tags are square-bracketed tags that provide expressive control:
     - Emotions: [excited], [sad], [angry], [happily], [sorrowful]
     - Delivery: [whispers], [shouts], [x accent]
     - Human reactions: [laughs], [clears throat], [sighs]
     - Sound effects: [gunshot], [clapping], [explosion] (when contextually appropriate)
-    
+
     :param script: The script to enhance
     :param enhancement_prompt: Optional prompt for enhancement guidance
     :param progress_callback: Optional callback function to update progress
@@ -111,14 +113,17 @@ IMPORTANT: Provide ONLY the enhanced script as your response. Do not include any
 
 
 def enhance_script_with_openrouter(
-    script: str, enhancement_prompt: str = "", progress_callback=None, model_id: Optional[str] = None
-) -> Tuple[bool, str]:
+    script: str,
+    enhancement_prompt: str = "",
+    progress_callback=None,
+    model_id: str | None = None,
+) -> tuple[bool, str]:
     """
     Enhance the given script using OpenRouter's LLM.
-    
+
     Routes to v3-specific enhancement (Audio Tags) when a v3 model is detected,
     otherwise uses traditional enhancement techniques.
-    
+
     :param script: The script to enhance
     :param enhancement_prompt: Optional prompt for enhancement guidance
     :param progress_callback: Optional callback function to update progress
@@ -128,12 +133,12 @@ def enhance_script_with_openrouter(
     # Route to v3-specific enhancement if model supports Audio Tags
     if model_id and supports_audio_tags(model_id):
         return enhance_script_for_v3(script, enhancement_prompt, progress_callback)
-    
+
     # Use traditional enhancement for non-v3 models
     api_key = get_openrouter_api_key()
     if not api_key:
         return False, "OpenRouter API key not found. Please set it in Settings."
-    
+
     # Always use default enhancement model for OpenRouter API call
     # (model_id parameter is only for ElevenLabs v3 routing logic)
     openrouter_model_id = get_default_enhancement_model()
@@ -190,7 +195,7 @@ IMPORTANT: Provide ONLY the enhanced script as your response. Do not include any
         return False, f"OpenRouter API error: {str(e)}"
 
 
-def get_openrouter_response(prompt: str, model: Optional[str] = None) -> str:
+def get_openrouter_response(prompt: str, model: str | None = None) -> str:
     """Get a response from OpenRouter using the specified model or default."""
     api_key = get_openrouter_api_key()
     if not api_key:
@@ -218,29 +223,31 @@ def get_openrouter_response(prompt: str, model: Optional[str] = None) -> str:
         return f"OpenRouter API error: {str(e)}"
 
 
-def translate_script_with_openrouter(text: str, language: str, model: Optional[str] = None) -> str:
+def translate_script_with_openrouter(
+    text: str, language: str, model: str | None = None
+) -> str:
     """
     Translate the text to the given language using OpenRouter.
-    
+
     Args:
         text: Text to translate.
         language: Target language.
         model: Optional model to use. If None, uses default model from settings.
-        
+
     Returns:
         Translated text.
     """
     # Use default translation model if no model provided
     if model is None:
         model = get_default_translation_model()
-    
+
     prompt = f"Translate the following text to {language}:\n\n{text}"
     return get_openrouter_response(prompt, model=model)
 
 
 def convert_word_to_phonetic_openrouter(
     word: str, language: str, model: str
-) -> Optional[str]:
+) -> str | None:
     """Convert a word to its phonetic spelling in a given language using OpenRouter."""
     if model == "eleven_monolingual_v1":
         prompt = f"You speak perfect {language}. Convert the word {word} into the phonetic spelling appropriate for the {language} language. Only respond with the phonetic spelling of the word, nothing else."
@@ -251,25 +258,25 @@ def convert_word_to_phonetic_openrouter(
 
 
 @st.cache_data(ttl=3600)
-def fetch_openrouter_models() -> List[Dict[str, Any]]:
+def fetch_openrouter_models() -> list[dict[str, Any]]:
     """
     Fetch available models from OpenRouter API.
-    
+
     Returns:
         List of model dictionaries containing model information.
-        
+
     Raises:
         APIError: If the API request fails or returns an error response.
     """
     api_key = get_openrouter_api_key()
     if not api_key:
         raise APIError("OpenRouter API key not found. Please set it in Settings.")
-    
+
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
     }
-    
+
     try:
         response = requests.get(OPENROUTER_MODELS_URL, headers=headers, timeout=30)
         response.raise_for_status()
@@ -279,49 +286,51 @@ def fetch_openrouter_models() -> List[Dict[str, Any]]:
         raise APIError(f"Failed to fetch models from OpenRouter: {str(e)}")
 
 
-def identify_free_models(models: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def identify_free_models(models: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """
     Identify free models from a list of models.
-    
+
     A model is considered free if:
     1. Model ID ends with ":free" (e.g., "minimax/minimax-m2:free"), OR
     2. Both pricing.prompt and pricing.completion are 0
-    
+
     Args:
         models: List of model dictionaries from OpenRouter API.
-        
+
     Returns:
         List of free model dictionaries.
     """
     free_models = []
     for model in models:
         model_id = model.get("id", "")
-        
+
         # Check if model ID ends with ":free" (most reliable indicator)
         if model_id.endswith(":free"):
             free_models.append(model)
             continue
-        
+
         # Fallback: Check pricing (some free models may not have :free suffix)
         pricing = model.get("pricing", {})
         prompt_price = pricing.get("prompt", None)
         completion_price = pricing.get("completion", None)
-        
+
         # Check if both prices are 0 (free)
         if prompt_price == 0 and completion_price == 0:
             free_models.append(model)
-    
+
     return free_models
 
 
-def filter_free_models(models: List[Dict[str, Any]], show_free_only: bool) -> List[Dict[str, Any]]:
+def filter_free_models(
+    models: list[dict[str, Any]], show_free_only: bool
+) -> list[dict[str, Any]]:
     """
     Filter models to show only free models if requested.
-    
+
     Args:
         models: List of model dictionaries.
         show_free_only: If True, return only free models. If False, return all models.
-        
+
     Returns:
         Filtered list of model dictionaries.
     """
@@ -333,69 +342,71 @@ def filter_free_models(models: List[Dict[str, Any]], show_free_only: bool) -> Li
 def _fuzzy_match_score(query: str, text: str) -> float:
     """
     Calculate fuzzy match score between query and text.
-    
+
     Uses SequenceMatcher for similarity scoring (0.0 to 1.0).
     Also checks if query is a substring for partial matches.
-    
+
     Args:
         query: Search query string.
         text: Text to match against.
-        
+
     Returns:
         Similarity score between 0.0 and 1.0.
     """
     query_lower = query.lower()
     text_lower = text.lower()
-    
+
     # Exact match gets highest score
     if query_lower == text_lower:
         return 1.0
-    
+
     # Substring match gets high score
     if query_lower in text_lower:
         return 0.9
-    
+
     # Calculate similarity using SequenceMatcher
     similarity = SequenceMatcher(None, query_lower, text_lower).ratio()
     return similarity
 
 
-def search_models_fuzzy(models: List[Dict[str, Any]], query: str, min_score: float = 0.3) -> List[Dict[str, Any]]:
+def search_models_fuzzy(
+    models: list[dict[str, Any]], query: str, min_score: float = 0.3
+) -> list[dict[str, Any]]:
     """
     Search models using fuzzy matching algorithm.
-    
+
     Args:
         models: List of model dictionaries to search.
         query: Search query string.
         min_score: Minimum similarity score threshold (0.0 to 1.0). Default 0.3.
-        
+
     Returns:
         List of matching models sorted by relevance (highest score first).
     """
     # Strip whitespace and treat empty/whitespace-only queries as no search
     if not query or not query.strip():
         return models
-    
+
     # Use stripped query for matching
     query = query.strip()
-    
+
     # Calculate scores for each model
     scored_models = []
     for model in models:
         model_name = model.get("id", "")
         model_name_display = model.get("name", model_name)
-        
+
         # Score based on model ID and name
         id_score = _fuzzy_match_score(query, model_name)
         name_score = _fuzzy_match_score(query, model_name_display)
-        
+
         # Use the higher score
         score = max(id_score, name_score)
-        
+
         # Only include models with score above threshold
         if score >= min_score:
             scored_models.append((score, model))
-    
+
     # Sort by score (descending) and return models
     scored_models.sort(key=lambda x: x[0], reverse=True)
     return [model for _, model in scored_models]
@@ -404,7 +415,7 @@ def search_models_fuzzy(models: List[Dict[str, Any]], query: str, min_score: flo
 def get_default_translation_model() -> str:
     """
     Get the default translation model from session state or fallback to hardcoded default.
-    
+
     Returns:
         Model ID string for translation.
     """
@@ -414,7 +425,7 @@ def get_default_translation_model() -> str:
 def get_default_enhancement_model() -> str:
     """
     Get the default enhancement model from session state or fallback to hardcoded default.
-    
+
     Returns:
         Model ID string for script enhancement.
     """

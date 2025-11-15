@@ -1,19 +1,19 @@
 """Tests for security utilities."""
 
-import pytest
 import os
+
 from utils.security import (
-    sanitize_path_component,
-    validate_path_within_base,
-    validate_csv_file_size,
-    validate_dataframe_rows,
-    validate_column_name,
-    validate_text_length,
-    escape_html_content,
-    sanitize_filename,
     MAX_CSV_SIZE,
     MAX_DF_ROWS,
     MAX_TEXT_LENGTH,
+    escape_html_content,
+    sanitize_filename,
+    sanitize_path_component,
+    validate_column_name,
+    validate_csv_file_size,
+    validate_dataframe_rows,
+    validate_path_within_base,
+    validate_text_length,
 )
 
 
@@ -65,7 +65,7 @@ class TestValidatePathWithinBase:
         os.makedirs(base_dir, exist_ok=True)
         test_path = str(tmp_path / "base" / "subdir" / "file.txt")
         os.makedirs(os.path.dirname(test_path), exist_ok=True)
-        
+
         assert validate_path_within_base(test_path, base_dir) is True
 
     def test_invalid_path_outside_base(self, tmp_path):
@@ -74,7 +74,7 @@ class TestValidatePathWithinBase:
         os.makedirs(base_dir, exist_ok=True)
         test_path = str(tmp_path / "other" / "file.txt")
         os.makedirs(os.path.dirname(test_path), exist_ok=True)
-        
+
         assert validate_path_within_base(test_path, base_dir) is False
 
     def test_absolute_paths(self, tmp_path):
@@ -82,10 +82,10 @@ class TestValidatePathWithinBase:
         base_dir = str(tmp_path / "base")
         os.makedirs(base_dir, exist_ok=True)
         test_path = str(tmp_path / "base" / "file.txt")
-        
+
         abs_base = os.path.abspath(base_dir)
         abs_path = os.path.abspath(test_path)
-        
+
         assert validate_path_within_base(abs_path, abs_base) is True
 
 
@@ -237,4 +237,3 @@ class TestSanitizeFilename:
         """Test sanitization of empty string."""
         result = sanitize_filename("")
         assert result == "default"
-

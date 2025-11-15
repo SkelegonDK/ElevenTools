@@ -1,7 +1,9 @@
 """Unit tests for OpenRouter model fetching, filtering, and search functions."""
 
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
+
 import scripts.openrouter_functions as orf
 from utils.error_handling import APIError
 
@@ -9,6 +11,7 @@ from utils.error_handling import APIError
 @pytest.fixture(autouse=True)
 def mock_streamlit_session(monkeypatch):
     """Mock Streamlit session state and secrets."""
+
     class FakeSession(dict):
         def get(self, key, default=None):
             if key == "OPENROUTER_API_KEY":
@@ -85,6 +88,7 @@ def test_fetch_openrouter_models_success(mock_get, sample_models):
 def test_fetch_openrouter_models_api_error(mock_get):
     """Test error handling for API failures."""
     import requests
+
     mock_get.side_effect = requests.exceptions.RequestException("Network error")
 
     # Clear cache before testing
@@ -166,7 +170,10 @@ def test_identify_free_models(sample_models):
         },
         {
             "id": "minimax/minimax-m2:free",
-            "pricing": {"prompt": 0.001, "completion": 0.002},  # :free suffix makes it free
+            "pricing": {
+                "prompt": 0.001,
+                "completion": 0.002,
+            },  # :free suffix makes it free
         },
     ]
 
@@ -191,7 +198,10 @@ def test_identify_free_models_mixed_pricing():
         {"id": "partial1", "pricing": {"prompt": 0, "completion": 0.01}},
         {"id": "partial2", "pricing": {"prompt": 0.01, "completion": 0}},
         {"id": "missing_pricing", "pricing": {}},
-        {"id": "minimax/minimax-m2:free", "pricing": {"prompt": 0.001, "completion": 0.002}},  # :free suffix makes it free
+        {
+            "id": "minimax/minimax-m2:free",
+            "pricing": {"prompt": 0.001, "completion": 0.002},
+        },  # :free suffix makes it free
     ]
 
     free_models = orf.identify_free_models(models)
@@ -236,7 +246,10 @@ def test_search_models_fuzzy_partial_match(sample_models):
     result = orf.search_models_fuzzy(sample_models, "Claude")
 
     assert len(result) > 0
-    assert any("claude" in m["id"].lower() or "claude" in m.get("name", "").lower() for m in result)
+    assert any(
+        "claude" in m["id"].lower() or "claude" in m.get("name", "").lower()
+        for m in result
+    )
 
 
 def test_search_models_fuzzy_typo_tolerance(sample_models):
@@ -271,7 +284,9 @@ def test_search_models_fuzzy_empty_query(sample_models):
 def test_search_models_fuzzy_no_match(sample_models):
     """Test behavior when no models match."""
     # Use a query that definitely won't match anything, with higher threshold
-    result = orf.search_models_fuzzy(sample_models, "zzzzzzzzzzzzzzzzzzz", min_score=0.5)
+    result = orf.search_models_fuzzy(
+        sample_models, "zzzzzzzzzzzzzzzzzzz", min_score=0.5
+    )
 
     assert len(result) == 0
 
@@ -280,9 +295,21 @@ def test_combined_fuzzy_search_and_free_filter(sample_models):
     """Test combining fuzzy search and free filter."""
     # Convert pricing to numbers for test
     models = [
-        {"id": "free-model-1", "name": "Free Model One", "pricing": {"prompt": 0, "completion": 0}},
-        {"id": "paid-model-1", "name": "Paid Model One", "pricing": {"prompt": 0.01, "completion": 0.02}},
-        {"id": "free-model-2", "name": "Free Model Two", "pricing": {"prompt": 0, "completion": 0}},
+        {
+            "id": "free-model-1",
+            "name": "Free Model One",
+            "pricing": {"prompt": 0, "completion": 0},
+        },
+        {
+            "id": "paid-model-1",
+            "name": "Paid Model One",
+            "pricing": {"prompt": 0.01, "completion": 0.02},
+        },
+        {
+            "id": "free-model-2",
+            "name": "Free Model Two",
+            "pricing": {"prompt": 0, "completion": 0},
+        },
     ]
 
     # First filter by free
@@ -294,28 +321,41 @@ def test_combined_fuzzy_search_and_free_filter(sample_models):
 
     # Should find at least the model with "One" in the name
     assert len(result) >= 1
-    assert any("one" in m.get("name", "").lower() or "model-1" in m.get("id", "") for m in result)
+    assert any(
+        "one" in m.get("name", "").lower() or "model-1" in m.get("id", "")
+        for m in result
+    )
 
 
 def test_search_with_whitespace_only_query():
     """Test that whitespace-only queries don't filter out all models (bug fix)."""
     models = [
-        {"id": "free-model-1", "name": "Free Model One", "pricing": {"prompt": 0, "completion": 0}},
-        {"id": "free-model-2", "name": "Free Model Two", "pricing": {"prompt": 0, "completion": 0}},
+        {
+            "id": "free-model-1",
+            "name": "Free Model One",
+            "pricing": {"prompt": 0, "completion": 0},
+        },
+        {
+            "id": "free-model-2",
+            "name": "Free Model Two",
+            "pricing": {"prompt": 0, "completion": 0},
+        },
     ]
-    
+
     # Filter to free models first
     free_models = orf.filter_free_models(models, show_free_only=True)
     assert len(free_models) == 2
-    
+
     # Search with whitespace-only query should return all models (not filter them out)
     result = orf.search_models_fuzzy(free_models, "   ")
-    assert len(result) == 2, "Whitespace-only query should return all models, not filter them out"
-    
+    assert (
+        len(result) == 2
+    ), "Whitespace-only query should return all models, not filter them out"
+
     # Test with empty string
     result2 = orf.search_models_fuzzy(free_models, "")
     assert len(result2) == 2
-    
+
     # Test with tab/newline whitespace
     result3 = orf.search_models_fuzzy(free_models, "\t\n")
     assert len(result3) == 2
@@ -353,10 +393,19 @@ def test_translate_with_default_model(mock_post, monkeypatch):
         status_code=200,
         json=lambda: {"choices": [{"message": {"content": "Hola"}}]},
     )
-    
+
     # Mock session state to return default translation model
     import streamlit as st
-    monkeypatch.setattr(st.session_state, "get", lambda key, default=None: orf.DEFAULT_TRANSLATION_MODEL if key == "default_translation_model" else default)
+
+    monkeypatch.setattr(
+        st.session_state,
+        "get",
+        lambda key, default=None: (
+            orf.DEFAULT_TRANSLATION_MODEL
+            if key == "default_translation_model"
+            else default
+        ),
+    )
 
     result = orf.translate_script_with_openrouter("Hello", "Spanish")
 
@@ -364,4 +413,3 @@ def test_translate_with_default_model(mock_post, monkeypatch):
     # Verify default translation model was used
     call_data = mock_post.call_args[1]["json"]
     assert call_data["model"] == orf.DEFAULT_TRANSLATION_MODEL
-

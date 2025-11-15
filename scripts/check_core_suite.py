@@ -12,7 +12,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 MAX_CORE_TESTS = 99
 
 
@@ -40,7 +39,9 @@ def collect_core_suite_count() -> int:
         raise SystemExit(result.returncode)
 
     count = sum(
-        1 for line in result.stdout.splitlines() if line and not line.startswith(("collecting", "warning", "="))
+        1
+        for line in result.stdout.splitlines()
+        if line and not line.startswith(("collecting", "warning", "="))
     )
     return count
 
@@ -61,4 +62,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

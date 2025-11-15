@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  eleventools:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eleventools
+    ports:
+      - "8501:8501"
+    environment:
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+    volumes:
+      # Mount outputs directory for persistence
+      - ./outputs:/app/outputs
+      # Mount secrets if using local secrets.toml (optional)
+      # - ./.streamlit:/app/.streamlit:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+

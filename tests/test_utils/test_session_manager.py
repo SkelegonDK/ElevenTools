@@ -1,17 +1,15 @@
 """Tests for session management utilities."""
 
-import pytest
 import os
 import time
-import shutil
-import streamlit as st
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
+
 from utils.session_manager import (
+    cleanup_old_sessions,
+    get_session_bulk_dir,
     get_session_id,
     get_session_output_dir,
     get_session_single_dir,
-    get_session_bulk_dir,
-    cleanup_old_sessions,
 )
 
 
@@ -81,17 +79,17 @@ class TestCleanupOldSessions:
         """Test that cleanup removes directories older than threshold."""
         outputs_dir = tmp_path / "outputs"
         outputs_dir.mkdir()
-        
+
         # Create old session directory
         old_session = outputs_dir / "old-session-id"
         old_session.mkdir()
         old_file = old_session / "test.mp3"
         old_file.write_text("test")
-        
+
         # Set modification time to 25 hours ago
         old_time = time.time() - (25 * 3600)
         os.utime(str(old_session), (old_time, old_time))
-        
+
         with patch("os.getcwd", return_value=str(tmp_path)):
             removed = cleanup_old_sessions(max_age_hours=24)
             assert removed == 1
@@ -101,17 +99,17 @@ class TestCleanupOldSessions:
         """Test that cleanup preserves directories newer than threshold."""
         outputs_dir = tmp_path / "outputs"
         outputs_dir.mkdir()
-        
+
         # Create recent session directory
         recent_session = outputs_dir / "recent-session-id"
         recent_session.mkdir()
         recent_file = recent_session / "test.mp3"
         recent_file.write_text("test")
-        
+
         # Set modification time to 1 hour ago
         recent_time = time.time() - (1 * 3600)
         os.utime(str(recent_session), (recent_time, recent_time))
-        
+
         with patch("os.getcwd", return_value=str(tmp_path)):
             removed = cleanup_old_sessions(max_age_hours=24)
             assert removed == 0
@@ -121,19 +119,19 @@ class TestCleanupOldSessions:
         """Test that cleanup skips directories like 'single' and 'bulk'."""
         outputs_dir = tmp_path / "outputs"
         outputs_dir.mkdir()
-        
+
         # Create non-session directories
         single_dir = outputs_dir / "single"
         single_dir.mkdir()
         bulk_dir = outputs_dir / "bulk"
         bulk_dir.mkdir()
-        
+
         # Create old session directory
         old_session = outputs_dir / "old-session-id"
         old_session.mkdir()
         old_time = time.time() - (25 * 3600)
         os.utime(str(old_session), (old_time, old_time))
-        
+
         with patch("os.getcwd", return_value=str(tmp_path)):
             removed = cleanup_old_sessions(max_age_hours=24)
             assert removed == 1
@@ -145,7 +143,7 @@ class TestCleanupOldSessions:
         """Test that cleanup handles missing outputs directory gracefully."""
         outputs_dir = tmp_path / "outputs"
         # Don't create outputs directory
-        
+
         with patch("os.getcwd", return_value=str(tmp_path)):
             removed = cleanup_old_sessions(max_age_hours=24)
             assert removed == 0
@@ -154,15 +152,14 @@ class TestCleanupOldSessions:
         """Test that cleanup handles permission errors gracefully."""
         outputs_dir = tmp_path / "outputs"
         outputs_dir.mkdir()
-        
+
         # Create session directory
         session_dir = outputs_dir / "session-id"
         session_dir.mkdir()
-        
+
         # Mock os.listdir to raise PermissionError
         with patch("os.getcwd", return_value=str(tmp_path)):
             with patch("os.listdir", side_effect=PermissionError("Access denied")):
                 removed = cleanup_old_sessions(max_age_hours=24)
                 # Should not raise exception, just return 0
                 assert removed == 0
-

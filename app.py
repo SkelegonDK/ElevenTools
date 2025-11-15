@@ -1,36 +1,34 @@
-import uuid
-import random
 import logging
 import os
+import uuid
 from datetime import datetime
+
 import streamlit as st
-from scripts.functions import detect_string_variables, detect_phonetic_conversion
+
 from scripts.Elevenlabs_functions import (
-    generate_audio,
     fetch_models,
     fetch_voices,
+    generate_audio,
     get_voice_id,
 )
+from scripts.functions import detect_phonetic_conversion, detect_string_variables
 from scripts.openrouter_functions import (
-    enhance_script_with_openrouter,
     convert_word_to_phonetic_openrouter,
+    enhance_script_with_openrouter,
     get_default_enhancement_model,
 )
-
+from utils.api_keys import get_elevenlabs_api_key
+from utils.caching import Cache
 from utils.error_handling import (
+    APIError,
+    ConfigurationError,
+    ProgressManager,
     handle_error,
     validate_api_key,
-    ProgressManager,
-    APIError,
-    ValidationError,
-    ConfigurationError,
 )
-from utils.model_capabilities import supports_speed, supports_audio_tags
-from utils.api_keys import get_elevenlabs_api_key
-from utils.security import validate_text_length, escape_html_content
-from utils.caching import Cache
-from utils.session_manager import get_session_single_dir, cleanup_old_sessions
-
+from utils.model_capabilities import supports_audio_tags, supports_speed
+from utils.security import escape_html_content, validate_text_length
+from utils.session_manager import cleanup_old_sessions, get_session_single_dir
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -68,7 +66,9 @@ if not ELEVENLABS_API_KEY:
            ```
         """
     )
-    st.info("💡 **Tip**: API keys entered via the Settings page are stored only in your browser session and are never saved to disk or shared between users.")
+    st.info(
+        "💡 **Tip**: API keys entered via the Settings page are stored only in your browser session and are never saved to disk or shared between users."
+    )
     st.stop()
 
 # Validate API key format
@@ -76,9 +76,7 @@ try:
     validate_api_key(ELEVENLABS_API_KEY, "ElevenLabs")
 except ConfigurationError as e:
     handle_error(e)
-    st.markdown(
-        "💡 **Need help?** Visit the **Settings** page to update your API key."
-    )
+    st.markdown("💡 **Need help?** Visit the **Settings** page to update your API key.")
     st.stop()
 
 # Initialize session state with progress tracking
@@ -87,10 +85,10 @@ try:
     # Cleanup expired cache files on startup
     cache = Cache()
     cache.cleanup_expired()
-    
+
     # Cleanup old session directories on startup
     cleanup_old_sessions()
-    
+
     if "models" not in st.session_state:
         progress.update(1, "Fetching available models")
         st.session_state["models"] = fetch_models(ELEVENLABS_API_KEY)
@@ -99,14 +97,15 @@ try:
         progress.update(2, "Fetching available voices")
         st.session_state["voices"] = fetch_voices(ELEVENLABS_API_KEY)
 
-
     if "generated_audio" not in st.session_state:
         st.session_state["generated_audio"] = []
-    
+
     # Enforce maximum size limit for generated_audio list (100 entries)
     MAX_GENERATED_AUDIO_HISTORY = 100
     if len(st.session_state["generated_audio"]) > MAX_GENERATED_AUDIO_HISTORY:
-        st.session_state["generated_audio"] = st.session_state["generated_audio"][-MAX_GENERATED_AUDIO_HISTORY:]
+        st.session_state["generated_audio"] = st.session_state["generated_audio"][
+            -MAX_GENERATED_AUDIO_HISTORY:
+        ]
 
     if "original_script" not in st.session_state:
         st.session_state["original_script"] = ""
@@ -152,10 +151,13 @@ try:
     previous_model_id = st.session_state.get("selected_model_id")
     st.session_state["selected_model_id"] = selected_model_id
     st.session_state["selected_voice_id"] = selected_voice_id
-    
+
     # Clear speed from voice_settings if model changed to one that doesn't support speed
     if previous_model_id != selected_model_id:
-        if not supports_speed(selected_model_id) and "voice_settings" in st.session_state:
+        if (
+            not supports_speed(selected_model_id)
+            and "voice_settings" in st.session_state
+        ):
             st.session_state["voice_settings"].pop("speed", None)
 
 except Exception as e:
@@ -186,13 +188,21 @@ col_enhance_title, col_enhance_settings = st.columns([10, 1])
 with col_enhance_title:
     st.markdown("Configure script enhancement settings below.")
 with col_enhance_settings:
-    if st.button("⚙️", help="Open Settings to configure default enhancement model", key="enhancement_settings_btn"):
+    if st.button(
+        "⚙️",
+        help="Open Settings to configure default enhancement model",
+        key="enhancement_settings_btn",
+    ):
         st.switch_page("pages/Settings.py")
 
 # New prompt input for script enhancement
 # Show v3-specific help text if v3 model is selected
 selected_model_id_for_help = st.session_state.get("selected_model_id", "")
-is_v3_model = supports_audio_tags(selected_model_id_for_help) if selected_model_id_for_help else False
+is_v3_model = (
+    supports_audio_tags(selected_model_id_for_help)
+    if selected_model_id_for_help
+    else False
+)
 
 enhancement_help_text = (
     "Provide a prompt to guide the script enhancement process."
@@ -219,7 +229,7 @@ if st.button("Enhance script"):
         try:
             # Get selected ElevenLabs model ID for v3 routing logic
             selected_elevenlabs_model_id = st.session_state.get("selected_model_id")
-            
+
             # Get default enhancement model for OpenRouter API call
             default_enhancement = get_default_enhancement_model()
             if not default_enhancement:
@@ -227,30 +237,43 @@ if st.button("Enhance script"):
                     "⚠️ No enhancement model configured. Please configure a default model in Settings (⚙️)."
                 )
                 st.stop()
-            
-            st.info(f"ℹ️ Using default enhancement model: **{default_enhancement}** (configure in Settings ⚙️)")
-            
+
+            st.info(
+                f"ℹ️ Using default enhancement model: **{default_enhancement}** (configure in Settings ⚙️)"
+            )
+
             # Check if selected ElevenLabs model supports v3 Audio Tags for routing
             # Pass ElevenLabs model ID for routing logic, but OpenRouter uses default enhancement model
-            is_v3 = supports_audio_tags(selected_elevenlabs_model_id) if selected_elevenlabs_model_id else False
-            
+            is_v3 = (
+                supports_audio_tags(selected_elevenlabs_model_id)
+                if selected_elevenlabs_model_id
+                else False
+            )
+
             # Show indicator if using v3 enhancement
             if is_v3:
-                st.info("🎙️ Using v3 Audio Tags enhancement for expressive speech generation")
+                st.info(
+                    "🎙️ Using v3 Audio Tags enhancement for expressive speech generation"
+                )
 
             def update_progress(prog):
                 progress.update(int(prog * 100), "Enhancing script")
 
             # Pass ElevenLabs model ID for routing (v3 vs traditional), function will use default for OpenRouter API
             success, result = enhance_script_with_openrouter(
-                script, enhancement_prompt, update_progress, model_id=selected_elevenlabs_model_id
+                script,
+                enhancement_prompt,
+                update_progress,
+                model_id=selected_elevenlabs_model_id,
             )
 
             if success:
                 st.session_state["enhanced_script"] = result
                 progress.complete()
                 # Escape content before display to prevent XSS
-                escaped_script = escape_html_content(st.session_state["enhanced_script"])
+                escaped_script = escape_html_content(
+                    st.session_state["enhanced_script"]
+                )
                 st.text_area(
                     "Enhanced script",
                     value=st.session_state["enhanced_script"],
@@ -391,9 +414,14 @@ if st.button("Generate Audio"):
                 st.success("✅ Audio generated successfully")
                 # Enforce maximum size limit before appending
                 MAX_GENERATED_AUDIO_HISTORY = 100
-                if len(st.session_state["generated_audio"]) >= MAX_GENERATED_AUDIO_HISTORY:
-                    st.session_state["generated_audio"] = st.session_state["generated_audio"][-MAX_GENERATED_AUDIO_HISTORY+1:]
-                
+                if (
+                    len(st.session_state["generated_audio"])
+                    >= MAX_GENERATED_AUDIO_HISTORY
+                ):
+                    st.session_state["generated_audio"] = st.session_state[
+                        "generated_audio"
+                    ][-MAX_GENERATED_AUDIO_HISTORY + 1 :]
+
                 st.session_state["generated_audio"].append(
                     {
                         "filename": temp_filename,
@@ -417,7 +445,7 @@ with Generated_audio:
         # Escape user-controlled content before display
         safe_filename = escape_html_content(audio["filename"])
         safe_voice = escape_html_content(audio["voice"])
-        
+
         col1, col2, col3 = st.columns([3, 4, 1])
         with col1:
             st.audio(audio["path"], format="audio/mp3")
@@ -434,7 +462,7 @@ with Generated_audio:
                             data=f.read(),
                             file_name=audio["filename"],
                             mime="audio/mpeg",
-                            key=f"download_{idx}_{audio['filename']}"
+                            key=f"download_{idx}_{audio['filename']}",
                         )
                 except Exception:
                     st.caption("Download unavailable")

@@ -1,7 +1,7 @@
 import io
 import runpy
 from types import SimpleNamespace
-from typing import Any, Dict, List
+from typing import Any
 
 import pandas as pd
 import pytest
@@ -49,7 +49,7 @@ class DummySpinner:
 
 
 class DummyForm(DummyContainer):
-    def __init__(self, button_states: Dict[str, bool]):
+    def __init__(self, button_states: dict[str, bool]):
         super().__init__()
         self._button_states = button_states
 
@@ -70,15 +70,15 @@ class StubSessionState(dict):
 
 @pytest.fixture
 def stub_streamlit(monkeypatch):
-    button_states: Dict[str, bool] = {}
-    text_area_values: Dict[str, str] = {}
-    text_input_values: Dict[str, str] = {}
-    selectbox_choices: Dict[str, Any] = {}
-    checkbox_states: Dict[str, bool] = {}
+    button_states: dict[str, bool] = {}
+    text_area_values: dict[str, str] = {}
+    text_input_values: dict[str, str] = {}
+    selectbox_choices: dict[str, Any] = {}
+    checkbox_states: dict[str, bool] = {}
     uploader_value: Any = None
 
     session_state: StubSessionState = StubSessionState()
-    secrets: Dict[str, Any] = {}
+    secrets: dict[str, Any] = {}
 
     def set_button(label: str, value: bool) -> None:
         button_states[label] = value
@@ -102,7 +102,9 @@ def stub_streamlit(monkeypatch):
     monkeypatch.setattr(st, "session_state", session_state, raising=False)
     monkeypatch.setattr(st, "secrets", secrets, raising=False)
 
-    monkeypatch.setattr(st, "set_page_config", lambda *args, **kwargs: None, raising=False)
+    monkeypatch.setattr(
+        st, "set_page_config", lambda *args, **kwargs: None, raising=False
+    )
     monkeypatch.setattr(st, "title", lambda *args, **kwargs: None, raising=False)
     monkeypatch.setattr(st, "subheader", lambda *args, **kwargs: None, raising=False)
     monkeypatch.setattr(st, "header", lambda *args, **kwargs: None, raising=False)
@@ -116,12 +118,14 @@ def stub_streamlit(monkeypatch):
     monkeypatch.setattr(st, "write", lambda *args, **kwargs: None, raising=False)
     monkeypatch.setattr(st, "caption", lambda *args, **kwargs: None, raising=False)
     monkeypatch.setattr(st, "audio", lambda *args, **kwargs: None, raising=False)
-    monkeypatch.setattr(st, "download_button", lambda *args, **kwargs: None, raising=False)
+    monkeypatch.setattr(
+        st, "download_button", lambda *args, **kwargs: None, raising=False
+    )
     monkeypatch.setattr(st, "toast", lambda *args, **kwargs: None, raising=False)
     monkeypatch.setattr(st, "switch_page", lambda *args, **kwargs: None, raising=False)
     monkeypatch.setattr(st, "rerun", lambda *args, **kwargs: None, raising=False)
 
-    def selectbox(label: str, options: List[Any], **kwargs) -> Any:
+    def selectbox(label: str, options: list[Any], **kwargs) -> Any:
         if not options:
             return None
         return selectbox_choices.get(label, options[0])
@@ -147,17 +151,28 @@ def stub_streamlit(monkeypatch):
     monkeypatch.setattr(st, "checkbox", checkbox, raising=False)
     monkeypatch.setattr(st, "button", button, raising=False)
     monkeypatch.setattr(st, "file_uploader", file_uploader, raising=False)
-    monkeypatch.setattr(st, "slider", lambda *args, **kwargs: kwargs.get("value", 0.5), raising=False)
+    monkeypatch.setattr(
+        st, "slider", lambda *args, **kwargs: kwargs.get("value", 0.5), raising=False
+    )
 
     monkeypatch.setattr(
         st,
         "columns",
-        lambda layout: [DummyContainer() for _ in (layout if isinstance(layout, (list, tuple)) else range(layout))],
+        lambda layout: [
+            DummyContainer()
+            for _ in (layout if isinstance(layout, (list, tuple)) else range(layout))
+        ],
         raising=False,
     )
-    monkeypatch.setattr(st, "expander", lambda *args, **kwargs: DummyContainer(), raising=False)
-    monkeypatch.setattr(st, "spinner", lambda *args, **kwargs: DummySpinner(), raising=False)
-    monkeypatch.setattr(st, "form", lambda *args, **kwargs: DummyForm(button_states), raising=False)
+    monkeypatch.setattr(
+        st, "expander", lambda *args, **kwargs: DummyContainer(), raising=False
+    )
+    monkeypatch.setattr(
+        st, "spinner", lambda *args, **kwargs: DummySpinner(), raising=False
+    )
+    monkeypatch.setattr(
+        st, "form", lambda *args, **kwargs: DummyForm(button_states), raising=False
+    )
     monkeypatch.setattr(
         st,
         "form_submit_button",
@@ -200,7 +215,10 @@ def test_app_page_generates_audio(monkeypatch, stub_streamlit, tmp_path):
     stub_streamlit["session_state"]["ELEVENLABS_API_KEY"] = "sk-test"
 
     monkeypatch.setattr("utils.api_keys.get_elevenlabs_api_key", lambda: "sk-test")
-    monkeypatch.setattr("utils.error_handling.validate_api_key", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        "utils.error_handling.validate_api_key", lambda *args, **kwargs: None
+    )
+
     class ProgressStub:
         def __init__(self, *args, **kwargs):
             pass
@@ -212,13 +230,26 @@ def test_app_page_generates_audio(monkeypatch, stub_streamlit, tmp_path):
             pass
 
     monkeypatch.setattr("utils.error_handling.ProgressManager", ProgressStub)
-    monkeypatch.setattr("utils.caching.Cache", lambda *args, **kwargs: SimpleNamespace(cleanup_expired=lambda: 0))
+    monkeypatch.setattr(
+        "utils.caching.Cache",
+        lambda *args, **kwargs: SimpleNamespace(cleanup_expired=lambda: 0),
+    )
     monkeypatch.setattr("utils.session_manager.cleanup_old_sessions", lambda: None)
-    monkeypatch.setattr("utils.session_manager.get_session_single_dir", lambda: str(single_dir))
-    monkeypatch.setattr("scripts.Elevenlabs_functions.fetch_models", lambda *_: [("model-1", "Model 1")])
-    monkeypatch.setattr("scripts.Elevenlabs_functions.fetch_voices", lambda *_: [("voice-1", "Voice 1")])
-    monkeypatch.setattr("scripts.Elevenlabs_functions.get_voice_id", lambda *_: "voice-1")
-    monkeypatch.setattr("scripts.Elevenlabs_functions.generate_audio", fake_generate_audio)
+    monkeypatch.setattr(
+        "utils.session_manager.get_session_single_dir", lambda: str(single_dir)
+    )
+    monkeypatch.setattr(
+        "scripts.Elevenlabs_functions.fetch_models", lambda *_: [("model-1", "Model 1")]
+    )
+    monkeypatch.setattr(
+        "scripts.Elevenlabs_functions.fetch_voices", lambda *_: [("voice-1", "Voice 1")]
+    )
+    monkeypatch.setattr(
+        "scripts.Elevenlabs_functions.get_voice_id", lambda *_: "voice-1"
+    )
+    monkeypatch.setattr(
+        "scripts.Elevenlabs_functions.generate_audio", fake_generate_audio
+    )
     monkeypatch.setattr(
         "scripts.openrouter_functions.get_default_enhancement_model",
         lambda: "openrouter/auto",
@@ -256,31 +287,46 @@ def test_bulk_generation_page_invokes_bulk_generation(monkeypatch, stub_streamli
     stub_streamlit["set_button"]("Generate Bulk Audio", True)
     stub_streamlit["set_selectbox"]("Select model", "Model 1")
     stub_streamlit["set_selectbox"]("Select voice", "Voice 1")
-    df = pd.DataFrame([{"text": "Hello {name}", "filename": "greeting_{name}", "name": "Alice"}])
+    df = pd.DataFrame(
+        [{"text": "Hello {name}", "filename": "greeting_{name}", "name": "Alice"}]
+    )
     monkeypatch.setattr("pandas.read_csv", lambda *_: df.copy())
 
-    success_messages: List[str] = []
+    success_messages: list[str] = []
 
     def record_bulk(*args, **kwargs):
         return True, "ok"
 
     from pages import Bulk_Generation
+
     monkeypatch.setattr(Bulk_Generation, "get_elevenlabs_api_key", lambda: "sk-test")
-    monkeypatch.setattr(Bulk_Generation, "validate_api_key", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        Bulk_Generation, "validate_api_key", lambda *args, **kwargs: None
+    )
     monkeypatch.setattr(Bulk_Generation, "cleanup_old_sessions", lambda: None)
-    monkeypatch.setattr(Bulk_Generation, "get_session_bulk_dir", lambda name: f"outputs/{name}")
-    monkeypatch.setattr(Bulk_Generation, "fetch_models", lambda *_: [("model-1", "Model 1")])
-    monkeypatch.setattr(Bulk_Generation, "fetch_voices", lambda *_: [("voice-1", "Voice 1")])
+    monkeypatch.setattr(
+        Bulk_Generation, "get_session_bulk_dir", lambda name: f"outputs/{name}"
+    )
+    monkeypatch.setattr(
+        Bulk_Generation, "fetch_models", lambda *_: [("model-1", "Model 1")]
+    )
+    monkeypatch.setattr(
+        Bulk_Generation, "fetch_voices", lambda *_: [("voice-1", "Voice 1")]
+    )
     monkeypatch.setattr(Bulk_Generation, "get_voice_id", lambda *_: "voice-1")
     monkeypatch.setattr(Bulk_Generation, "supports_speed", lambda *_: False)
     monkeypatch.setattr(Bulk_Generation, "validate_csv_file_size", lambda *_: True)
     monkeypatch.setattr(Bulk_Generation, "validate_dataframe_rows", lambda *_: True)
     monkeypatch.setattr(Bulk_Generation, "validate_column_name", lambda *_: True)
     monkeypatch.setattr(Bulk_Generation, "sanitize_path_component", lambda name: name)
-    monkeypatch.setattr(Bulk_Generation, "validate_path_within_base", lambda *args, **kwargs: True)
+    monkeypatch.setattr(
+        Bulk_Generation, "validate_path_within_base", lambda *args, **kwargs: True
+    )
     monkeypatch.setattr(Bulk_Generation, "bulk_generate_audio", record_bulk)
     monkeypatch.setattr(st, "stop", lambda: None, raising=False)
-    monkeypatch.setattr(st, "success", lambda message: success_messages.append(message), raising=False)
+    monkeypatch.setattr(
+        st, "success", lambda message: success_messages.append(message), raising=False
+    )
 
     Bulk_Generation.main()
     assert any("Bulk generation completed!" in message for message in success_messages)
@@ -294,17 +340,38 @@ def test_translation_page_triggers_translation(monkeypatch, stub_streamlit):
     stub_streamlit["set_selectbox"]("Select target language", "French")
     stub_streamlit["set_button"]("Translate", True)
 
-    monkeypatch.setattr("scripts.openrouter_functions.get_openrouter_api_key", lambda: "sk-open")
-    monkeypatch.setattr("scripts.openrouter_functions.fetch_openrouter_models", lambda: [{"id": "model-1", "name": "Model 1", "pricing": {"prompt": 0, "completion": 0}}])
-    monkeypatch.setattr("scripts.openrouter_functions.filter_free_models", lambda models, show_free_only=True: models)
-    monkeypatch.setattr("scripts.openrouter_functions.search_models_fuzzy", lambda models, query: models)
-    monkeypatch.setattr("scripts.openrouter_functions.get_default_translation_model", lambda: "model-1")
+    monkeypatch.setattr(
+        "scripts.openrouter_functions.get_openrouter_api_key", lambda: "sk-open"
+    )
+    monkeypatch.setattr(
+        "scripts.openrouter_functions.fetch_openrouter_models",
+        lambda: [
+            {
+                "id": "model-1",
+                "name": "Model 1",
+                "pricing": {"prompt": 0, "completion": 0},
+            }
+        ],
+    )
+    monkeypatch.setattr(
+        "scripts.openrouter_functions.filter_free_models",
+        lambda models, show_free_only=True: models,
+    )
+    monkeypatch.setattr(
+        "scripts.openrouter_functions.search_models_fuzzy", lambda models, query: models
+    )
+    monkeypatch.setattr(
+        "scripts.openrouter_functions.get_default_translation_model", lambda: "model-1"
+    )
     monkeypatch.setattr("utils.security.validate_text_length", lambda *_: True)
     monkeypatch.setattr(
         "scripts.Translation_functions.translate_script",
-        lambda *args, **kwargs: calls.update(translate=calls["translate"] + 1) or "Bonjour",
+        lambda *args, **kwargs: calls.update(translate=calls["translate"] + 1)
+        or "Bonjour",
     )
-    monkeypatch.setattr("utils.error_handling.handle_error", lambda *args, **kwargs: (False, "handled"))
+    monkeypatch.setattr(
+        "utils.error_handling.handle_error", lambda *args, **kwargs: (False, "handled")
+    )
 
     try:
         runpy.run_path("pages/3_Translation.py", run_name="__main__")
@@ -323,12 +390,32 @@ def test_settings_page_updates_session_state(monkeypatch, stub_streamlit):
     stub_streamlit["session_state"]["default_translation_model"] = "model-1"
     stub_streamlit["session_state"]["default_enhancement_model"] = "model-1"
 
-    monkeypatch.setattr("scripts.openrouter_functions.get_openrouter_api_key", lambda: "sk-open")
-    monkeypatch.setattr("scripts.openrouter_functions.fetch_openrouter_models", lambda: [{"id": "model-1", "name": "Model 1", "pricing": {"prompt": 0, "completion": 0}}])
-    monkeypatch.setattr("scripts.openrouter_functions.filter_free_models", lambda models, show_free_only=True: models)
-    monkeypatch.setattr("scripts.openrouter_functions.search_models_fuzzy", lambda models, query: models)
-    monkeypatch.setattr("utils.error_handling.validate_api_key", lambda *args, **kwargs: None)
-    monkeypatch.setattr("utils.error_handling.handle_error", lambda *args, **kwargs: (False, "handled"))
+    monkeypatch.setattr(
+        "scripts.openrouter_functions.get_openrouter_api_key", lambda: "sk-open"
+    )
+    monkeypatch.setattr(
+        "scripts.openrouter_functions.fetch_openrouter_models",
+        lambda: [
+            {
+                "id": "model-1",
+                "name": "Model 1",
+                "pricing": {"prompt": 0, "completion": 0},
+            }
+        ],
+    )
+    monkeypatch.setattr(
+        "scripts.openrouter_functions.filter_free_models",
+        lambda models, show_free_only=True: models,
+    )
+    monkeypatch.setattr(
+        "scripts.openrouter_functions.search_models_fuzzy", lambda models, query: models
+    )
+    monkeypatch.setattr(
+        "utils.error_handling.validate_api_key", lambda *args, **kwargs: None
+    )
+    monkeypatch.setattr(
+        "utils.error_handling.handle_error", lambda *args, **kwargs: (False, "handled")
+    )
 
     from pages import Settings
 
@@ -357,15 +444,29 @@ def test_file_explorer_page_lists_outputs(monkeypatch, stub_streamlit, tmp_path)
 
     monkeypatch.setattr("utils.session_manager.cleanup_old_sessions", lambda: None)
     monkeypatch.setattr("utils.session_manager.get_session_id", lambda: "abcdef123456")
-    monkeypatch.setattr("utils.session_manager.get_session_output_dir", lambda: str(session_dir))
-    monkeypatch.setattr("utils.security.validate_path_within_base", lambda *args, **kwargs: True)
+    monkeypatch.setattr(
+        "utils.session_manager.get_session_output_dir", lambda: str(session_dir)
+    )
+    monkeypatch.setattr(
+        "utils.security.validate_path_within_base", lambda *args, **kwargs: True
+    )
     monkeypatch.setattr("utils.security.escape_html_content", lambda value: value)
     monkeypatch.setattr("os.path.exists", lambda path: True)
     monkeypatch.setattr(
         "os.listdir",
-        lambda path: ["demo"] if path.endswith("bulk") else ["demo_file.mp3"] if path.endswith("demo") else ["en_voice_20250101_abc12345.mp3"],
+        lambda path: (
+            ["demo"]
+            if path.endswith("bulk")
+            else (
+                ["demo_file.mp3"]
+                if path.endswith("demo")
+                else ["en_voice_20250101_abc12345.mp3"]
+            )
+        ),
     )
-    monkeypatch.setattr("builtins.open", lambda *args, **kwargs: io.BytesIO(b"binary"), raising=False)
+    monkeypatch.setattr(
+        "builtins.open", lambda *args, **kwargs: io.BytesIO(b"binary"), raising=False
+    )
 
     try:
         runpy.run_path("pages/File_Explorer.py", run_name="__main__")
@@ -383,7 +484,10 @@ def test_voice_design_workflow_uses_api_functions(monkeypatch, stub_streamlit):
 
     def fake_generate_previews(*args, **kwargs):
         calls["previews"] += 1
-        return {"generated_voice_id": "voice-xyz", "audio": [{"id": "preview-1", "path": "preview_0.mp3"}]}
+        return {
+            "generated_voice_id": "voice-xyz",
+            "audio": [{"id": "preview-1", "path": "preview_0.mp3"}],
+        }
 
     def fake_create_voice(*args, **kwargs):
         calls["create"] += 1
@@ -394,8 +498,12 @@ def test_voice_design_workflow_uses_api_functions(monkeypatch, stub_streamlit):
     stub_streamlit["set_button"]("Create Voice", True)
     stub_streamlit["set_text_input"]("Voice name", "Narrator Voice")
 
-    monkeypatch.setattr("scripts.Elevenlabs_functions.generate_voice_previews", fake_generate_previews)
-    monkeypatch.setattr("scripts.Elevenlabs_functions.create_voice_from_preview", fake_create_voice)
+    monkeypatch.setattr(
+        "scripts.Elevenlabs_functions.generate_voice_previews", fake_generate_previews
+    )
+    monkeypatch.setattr(
+        "scripts.Elevenlabs_functions.create_voice_from_preview", fake_create_voice
+    )
 
     def voice_design_demo():
         st.title("Voice Design")
@@ -406,7 +514,9 @@ def test_voice_design_workflow_uses_api_functions(monkeypatch, stub_streamlit):
         if st.button("Create Voice") and st.session_state.get("voice_preview"):
             name = st.text_input("Voice name")
             if name:
-                fake_create_voice("sk", name, description, st.session_state["voice_preview"])
+                fake_create_voice(
+                    "sk", name, description, st.session_state["voice_preview"]
+                )
                 st.success("Voice created")
 
     try:
@@ -417,4 +527,3 @@ def test_voice_design_workflow_uses_api_functions(monkeypatch, stub_streamlit):
 
     assert calls["previews"] == 1
     assert calls["create"] == 1
-

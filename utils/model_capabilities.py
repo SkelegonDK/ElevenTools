@@ -5,9 +5,8 @@ by different ElevenLabs models. Uses allow-list and pattern matching for
 flexible capability detection.
 """
 
-from typing import Dict
-from utils.caching import st_cache
 
+from utils.caching import st_cache
 
 # Allow-list of model IDs that explicitly support speed control
 # Based on ElevenLabs API documentation and MCP verification
@@ -32,8 +31,8 @@ AUDIO_TAGS_SUPPORTED_MODELS = {
 # needing to add them explicitly to the allow-list
 SPEED_SUPPORT_PATTERNS = [
     "multilingual",  # Multilingual models typically support speed
-    "turbo_v2",      # Turbo v2+ models support speed
-    "flash_v2",      # Flash v2+ models support speed
+    "turbo_v2",  # Turbo v2+ models support speed
+    "flash_v2",  # Flash v2+ models support speed
 ]
 
 # Pattern-based detection for models that might support Audio Tags
@@ -124,7 +123,7 @@ def supports_audio_tags(model_id: str) -> bool:
 
 
 @st_cache(ttl_minutes=60)
-def get_model_capabilities(model_id: str) -> Dict[str, bool]:
+def get_model_capabilities(model_id: str) -> dict[str, bool]:
     """Get all capabilities for a given model.
 
     Returns a dictionary of capability flags. Currently supports:
@@ -156,4 +155,3 @@ def get_model_capabilities(model_id: str) -> Dict[str, bool]:
         # "style": supports_style(model_id),
         # "advanced_settings": supports_advanced_settings(model_id),
     }
-

@@ -1,9 +1,10 @@
 """Shared fixtures for Playwright UI tests."""
 
-import pytest
 import subprocess
 import time
 from pathlib import Path
+
+import pytest
 
 
 def _check_server_running(url: str) -> bool:
@@ -74,7 +75,7 @@ def streamlit_server():
 def configured_page(page):  # pytest-playwright provides the page fixture
     """Configure page for UI tests with consistent viewport."""
     page.set_viewport_size({"width": 1280, "height": 720})
-    
+
     # Suppress harmless 404 console errors for Streamlit internal endpoints
     # These are health check endpoints that don't exist in all Streamlit versions
     def handle_console(msg):
@@ -84,6 +85,7 @@ def configured_page(page):  # pytest-playwright provides the page fixture
             if "404" in text and ("health" in text or "host-config" in text):
                 return  # Don't log these specific errors
         # Let other console messages through normally
+
     page.on("console", handle_console)
-    
+
     yield page

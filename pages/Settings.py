@@ -1,14 +1,16 @@
-import streamlit as st
-from utils.error_handling import validate_api_key, handle_error
-from scripts.openrouter_functions import (
-    get_openrouter_api_key,
-    fetch_openrouter_models,
-    search_models_fuzzy,
-    filter_free_models,
-    DEFAULT_TRANSLATION_MODEL,
-    DEFAULT_ENHANCEMENT_MODEL,
-)
 import os
+
+import streamlit as st
+
+from scripts.openrouter_functions import (
+    DEFAULT_ENHANCEMENT_MODEL,
+    DEFAULT_TRANSLATION_MODEL,
+    fetch_openrouter_models,
+    filter_free_models,
+    get_openrouter_api_key,
+    search_models_fuzzy,
+)
+from utils.error_handling import handle_error, validate_api_key
 
 EXPECTED_KEYS = [
     ("ELEVENLABS_API_KEY", "ElevenLabs"),
@@ -29,31 +31,31 @@ def render_model_selection(
 ) -> str:
     """
     Render a reusable model selection UI component matching Translation page.
-    
+
     Args:
         all_models: List of all available models from OpenRouter
         session_state_key: Key for storing search/filter state (e.g., "translation_model_search")
         default_model_key: Key for storing selected default model in session state
         title: Section title for the model selection
         help_text: Optional help text to display
-        
+
     Returns:
         Selected model ID or None
     """
     st.subheader(title)
     if help_text:
         st.caption(help_text)
-    
+
     # Initialize session state variables for this model selection
     search_key = f"{session_state_key}_search_query"
     free_filter_key = f"{session_state_key}_show_free_only"
     selected_key = f"{session_state_key}_selected"
-    
+
     if search_key not in st.session_state:
         st.session_state[search_key] = ""
     if free_filter_key not in st.session_state:
         st.session_state[free_filter_key] = False
-    
+
     # Free model filter
     show_free_only = st.checkbox(
         "Show only free models",
@@ -61,7 +63,7 @@ def render_model_selection(
         key=free_filter_key,
         help="Filter to show only models with zero cost",
     )
-    
+
     # Fuzzy search input
     search_query = st.text_input(
         "Search models",
@@ -70,18 +72,18 @@ def render_model_selection(
         placeholder="Type to search for models...",
         help="Search models by name (supports partial matches and typos)",
     )
-    
+
     # Filter models based on search and free filter
     filtered_models = all_models.copy()
-    
+
     # Apply free filter
     if show_free_only:
         filtered_models = filter_free_models(filtered_models, show_free_only=True)
-    
+
     # Apply fuzzy search
     if search_query and search_query.strip():
         filtered_models = search_models_fuzzy(filtered_models, search_query.strip())
-    
+
     # Create model options for selectbox
     selected_model_id = None
     if filtered_models:
@@ -90,13 +92,22 @@ def render_model_selection(
         for model in filtered_models:
             model_id = model.get("id", "")
             model_name = model.get("name", model_id)
-            display_name = f"{model_name} ({model_id})" if model_name != model_id else model_id
+            display_name = (
+                f"{model_name} ({model_id})" if model_name != model_id else model_id
+            )
             model_options.append(display_name)
             model_dict[display_name] = model_id
-        
+
         # Get current default model for this selection
-        current_default = st.session_state.get(default_model_key, DEFAULT_TRANSLATION_MODEL if "translation" in default_model_key else DEFAULT_ENHANCEMENT_MODEL)
-        
+        current_default = st.session_state.get(
+            default_model_key,
+            (
+                DEFAULT_TRANSLATION_MODEL
+                if "translation" in default_model_key
+                else DEFAULT_ENHANCEMENT_MODEL
+            ),
+        )
+
         # Find index of current default if it exists in options
         default_index = 0
         if current_default in model_dict.values():
@@ -104,7 +115,7 @@ def render_model_selection(
                 if model_dict[display_name] == current_default:
                     default_index = idx
                     break
-        
+
         # Model selection dropdown
         selected_display = st.selectbox(
             "Select model",
@@ -113,10 +124,10 @@ def render_model_selection(
             key=f"{session_state_key}_selectbox",
             help=f"Select a default model for {title.lower()}. Use search and filters above to narrow options.",
         )
-        
+
         if selected_display:
             selected_model_id = model_dict.get(selected_display)
-        
+
         # Show selected model info
         if selected_model_id:
             selected_model_data = next(
@@ -132,19 +143,25 @@ def render_model_selection(
                     pricing = selected_model_data.get("pricing", {})
                     prompt_price = pricing.get("prompt", "N/A")
                     completion_price = pricing.get("completion", "N/A")
-                    
-                    is_free = model_id.endswith(":free") or (prompt_price == 0 and completion_price == 0)
-                    
+
+                    is_free = model_id.endswith(":free") or (
+                        prompt_price == 0 and completion_price == 0
+                    )
+
                     if is_free:
                         st.success("🆓 Free model")
                     else:
-                        st.caption(f"Prompt: ${prompt_price}, Completion: ${completion_price}")
+                        st.caption(
+                            f"Prompt: ${prompt_price}, Completion: ${completion_price}"
+                        )
     else:
         if search_query or show_free_only:
-            st.warning("No models match your search criteria. Try adjusting your filters.")
+            st.warning(
+                "No models match your search criteria. Try adjusting your filters."
+            )
         else:
             st.warning("No models available.")
-    
+
     return selected_model_id
 
 
@@ -283,8 +300,12 @@ def main():
             )
 
             if selected_translation_model:
-                st.session_state["default_translation_model"] = selected_translation_model
-                st.success(f"✅ Default translation model set to: {selected_translation_model}")
+                st.session_state["default_translation_model"] = (
+                    selected_translation_model
+                )
+                st.success(
+                    f"✅ Default translation model set to: {selected_translation_model}"
+                )
 
             st.divider()
 
@@ -298,15 +319,21 @@ def main():
             )
 
             if selected_enhancement_model:
-                st.session_state["default_enhancement_model"] = selected_enhancement_model
-                st.success(f"✅ Default enhancement model set to: {selected_enhancement_model}")
+                st.session_state["default_enhancement_model"] = (
+                    selected_enhancement_model
+                )
+                st.success(
+                    f"✅ Default enhancement model set to: {selected_enhancement_model}"
+                )
 
             # Manual refresh button
             if st.button("🔄 Refresh Model List"):
                 fetch_openrouter_models.clear()
                 st.rerun()
         else:
-            st.warning("No models available. Please check your OpenRouter API key and try refreshing.")
+            st.warning(
+                "No models available. Please check your OpenRouter API key and try refreshing."
+            )
 
     st.divider()
 
@@ -326,4 +353,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

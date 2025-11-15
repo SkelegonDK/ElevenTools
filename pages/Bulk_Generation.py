@@ -1,25 +1,31 @@
 import os
+
 import pandas as pd
 import streamlit as st
+
 from scripts.Elevenlabs_functions import (
     bulk_generate_audio,
     fetch_models,
     fetch_voices,
     get_voice_id,
 )
-from utils.model_capabilities import supports_speed
 from utils.api_keys import get_elevenlabs_api_key
-from utils.error_handling import handle_error, validate_api_key, ConfigurationError, ValidationError
+from utils.error_handling import (
+    ConfigurationError,
+    handle_error,
+    validate_api_key,
+)
+from utils.model_capabilities import supports_speed
 from utils.security import (
-    sanitize_path_component,
-    validate_path_within_base,
-    validate_csv_file_size,
-    validate_dataframe_rows,
-    validate_column_name,
     MAX_CSV_SIZE,
     MAX_DF_ROWS,
+    sanitize_path_component,
+    validate_column_name,
+    validate_csv_file_size,
+    validate_dataframe_rows,
+    validate_path_within_base,
 )
-from utils.session_manager import get_session_bulk_dir, cleanup_old_sessions
+from utils.session_manager import cleanup_old_sessions, get_session_bulk_dir
 
 
 def main():
@@ -58,7 +64,9 @@ def main():
                ```
             """
         )
-        st.info("💡 **Tip**: API keys entered via the Settings page are stored only in your browser session and are never saved to disk or shared between users.")
+        st.info(
+            "💡 **Tip**: API keys entered via the Settings page are stored only in your browser session and are never saved to disk or shared between users."
+        )
         st.stop()
 
     # Validate API key format
@@ -102,7 +110,7 @@ def main():
     # Clear speed setting if model changed and new model doesn't support speed
     previous_model_id = st.session_state.get("selected_model_id")
     st.session_state["selected_model_id"] = selected_model_id
-    
+
     if previous_model_id != selected_model_id:
         if not supports_speed(selected_model_id):
             # Clear any speed-related session state
@@ -166,9 +174,9 @@ def main():
                     f"({MAX_CSV_SIZE / (1024*1024):.2f} MB). Please use a smaller file."
                 )
                 st.stop()
-            
+
             df = pd.read_csv(uploaded_file)
-            
+
             # Validate DataFrame row count
             if not validate_dataframe_rows(len(df)):
                 st.error(
@@ -176,21 +184,23 @@ def main():
                     f"Please split your file into smaller batches."
                 )
                 st.stop()
-            
+
             # Validate column names
-            invalid_columns = [col for col in df.columns if not validate_column_name(str(col))]
+            invalid_columns = [
+                col for col in df.columns if not validate_column_name(str(col))
+            ]
             if invalid_columns:
                 st.error(
                     f"⚠️ Invalid column names detected: {', '.join(invalid_columns)}. "
                     "Column names must contain only alphanumeric characters and underscores."
                 )
                 st.stop()
-            
+
             # Validate required 'text' column exists
             if "text" not in df.columns:
                 st.error("⚠️ CSV file must contain a 'text' column.")
                 st.stop()
-            
+
             st.write("CSV file uploaded successfully. Preview:")
             st.write(df.head())
 
@@ -198,14 +208,16 @@ def main():
                 # Sanitize CSV filename to prevent path traversal
                 raw_filename = uploaded_file.name.split(".")[0]
                 sanitized_filename = sanitize_path_component(raw_filename)
-                
+
                 # Use session-based bulk directory
                 output_dir = get_session_bulk_dir(sanitized_filename)
-                
+
                 # Validate that output directory is within session outputs
                 outputs_base = os.path.join(os.getcwd(), "outputs")
                 if not validate_path_within_base(output_dir, outputs_base):
-                    st.error("⚠️ Invalid output directory path. Path traversal detected.")
+                    st.error(
+                        "⚠️ Invalid output directory path. Path traversal detected."
+                    )
                     st.stop()
 
                 success, message = bulk_generate_audio(

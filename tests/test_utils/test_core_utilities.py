@@ -81,4 +81,3 @@ def test_model_capabilities_summary():
 
     capabilities_v3 = model_capabilities.get_model_capabilities("eleven_v3")
     assert capabilities_v3["audio_tags"] is True
-

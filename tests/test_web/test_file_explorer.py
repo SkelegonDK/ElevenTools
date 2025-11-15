@@ -1,6 +1,4 @@
-import pytest
-from unittest.mock import patch, MagicMock
-import builtins
+from unittest.mock import MagicMock, patch
 
 
 # Patch Streamlit and os modules for isolated testing
@@ -13,6 +11,7 @@ def test_outputs_dir_missing(monkeypatch):
         patch("streamlit.stop") as mock_stop,
     ):
         import importlib
+
         import pages.File_Explorer as file_explorer
 
         importlib.reload(file_explorer)
@@ -34,6 +33,7 @@ def test_empty_outputs(monkeypatch):
         patch("streamlit.write") as mock_write,
     ):
         import importlib
+
         import pages.File_Explorer as file_explorer
 
         importlib.reload(file_explorer)
@@ -84,20 +84,32 @@ def test_bulk_and_single_outputs(monkeypatch):
         mock_col1.__exit__ = MagicMock(return_value=False)
         mock_col2.__enter__ = MagicMock(return_value=mock_col2)
         mock_col2.__exit__ = MagicMock(return_value=False)
-        
+
         import importlib
+
         import pages.File_Explorer as file_explorer
 
         importlib.reload(file_explorer)
         # Check that expanders and audio players are called
         assert mock_expander.call_count >= 1  # At least one bulk group
-        assert mock_audio.call_count >= 2  # At least one bulk, one single (may be more due to reload)
+        assert (
+            mock_audio.call_count >= 2
+        )  # At least one bulk, one single (may be more due to reload)
         # Check that metadata is written
         # Get all write call arguments (st.write() is called with positional args)
-        write_calls = [str(call[0][0]) if call[0] and len(call[0]) > 0 else "" for call in mock_write.call_args_list]
+        write_calls = [
+            str(call[0][0]) if call[0] and len(call[0]) > 0 else ""
+            for call in mock_write.call_args_list
+        ]
         # Check for metadata (may include markdown formatting)
-        assert any("Filename" in call or "filename" in call.lower() for call in write_calls)
-        assert any("Source CSV" in call or "source csv" in call.lower() for call in write_calls)
+        assert any(
+            "Filename" in call or "filename" in call.lower() for call in write_calls
+        )
+        assert any(
+            "Source CSV" in call or "source csv" in call.lower() for call in write_calls
+        )
         # Language and Voice are only written for single files with parsed metadata
-        assert any("Language" in call or "language" in call.lower() for call in write_calls)
+        assert any(
+            "Language" in call or "language" in call.lower() for call in write_calls
+        )
         assert any("Voice" in call or "voice" in call.lower() for call in write_calls)

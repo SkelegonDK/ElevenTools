@@ -3,13 +3,15 @@
 This module provides caching functionality with TTL (Time To Live) support for the ElevenTools application.
 """
 
-from typing import Any, Optional, Callable
 import functools
-import streamlit as st
-import time
 import json
 import os
-from datetime import datetime, timedelta
+import time
+from collections.abc import Callable
+from datetime import timedelta
+from typing import Any
+
+import streamlit as st
 
 
 class Cache:
@@ -45,7 +47,7 @@ class Cache:
         # Use a hash of the key to avoid file system issues
         return os.path.join(self.cache_dir, f"{hash(key)}.json")
 
-    def get(self, key: str) -> Optional[Any]:
+    def get(self, key: str) -> Any | None:
         """Get value from cache if not expired.
 
         Args:
@@ -59,7 +61,7 @@ class Cache:
             return None
 
         try:
-            with open(cache_path, "r") as f:
+            with open(cache_path) as f:
                 data = json.load(f)
 
             # Check if expired
@@ -92,22 +94,22 @@ class Cache:
 
     def cleanup_expired(self) -> int:
         """Remove expired cache files.
-        
+
         Returns:
             Number of expired files removed
         """
         removed_count = 0
         if not os.path.exists(self.cache_dir):
             return 0
-        
+
         try:
             for file in os.listdir(self.cache_dir):
                 if file.endswith(".json"):
                     cache_path = os.path.join(self.cache_dir, file)
                     try:
-                        with open(cache_path, "r") as f:
+                        with open(cache_path) as f:
                             data = json.load(f)
-                        
+
                         # Check if expired
                         if time.time() - data["timestamp"] > self.ttl:
                             os.remove(cache_path)
@@ -121,7 +123,7 @@ class Cache:
                             pass  # Ignore errors during cleanup
         except Exception:
             pass  # Ignore errors during cleanup
-        
+
         return removed_count
 
 
