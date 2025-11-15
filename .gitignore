@@ -2,8 +2,6 @@
 __pycache__/
 *.py[cod]
 *$py.class
-# OpenSpec
-openspec/
 # C extensions
 *.so
 
@@ -173,7 +171,6 @@ ElevenTools.code-workspace
 .cursorrules
 _.cursorrules
 .cursor/
-openspec/
 outputs/
 *.mp3
-docs/
+eleventools/
