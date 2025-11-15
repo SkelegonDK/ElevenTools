@@ -51,6 +51,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+.ruff_cache/
 
 # Translations
 *.mo
@@ -171,3 +172,8 @@ ElevenTools.code-workspace
 .cursorrules
 .cursorrules
 _.cursorrules
+.cursor/
+openspec/
+outputs/
+*.mp3
+docs/
