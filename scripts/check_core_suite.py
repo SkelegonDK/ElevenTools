@@ -15,7 +15,7 @@ from pathlib import Path
 MAX_CORE_TESTS = 99
 
 
-def collect_core_suite_count() -> int:
+def collect_core_suite_count(project_root: Path) -> int:
     """Return the number of collected tests marked as core_suite."""
     cmd = [
         sys.executable,
@@ -32,6 +32,7 @@ def collect_core_suite_count() -> int:
         stderr=subprocess.STDOUT,
         text=True,
         check=False,
+        cwd=str(project_root),
     )
 
     if result.returncode not in (0, 5):  # pytest returns 5 when collection is empty
@@ -49,7 +50,7 @@ def collect_core_suite_count() -> int:
 def main() -> None:
     project_root = Path(__file__).resolve().parents[1]
     print(f"Checking core_suite test count in {project_root}...")
-    count = collect_core_suite_count()
+    count = collect_core_suite_count(project_root)
     print(f"core_suite tests collected: {count}")
     if count > MAX_CORE_TESTS:
         print(
