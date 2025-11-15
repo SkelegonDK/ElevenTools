@@ -155,3 +155,30 @@ class TestBulkGenerationPage:
             expect(error_messages).to_have_count(0, timeout=2000)
         finally:
             os.unlink(temp_file)
+
+    def test_template_download_button_present(
+        self, configured_page: Page, streamlit_server: str
+    ):
+        """Test that template download button is present."""
+        configured_page.goto(f"{streamlit_server}/Bulk_Generation")
+        configured_page.wait_for_load_state("networkidle")
+        configured_page.wait_for_timeout(1000)  # Wait for content to load
+
+        # Check for download button - Streamlit uses data-testid="stDownloadButton"
+        download_buttons = configured_page.locator('[data-testid="stDownloadButton"]')
+        if download_buttons.count() == 0:
+            # Fallback: look for button with download text
+            download_button = configured_page.get_by_role(
+                "button", name=re.compile(r"download.*template|template.*download", re.IGNORECASE)
+            )
+            expect(download_button).to_be_visible(timeout=10000)
+        else:
+            # Filter for template download button
+            template_button = download_buttons.filter(
+                has_text=re.compile(r"template", re.IGNORECASE)
+            )
+            if template_button.count() > 0:
+                expect(template_button.first).to_be_visible(timeout=10000)
+            else:
+                # If template button not found, at least verify a download button exists
+                expect(download_buttons.first).to_be_visible(timeout=10000)

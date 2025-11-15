@@ -1,7 +1,5 @@
 # ElevenTools v0.3.0
 
-[![CI/CD Pipeline](https://github.com/SkelegonDK/ElevenTools/actions/workflows/ci.yml/badge.svg)](https://github.com/SkelegonDK/ElevenTools/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/SkelegonDK/ElevenTools/branch/main/graph/badge.svg)](https://codecov.io/gh/SkelegonDK/ElevenTools)
 [![License](https://img.shields.io/badge/license-Custom-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![Streamlit](https://img.shields.io/badge/streamlit-1.32+-red.svg)](https://streamlit.io/)
@@ -113,11 +111,11 @@ Both API keys are required for full functionality:
 
 ## Deployment
 
-ElevenTools can be deployed in several ways depending on your needs:
+ElevenTools is deployed exclusively on Streamlit Cloud for production use. Docker is available for local development and testing purposes.
 
-### Streamlit Cloud Deployment
+### Streamlit Cloud Deployment (Production)
 
-Streamlit Cloud is the easiest way to deploy ElevenTools:
+Streamlit Cloud is the recommended and primary deployment method for ElevenTools:
 
 1. **Connect your repository** to [Streamlit Cloud](https://streamlit.io/cloud)
 2. **Configure secrets** (optional):
@@ -132,7 +130,9 @@ Streamlit Cloud is the easiest way to deploy ElevenTools:
 
 The session-based approach allows each user to provide their own API keys without requiring a full authentication layer, making it ideal for prototype and multi-user scenarios.
 
-### Docker Deployment
+### Docker Deployment (Local Development)
+
+Docker can be used for local development and testing. For production deployment, use Streamlit Cloud.
 
 #### Using Docker Compose (Recommended)
 
@@ -321,7 +321,7 @@ ElevenTools uses a **curated pytest core suite** (capped below 100 tests) plus o
    uv run pytest
    ```
 
-4. Enforce the `<100` core-suite guardrail (CI must run this):
+4. Enforce the `<100` core-suite guardrail:
 
    ```bash
    uv run python scripts/check_core_suite.py

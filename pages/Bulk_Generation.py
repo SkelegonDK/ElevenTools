@@ -163,6 +163,22 @@ def main():
 """
     )
 
+    # Template download button
+    template_path = "bulk_template.csv"
+    if os.path.exists(template_path):
+        try:
+            with open(template_path, "rb") as f:
+                st.download_button(
+                    label="📥 Download CSV Template",
+                    data=f.read(),
+                    file_name="bulk_template.csv",
+                    mime="text/csv",
+                    key="download_template",
+                    help="Download a template CSV file with example data to get started",
+                )
+        except Exception as e:
+            st.caption(f"Template download unavailable: {str(e)}")
+
     uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
 
     if uploaded_file is not None:

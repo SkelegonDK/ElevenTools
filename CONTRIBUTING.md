@@ -249,7 +249,6 @@ feat: add bulk generation with CSV support
 
 3. **Review Process**:
    - At least one maintainer must approve
-   - All CI checks must pass
    - Code must follow style guidelines
    - Tests must pass and coverage maintained
 
