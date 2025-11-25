@@ -27,6 +27,9 @@ classifiers = [
     "Topic :: Multimedia :: Sound/Audio :: Speech",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
+dependencies = [
+    "watchdog>=6.0.0",
+]
 [project.urls]
 Homepage = "https://github.com/SkelegonDK/ElevenTools"
 Repository = "https://github.com/SkelegonDK/ElevenTools"

@@ -1,3 +1,10 @@
+"""Translation page for ElevenTools.
+
+This module provides the Streamlit page interface for script translation,
+allowing users to translate text to multiple languages using OpenRouter
+API with configurable model selection.
+"""
+
 import streamlit as st
 
 from scripts.openrouter_functions import (
@@ -129,16 +136,14 @@ if filtered_models:
                 pricing = selected_model_data.get("pricing", {})
                 prompt_price = pricing.get("prompt", "N/A")
                 completion_price = pricing.get("completion", "N/A")
-                
+
                 # Check if model is free (ends with :free or has zero pricing)
                 is_free = model_id.endswith(":free") or (
                     str(prompt_price) == "0" and str(completion_price) == "0"
                 )
-                
+
                 if is_free:
                     st.success("🆓 Free model")
-                else:
-                    st.caption(f"Prompt: ${prompt_price}, Completion: ${completion_price}")
                 else:
                     st.caption(
                         f"Prompt: ${prompt_price}, Completion: ${completion_price}"

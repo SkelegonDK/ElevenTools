@@ -16,7 +16,20 @@ MAX_CORE_TESTS = 99
 
 
 def collect_core_suite_count(project_root: Path) -> int:
-    """Return the number of collected tests marked as core_suite."""
+    """Return the number of collected tests marked as core_suite.
+
+    Runs pytest in collection-only mode with the core_suite marker to count
+    how many tests are in the curated core test suite.
+
+    Args:
+        project_root (Path): Root directory of the project.
+
+    Returns:
+        int: Number of tests marked with core_suite marker.
+
+    Raises:
+        SystemExit: If pytest collection fails with an unexpected error code.
+    """
     cmd = [
         sys.executable,
         "-m",
@@ -48,6 +61,17 @@ def collect_core_suite_count(project_root: Path) -> int:
 
 
 def main() -> None:
+    """Main entry point for core suite size check.
+
+    Checks that the number of tests marked with core_suite marker does not
+    exceed MAX_CORE_TESTS (99). Exits with code 1 if limit is exceeded.
+
+    Returns:
+        None
+
+    Raises:
+        SystemExit: If core suite size exceeds limit or pytest collection fails.
+    """
     project_root = Path(__file__).resolve().parents[1]
     print(f"Checking core_suite test count in {project_root}...")
     count = collect_core_suite_count(project_root)

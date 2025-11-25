@@ -1,4 +1,11 @@
+"""Settings page for ElevenTools.
+
+This module provides the Streamlit page interface for application settings,
+including API key management, model selection, and configuration options.
+"""
+
 import os
+import time
 
 import streamlit as st
 
@@ -10,7 +17,13 @@ from scripts.openrouter_functions import (
     get_openrouter_api_key,
     search_models_fuzzy,
 )
-from utils.error_handling import handle_error, validate_api_key
+from utils.error_handling import (
+    APIError,
+    ConfigurationError,
+    handle_error,
+    test_api_key_actual,
+    validate_api_key,
+)
 
 EXPECTED_KEYS = [
     ("ELEVENLABS_API_KEY", "ElevenLabs"),
@@ -52,7 +65,6 @@ def render_model_selection(
     # Initialize session state variables for this model selection
     search_key = f"{session_state_key}_search_query"
     free_filter_key = f"{session_state_key}_show_free_only"
-    selected_key = f"{session_state_key}_selected"
 
     if search_key not in st.session_state:
         st.session_state[search_key] = ""
@@ -185,7 +197,21 @@ def render_model_selection(
     return selected_model_id
 
 
-def main():
+def main() -> None:
+    """Main entry point for the Settings page.
+
+    This function renders the settings interface, allowing users to:
+    - Configure API keys for ElevenLabs and OpenRouter
+    - Set default models for translation and script enhancement
+    - Validate API keys and view validation status
+    - Manage session-based configuration
+
+    API keys can be entered via the UI (stored in session state) or configured
+    via Streamlit secrets for cloud deployment.
+
+    Returns:
+        None
+    """
     st.set_page_config(page_title="Settings", page_icon="⚙️", layout="centered")
     st.title("Settings")
     st.info(
@@ -205,15 +231,77 @@ def main():
 
     # Section: Current API Keys
     st.header("API Key Management")
+
+    # Initialize validation cache in session state
+    if "api_key_validation_cache" not in st.session_state:
+        st.session_state["api_key_validation_cache"] = {}
+
+    # Cache TTL: 5 minutes (300 seconds)
+    CACHE_TTL = 300
+
+    def get_cached_validation(
+        env_key: str, api_key: str | None
+    ) -> tuple[bool, str | None] | None:
+        """Get cached validation result if still valid."""
+        cache_key = f"{env_key}_{api_key}"
+        if cache_key in st.session_state["api_key_validation_cache"]:
+            cached_result, cached_time = st.session_state["api_key_validation_cache"][
+                cache_key
+            ]
+            if time.time() - cached_time < CACHE_TTL:
+                return cached_result
+            else:
+                # Cache expired, remove it
+                del st.session_state["api_key_validation_cache"][cache_key]
+        return None
+
+    def cache_validation(
+        env_key: str, api_key: str | None, result: tuple[bool, str | None]
+    ):
+        """Cache validation result with timestamp."""
+        cache_key = f"{env_key}_{api_key}"
+        st.session_state["api_key_validation_cache"][cache_key] = (result, time.time())
+
     key_status = []
     for env_key, service in EXPECTED_KEYS:
         # Prefer session state, fallback to st.secrets
         value = st.session_state.get(env_key) or st.secrets.get(env_key, None)
+
+        # First check format validation
         try:
             validate_api_key(value, service)
-            status = "✅ Valid"
-        except Exception as e:
+        except ConfigurationError as e:
             status = f"❌ {str(e)}"
+            key_status.append(
+                {
+                    "Service": service,
+                    "Key Name": env_key,
+                    "Status": status,
+                    "Source": (
+                        "Session"
+                        if env_key in st.session_state
+                        else ("Secrets" if env_key in st.secrets else "Not set")
+                    ),
+                }
+            )
+            continue
+
+        # If format is valid, test the actual API key
+        # Check cache first
+        cached_result = get_cached_validation(env_key, value)
+        if cached_result is not None:
+            is_valid, error_msg = cached_result
+        else:
+            # Make actual API call to test the key
+            is_valid, error_msg = test_api_key_actual(value, service)
+            # Cache the result
+            cache_validation(env_key, value, (is_valid, error_msg))
+
+        if is_valid:
+            status = "✅ Valid"
+        else:
+            status = f"❌ {error_msg or 'Invalid API key'}"
+
         key_status.append(
             {
                 "Service": service,
@@ -228,6 +316,13 @@ def main():
         )
 
     st.table(key_status)
+
+    # Manual refresh button to retest API keys
+    if st.button("🔄 Retest API Keys", help="Clear cache and retest all API keys"):
+        # Clear all validation cache
+        if "api_key_validation_cache" in st.session_state:
+            st.session_state["api_key_validation_cache"].clear()
+        st.rerun()
 
     # Section: Integration Status
     st.subheader("Integration Status")
@@ -269,6 +364,19 @@ def main():
         )
         submitted = st.form_submit_button("Save API Keys")
         if submitted:
+            # Clear validation cache when keys are updated
+            if "api_key_validation_cache" in st.session_state:
+                # Clear cache entries for keys that are being changed
+                old_eleven_key = st.session_state.get("ELEVENLABS_API_KEY")
+                old_openrouter_key = st.session_state.get("OPENROUTER_API_KEY")
+
+                if old_eleven_key:
+                    cache_key = f"ELEVENLABS_API_KEY_{old_eleven_key}"
+                    st.session_state["api_key_validation_cache"].pop(cache_key, None)
+                if old_openrouter_key:
+                    cache_key = f"OPENROUTER_API_KEY_{old_openrouter_key}"
+                    st.session_state["api_key_validation_cache"].pop(cache_key, None)
+
             if eleven_key:
                 st.session_state["ELEVENLABS_API_KEY"] = eleven_key
             elif "ELEVENLABS_API_KEY" in st.session_state:
@@ -278,6 +386,7 @@ def main():
             elif "OPENROUTER_API_KEY" in st.session_state:
                 del st.session_state["OPENROUTER_API_KEY"]
             st.success("API keys updated for this session.")
+            st.rerun()  # Rerun to refresh validation status
 
     st.caption(
         "Never share your API keys publicly. Keys entered here are only stored in your browser session and will be cleared when you close the browser or tab."
@@ -304,7 +413,7 @@ def main():
         # Fetch models with caching
         try:
             all_models = fetch_openrouter_models()
-        except Exception as e:
+        except APIError as e:
             handle_error(e)
             st.warning("Could not fetch models. Please check your OpenRouter API key.")
             all_models = []

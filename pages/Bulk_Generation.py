@@ -1,3 +1,10 @@
+"""Bulk audio generation page for ElevenTools.
+
+This module provides the Streamlit page interface for bulk audio generation,
+allowing users to process CSV files with multiple text entries and generate
+audio files in batch with variable replacement support.
+"""
+
 import os
 
 import pandas as pd
@@ -28,7 +35,21 @@ from utils.security import (
 from utils.session_manager import cleanup_old_sessions, get_session_bulk_dir
 
 
-def main():
+def main() -> None:
+    """Main entry point for the Bulk Generation page.
+
+    This function renders the bulk audio generation interface, allowing users to:
+    - Upload CSV files with text and optional filename columns
+    - Configure voice settings and model selection
+    - Generate multiple audio files in batch with variable replacement
+    - Monitor generation progress and handle errors
+
+    The function handles API key validation, CSV file processing, variable detection,
+    and bulk audio generation using the ElevenLabs API.
+
+    Returns:
+        None
+    """
     st.set_page_config(page_title="Bulk Generation", page_icon="📚", layout="centered")
 
     st.title("ElevenTools")

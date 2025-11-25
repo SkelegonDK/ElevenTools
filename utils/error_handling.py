@@ -1,9 +1,15 @@
 """Error handling utilities for ElevenTools."""
 
 import logging
+import time
 import traceback
 
 import streamlit as st
+
+try:
+    import requests
+except ImportError:
+    requests = None
 
 
 class ElevenToolsError(Exception):
@@ -93,10 +99,78 @@ def validate_api_key(api_key: str | None, service_name: str) -> None:
         )
 
 
+def test_api_key_actual(api_key: str, service_name: str) -> tuple[bool, str | None]:
+    """Test API key by making an actual API call.
+
+    This function makes a lightweight API call to verify the key works,
+    not just that it has the correct format.
+
+    Args:
+        api_key: The API key to test
+        service_name: Name of the service (e.g., 'ElevenLabs', 'OpenRouter')
+
+    Returns:
+        Tuple of (is_valid, error_message). is_valid is True if the key works,
+        False otherwise. error_message is None if valid, otherwise contains the error.
+    """
+    if not requests:
+        # If requests is not available, fall back to format validation
+        try:
+            validate_api_key(api_key, service_name)
+            return True, None
+        except ConfigurationError as e:
+            return False, str(e)
+
+    try:
+        if service_name == "ElevenLabs":
+            # Test by fetching models (lightweight endpoint)
+            url = "https://api.elevenlabs.io/v1/models"
+            headers = {"xi-api-key": api_key}
+            response = requests.get(url, headers=headers, timeout=10)
+            response.raise_for_status()
+            return True, None
+        elif service_name == "OpenRouter":
+            # Test by fetching models (lightweight endpoint)
+            url = "https://openrouter.ai/api/v1/models"
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            }
+            response = requests.get(url, headers=headers, timeout=10)
+            response.raise_for_status()
+            return True, None
+        else:
+            # Unknown service, fall back to format validation
+            try:
+                validate_api_key(api_key, service_name)
+                return True, None
+            except ConfigurationError as e:
+                return False, str(e)
+    except requests.exceptions.HTTPError as e:
+        # Check for specific error codes
+        if e.response.status_code == 401:
+            return False, "Invalid or expired API key"
+        elif e.response.status_code == 403:
+            return False, "API key lacks required permissions"
+        else:
+            return False, f"API error: {e.response.status_code}"
+    except requests.exceptions.Timeout:
+        return False, "Request timed out - please try again"
+    except requests.exceptions.RequestException as e:
+        return False, f"Network error: {str(e)}"
+    except Exception as e:
+        return False, f"Unexpected error: {str(e)}"
+
+
 class ProgressManager:
     """Manage progress bars and status messages in Streamlit."""
 
-    def __init__(self, total_steps: int = 100):
+    def __init__(self, total_steps: int = 100) -> None:
+        """Initialize progress manager.
+
+        Args:
+            total_steps (int, optional): Total number of steps for progress tracking. Defaults to 100.
+        """
         self.progress_bar = st.progress(0)
         self.status_text = st.empty()
         self.total_steps = total_steps

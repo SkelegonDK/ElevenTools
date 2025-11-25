@@ -1,3 +1,9 @@
+"""OpenRouter API integration functions.
+
+This module provides functions for interacting with the OpenRouter API, including
+script enhancement, translation, phonetic conversion, and model management.
+"""
+
 import html
 from difflib import SequenceMatcher
 from typing import Any
@@ -19,8 +25,7 @@ DEFAULT_ENHANCEMENT_MODEL = "minimax/minimax-m2:free"
 def enhance_script_for_v3(
     script: str, enhancement_prompt: str = "", progress_callback=None
 ) -> tuple[bool, str]:
-    """
-    Enhance the given script specifically for ElevenLabs v3 models using Audio Tags.
+    """Enhance the given script specifically for ElevenLabs v3 models using Audio Tags.
 
     Audio Tags are square-bracketed tags that provide expressive control:
     - Emotions: [excited], [sad], [angry], [happily], [sorrowful]
@@ -28,10 +33,14 @@ def enhance_script_for_v3(
     - Human reactions: [laughs], [clears throat], [sighs]
     - Sound effects: [gunshot], [clapping], [explosion] (when contextually appropriate)
 
-    :param script: The script to enhance
-    :param enhancement_prompt: Optional prompt for enhancement guidance
-    :param progress_callback: Optional callback function to update progress
-    :return: Tuple (success, result)
+    Args:
+        script (str): The script to enhance.
+        enhancement_prompt (str, optional): Optional prompt for enhancement guidance. Defaults to "".
+        progress_callback (Callable, optional): Optional callback function to update progress. Defaults to None.
+
+    Returns:
+        Tuple[bool, str]: Tuple containing (success, result) where success indicates if enhancement succeeded
+            and result contains the enhanced script or error message.
     """
     api_key = get_openrouter_api_key()
     if not api_key:
@@ -118,17 +127,20 @@ def enhance_script_with_openrouter(
     progress_callback=None,
     model_id: str | None = None,
 ) -> tuple[bool, str]:
-    """
-    Enhance the given script using OpenRouter's LLM.
+    """Enhance the given script using OpenRouter's LLM.
 
     Routes to v3-specific enhancement (Audio Tags) when a v3 model is detected,
     otherwise uses traditional enhancement techniques.
 
-    :param script: The script to enhance
-    :param enhancement_prompt: Optional prompt for enhancement guidance
-    :param progress_callback: Optional callback function to update progress
-    :param model_id: Optional model ID to determine enhancement strategy
-    :return: Tuple (success, result)
+    Args:
+        script (str): The script to enhance.
+        enhancement_prompt (str, optional): Optional prompt for enhancement guidance. Defaults to "".
+        progress_callback (Callable, optional): Optional callback function to update progress. Defaults to None.
+        model_id (str, optional): Optional model ID to determine enhancement strategy. Defaults to None.
+
+    Returns:
+        Tuple[bool, str]: Tuple containing (success, result) where success indicates if enhancement succeeded
+            and result contains the enhanced script or error message.
     """
     # Route to v3-specific enhancement if model supports Audio Tags
     if model_id and supports_audio_tags(model_id):
@@ -196,7 +208,15 @@ IMPORTANT: Provide ONLY the enhanced script as your response. Do not include any
 
 
 def get_openrouter_response(prompt: str, model: str | None = None) -> str:
-    """Get a response from OpenRouter using the specified model or default."""
+    """Get a response from OpenRouter using the specified model or default.
+
+    Args:
+        prompt (str): The prompt to send to OpenRouter.
+        model (str, optional): Model ID to use. If None, uses default model. Defaults to None.
+
+    Returns:
+        str: The response text from OpenRouter, or an error message if the request fails.
+    """
     api_key = get_openrouter_api_key()
     if not api_key:
         return "OpenRouter API key not found. Please set it in Settings."
@@ -248,7 +268,16 @@ def translate_script_with_openrouter(
 def convert_word_to_phonetic_openrouter(
     word: str, language: str, model: str
 ) -> str | None:
-    """Convert a word to its phonetic spelling in a given language using OpenRouter."""
+    """Convert a word to its phonetic spelling in a given language using OpenRouter.
+
+    Args:
+        word (str): The word to convert to phonetic spelling.
+        language (str): The target language for phonetic conversion.
+        model (str): The model ID to use for conversion.
+
+    Returns:
+        Optional[str]: The phonetic spelling of the word, or None if conversion fails.
+    """
     if model == "eleven_monolingual_v1":
         prompt = f"You speak perfect {language}. Convert the word {word} into the phonetic spelling appropriate for the {language} language. Only respond with the phonetic spelling of the word, nothing else."
     else:

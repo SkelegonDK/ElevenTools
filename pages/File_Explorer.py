@@ -1,3 +1,10 @@
+"""File Explorer page for ElevenTools.
+
+This module provides the Streamlit page interface for browsing and managing
+generated audio files, with support for both single and bulk outputs.
+Files are organized by session for privacy in multi-user deployments.
+"""
+
 import io
 import os
 import re
@@ -34,8 +41,19 @@ if not os.path.exists(session_output_dir):
 
 
 # Helper functions
-def parse_single_filename(filename):
-    """Parse single output filename to extract metadata."""
+def parse_single_filename(filename: str) -> dict[str, str] | None:
+    """Parse single output filename to extract metadata.
+
+    Parses filenames in the format: LANGUAGE_VOICE_NAME_DATE_ID.mp3
+    and extracts the components as a dictionary.
+
+    Args:
+        filename (str): The filename to parse (e.g., "en_Charlie_20250806_abc123.mp3").
+
+    Returns:
+        Optional[Dict[str, str]]: Dictionary with keys 'lang', 'voice', 'date', 'id'
+            if parsing succeeds, None otherwise.
+    """
     pattern = r"^(?P<lang>[^_]+)_(?P<voice>[^_]+)_(?P<date>[^_]+)_(?P<id>[^_]+)\.mp3$"
     match = re.match(pattern, filename)
     if match:
@@ -43,20 +61,30 @@ def parse_single_filename(filename):
     return None
 
 
-def parse_bulk_filename(filename):
-    """Parse bulk output filename."""
+def parse_bulk_filename(filename: str) -> dict[str, str]:
+    """Parse bulk output filename.
+
+    For bulk outputs, the filename is stored as-is since bulk files
+    don't follow the same naming convention as single outputs.
+
+    Args:
+        filename (str): The bulk output filename.
+
+    Returns:
+        Dict[str, str]: Dictionary with 'filename' key containing the original filename.
+    """
     return {"filename": filename}
 
 
-def create_zip_archive(file_paths, zip_filename):
+def create_zip_archive(file_paths: list[str], zip_filename: str) -> bytes:
     """Create a ZIP archive from file paths.
 
     Args:
-        file_paths: List of file paths to include in ZIP
-        zip_filename: Name for the ZIP file
+        file_paths (List[str]): List of file paths to include in ZIP archive.
+        zip_filename (str): Name for the ZIP file (used for internal naming).
 
     Returns:
-        BytesIO buffer containing ZIP file data
+        bytes: Binary data containing the ZIP archive file.
     """
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
