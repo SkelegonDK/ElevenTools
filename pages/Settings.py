@@ -17,6 +17,7 @@ from scripts.openrouter_functions import (
     get_openrouter_api_key,
     search_models_fuzzy,
 )
+from utils.api_keys import get_api_key
 from utils.error_handling import (
     APIError,
     ConfigurationError,
@@ -264,8 +265,8 @@ def main() -> None:
 
     key_status = []
     for env_key, service in EXPECTED_KEYS:
-        # Prefer session state, fallback to st.secrets
-        value = st.session_state.get(env_key) or st.secrets.get(env_key, None)
+        # Get API key from session state or secrets
+        value = get_api_key(env_key)
 
         # First check format validation
         try:

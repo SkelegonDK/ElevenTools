@@ -1,10 +1,8 @@
 # Bulk Audio Generation Specification
 
-## Overview
+## Purpose
 The Bulk Audio Generation capability provides batch processing of text-to-speech generation from CSV files, with support for variable replacement, seed management, and parallel processing.
-
 ## Requirements
-
 ### Requirement: CSV File Processing
 The system SHALL process CSV files for batch audio generation with support for text variables and metadata columns.
 
@@ -171,3 +169,22 @@ The system SHALL optimize bulk generation performance through caching, batching,
 - **WHEN** bulk generation runs
 - **THEN** system respects API rate limits and concurrent request constraints
 - **AND** adjusts processing speed based on API response times and limits
+
+### Requirement: Template File Download
+The system SHALL provide a download button for the bulk generation CSV template file on the Bulk Generation page.
+
+#### Scenario: Template download button availability
+- **WHEN** user navigates to the Bulk Generation page
+- **THEN** a download button for the template CSV file is displayed
+- **AND** the button is positioned near the CSV upload instructions for easy discovery
+
+#### Scenario: Template file download
+- **WHEN** user clicks the template download button
+- **THEN** the system provides the `bulk_template.csv` file for download
+- **AND** the downloaded file contains example data demonstrating proper CSV format with variables
+
+#### Scenario: Template file format
+- **WHEN** user downloads the template file
+- **THEN** the file includes required columns (text, filename) and example variable columns
+- **AND** the file demonstrates proper variable placeholder syntax ({variable_name}) in text content
+

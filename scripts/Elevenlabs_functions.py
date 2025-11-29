@@ -7,7 +7,6 @@ including voice management, audio generation, and voice preview functionality.
 import json
 import logging
 import os
-import re
 from typing import Any, BinaryIO
 
 try:
@@ -75,9 +74,7 @@ def fetch_voices(api_key: str) -> list[tuple[str, str]]:
 
 
 @st_cache(ttl_minutes=60)
-def get_voice_id(
-    voices: list[tuple[str, str]], selected_voice_name: str
-) -> str | None:
+def get_voice_id(voices: list[tuple[str, str]], selected_voice_name: str) -> str | None:
     """Get voice ID for selected voice name.
 
     Args:
@@ -286,22 +283,6 @@ def create_voice_from_preview(
         return response.json()
     except requests.exceptions.RequestException as e:
         raise APIError("Failed to create voice from preview", str(e))
-
-
-def process_text(text: str) -> tuple[str, list[str]]:
-    """Process text to handle variables and preserve formatting.
-
-    Args:
-        text (str): Input text to process.
-
-    Returns:
-        Tuple[str, List[str]]: Tuple containing:
-            - Processed text with newlines preserved
-            - List of variable names found in the text
-    """
-    text = text.replace("\\n", "\n")
-    variables = re.findall(r"\{(\w+)\}", text)
-    return text, variables
 
 
 def bulk_generate_audio(

@@ -11,8 +11,8 @@ from scripts.Elevenlabs_functions import (
     fetch_voices,
     generate_audio,
     get_voice_id,
-    process_text,
 )
+from scripts.functions import detect_string_variables
 
 
 def test_fetch_models(mocker):
@@ -105,8 +105,10 @@ def test_generate_audio_failure(mocker):
 
 
 def test_process_text():
+    """Test variable detection using detect_string_variables (replaces removed process_text)."""
     text = "Hello {name}\\nWelcome to {place}!"
-    processed_text, variables = process_text(text)
+    processed_text = text.replace("\\n", "\n")
+    variables = detect_string_variables(text)
     assert processed_text == "Hello {name}\nWelcome to {place}!"
     assert variables == ["name", "place"]
 
