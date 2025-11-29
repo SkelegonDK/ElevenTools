@@ -1,4 +1,4 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: Settings Page
 The system SHALL provide a unified Settings page for configuring application preferences including API keys and default model selections.

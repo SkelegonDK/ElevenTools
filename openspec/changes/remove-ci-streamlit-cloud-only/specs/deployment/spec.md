@@ -1,6 +1,4 @@
-# Deployment Specification
-
-## MODIFIED Requirements
+## ADDED Requirements
 
 ### Requirement: Deployment Platform Support
 

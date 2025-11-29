@@ -1,4 +1,4 @@
-## MODIFIED Requirements
+## ADDED Requirements
 
 ### Requirement: Script Enhancement
 The system SHALL enhance scripts for text-to-speech generation using AI-powered enhancement that adapts to the selected model's capabilities.
