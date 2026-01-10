@@ -3,7 +3,7 @@
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://eleventools.streamlit.app)
 [![License](https://img.shields.io/badge/license-Custom-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
-[![Streamlit](https://img.shields.io/badge/streamlit-1.32+-red.svg)](https://streamlit.io/)
+[![Streamlit](https://img.shields.io/badge/streamlit-1.36+-red.svg)](https://streamlit.io/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 ElevenTools is a comprehensive toolbox for ElevenLabs, providing a user-friendly interface for text-to-speech generation with advanced features and bulk processing capabilities.
@@ -14,7 +14,6 @@ ElevenTools is a comprehensive toolbox for ElevenLabs, providing a user-friendly
 
 - Dynamic voice and model selection from the ElevenLabs library
 - Text variable support for personalized audio generation
-- Random and fixed seed options for reproducible results
 - Customizable voice settings (stability, similarity, style, speaker boost)
 - Single and bulk audio generation
 - CSV support for batch processing
@@ -226,11 +225,15 @@ uv run -- streamlit run app.py
 
 Navigate to the provided local URL to access the ElevenTools interface.
 
+The app uses Streamlit's modern `st.navigation` API (requires Streamlit 1.36+) with pages organized into sections:
+- **Generate**: Text-to-Speech and Bulk Generation
+- **Tools**: Translation and File Explorer
+- **Config**: Settings
+
 ## Bulk Generation
 
 1. Prepare a CSV file with columns: 'text', 'filename' (optional), and any variables used in the text.
 2. Use the Bulk Generation page to upload your CSV and generate multiple audio files.
-3. Choose between random or fixed seed generation for consistent results.
 
 ## File Management
 
@@ -506,8 +509,3 @@ For translation and language processing, ElevenTools integrates with OpenRouter,
 - **main**: Production branch, always stable and deployable. All releases are tagged from here.
 - **develop**: Ongoing development branch. All new features and bugfixes are merged here before going to main.
 - **cloud**: Experimental or cloud-specific features branch, based on develop.
-
-**Recent update:**
-
-- `main` was updated to match `develop` (June 2024).
-- `cloud` branch created from `develop` for cloud-specific work.
