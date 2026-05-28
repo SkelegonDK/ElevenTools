@@ -119,7 +119,7 @@
                 - generic [ref=e130]:
                   - text: Paste CSV
                   - textbox "Paste CSV" [ref=e131]:
-                    - /placeholder: "text,filename\nHello {name},audio_{name}.mp3\nWelcome {user},welcome_{user}.mp3"
+                    - /placeholder: "text,filename,name\nHello {name},audio_{name}.mp3\nWelcome {user},welcome_{user}.mp3"
             - generic [ref=e132]:
               - generic [ref=e133]:
                 - generic [ref=e134]:
