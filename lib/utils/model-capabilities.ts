@@ -65,15 +65,65 @@ export function supportsAudioTags(modelId: string): boolean {
   return AUDIO_TAGS_SUPPORT_PATTERNS.some((pattern) => modelIdLower.includes(pattern))
 }
 
+// Models that don't support speaker boost (older models)
+const NO_SPEAKER_BOOST_MODELS = new Set([
+  'eleven_monolingual_v1',
+  'eleven_multilingual_v1',
+])
+
+// Models that don't support style parameter (older models)
+const NO_STYLE_MODELS = new Set([
+  'eleven_monolingual_v1',
+  'eleven_multilingual_v1',
+])
+
+/**
+ * Check if a model supports speaker boost
+ */
+export function supportsSpeakerBoost(modelId: string): boolean {
+  if (!modelId) {
+    return true // Default to true for unknown models
+  }
+
+  // Check deny-list
+  if (NO_SPEAKER_BOOST_MODELS.has(modelId)) {
+    return false
+  }
+
+  // Most models support speaker boost
+  return true
+}
+
+/**
+ * Check if a model supports style parameter
+ */
+export function supportsStyle(modelId: string): boolean {
+  if (!modelId) {
+    return true // Default to true for unknown models
+  }
+
+  // Check deny-list
+  if (NO_STYLE_MODELS.has(modelId)) {
+    return false
+  }
+
+  // Most models support style
+  return true
+}
+
 /**
  * Get all capabilities for a given model
  */
 export function getModelCapabilities(modelId: string): {
   speed: boolean
   audioTags: boolean
+  speakerBoost: boolean
+  style: boolean
 } {
   return {
     speed: supportsSpeed(modelId),
     audioTags: supportsAudioTags(modelId),
+    speakerBoost: supportsSpeakerBoost(modelId),
+    style: supportsStyle(modelId),
   }
 }

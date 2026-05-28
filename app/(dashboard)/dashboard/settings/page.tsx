@@ -1,46 +1,21 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Save, CheckCircle2, XCircle, Loader2 } from "lucide-react"
+import { Save, Loader2, Check } from "lucide-react"
 import { ModelSelector } from "@/components/model-selector"
 
-interface ApiKeyStatus {
-  service: string
-  status: "valid" | "invalid" | "not_set" | "checking"
-  message?: string
-}
-
 export default function SettingsPage() {
-  const [elevenLabsKey, setElevenLabsKey] = useState("")
-  const [openRouterKey, setOpenRouterKey] = useState("")
-  const [elevenLabsStatus, setElevenLabsStatus] = useState<ApiKeyStatus>({
-    service: "ElevenLabs",
-    status: "not_set",
-  })
-  const [openRouterStatus, setOpenRouterStatus] = useState<ApiKeyStatus>({
-    service: "OpenRouter",
-    status: "not_set",
-  })
-  const [isSaving, setIsSaving] = useState(false)
-  
-  // Default model settings
   const [defaultTranslationModel, setDefaultTranslationModel] = useState("")
   const [defaultEnhancementModel, setDefaultEnhancementModel] = useState("")
   const [showFreeOnlyTranslation, setShowFreeOnlyTranslation] = useState(false)
   const [showFreeOnlyEnhancement, setShowFreeOnlyEnhancement] = useState(false)
   const [isLoadingSettings, setIsLoadingSettings] = useState(true)
   const [isSavingModels, setIsSavingModels] = useState(false)
+  const [savedFlash, setSavedFlash] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Check existing API keys
-    checkApiKeys()
-    // Load default model settings
     loadDefaultModels()
   }, [])
 
@@ -53,8 +28,8 @@ export default function SettingsPage() {
         setDefaultTranslationModel(data.default_translation_model || "")
         setDefaultEnhancementModel(data.default_enhancement_model || "")
       }
-    } catch (error) {
-      console.error("Error loading default models:", error)
+    } catch (e) {
+      console.error("Error loading default models:", e)
     } finally {
       setIsLoadingSettings(false)
     }
@@ -62,6 +37,7 @@ export default function SettingsPage() {
 
   const handleSaveModels = async () => {
     setIsSavingModels(true)
+    setError(null)
     try {
       const response = await fetch("/api/settings/defaults", {
         method: "POST",
@@ -71,261 +47,134 @@ export default function SettingsPage() {
           default_enhancement_model: defaultEnhancementModel,
         }),
       })
-
       if (response.ok) {
-        // Show success feedback
-        alert("Default models saved successfully!")
+        setSavedFlash(true)
+        setTimeout(() => setSavedFlash(false), 1800)
       } else {
         const data = await response.json()
-        alert(`Failed to save: ${data.error}`)
+        setError(`Failed to save: ${data.error}`)
       }
-    } catch (error) {
-      console.error("Error saving default models:", error)
-      alert("Failed to save default models")
+    } catch (e) {
+      console.error(e)
+      setError("Failed to save default models")
     } finally {
       setIsSavingModels(false)
     }
   }
 
-  const checkApiKeys = async () => {
-    // Check ElevenLabs
-    setElevenLabsStatus({ service: "ElevenLabs", status: "checking" })
-    try {
-      const response = await fetch("/api/elevenlabs/models")
-      if (response.ok) {
-        setElevenLabsStatus({ service: "ElevenLabs", status: "valid" })
-      } else {
-        setElevenLabsStatus({
-          service: "ElevenLabs",
-          status: "invalid",
-          message: "API key not configured or invalid",
-        })
-      }
-    } catch {
-      setElevenLabsStatus({
-        service: "ElevenLabs",
-        status: "not_set",
-      })
-    }
-
-    // Check OpenRouter
-    setOpenRouterStatus({ service: "OpenRouter", status: "checking" })
-    try {
-      const response = await fetch("/api/openrouter/models")
-      if (response.ok) {
-        setOpenRouterStatus({ service: "OpenRouter", status: "valid" })
-      } else {
-        setOpenRouterStatus({
-          service: "OpenRouter",
-          status: "invalid",
-          message: "API key not configured or invalid",
-        })
-      }
-    } catch {
-      setOpenRouterStatus({
-        service: "OpenRouter",
-        status: "not_set",
-      })
-    }
-  }
-
-  const handleSave = async () => {
-    setIsSaving(true)
-    try {
-      // Save API keys
-      const responses = await Promise.all([
-        elevenLabsKey
-          ? fetch("/api/settings/api-keys", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                service: "elevenlabs",
-                apiKey: elevenLabsKey,
-              }),
-            })
-          : Promise.resolve(null),
-        openRouterKey
-          ? fetch("/api/settings/api-keys", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                service: "openrouter",
-                apiKey: openRouterKey,
-              }),
-            })
-          : Promise.resolve(null),
-      ])
-
-      // Recheck status
-      await checkApiKeys()
-
-      // Clear input fields
-      setElevenLabsKey("")
-      setOpenRouterKey("")
-    } catch (error) {
-      console.error("Error saving API keys:", error)
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
-  const getStatusBadge = (status: ApiKeyStatus) => {
-    switch (status.status) {
-      case "valid":
-        return (
-          <Badge variant="default" className="bg-green-600">
-            <CheckCircle2 className="mr-1 h-3 w-3" />
-            Valid
-          </Badge>
-        )
-      case "invalid":
-        return (
-          <Badge variant="destructive">
-            <XCircle className="mr-1 h-3 w-3" />
-            Invalid
-          </Badge>
-        )
-      case "checking":
-        return (
-          <Badge variant="secondary">
-            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-            Checking...
-          </Badge>
-        )
-      default:
-        return (
-          <Badge variant="secondary">Not Set</Badge>
-        )
-    }
-  }
-
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground mt-2">
-          Configure your API keys and preferences
+    <div className="space-y-8">
+      <header className="border-b border-foreground/20 pb-6">
+        <div className="label-section mb-3">[ 04 ] // SETTINGS</div>
+        <div className="flex items-end justify-between gap-6">
+          <h1 className="heading-display text-[clamp(2.5rem,6vw,5rem)] text-foreground">
+            OPERATOR<br />
+            <span className="text-primary">PREFS</span>
+          </h1>
+          <div className="hidden md:block">
+            <div className="border border-foreground/25 px-4 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+              <div>STORAGE</div>
+              <div className="mt-1 font-bold text-foreground">SQLITE · KEY/VAL</div>
+            </div>
+          </div>
+        </div>
+        <p className="mt-4 max-w-2xl font-mono text-sm text-muted-foreground">
+          Wire defaults for translation and script enhancement. Used when no model is explicitly selected
+          downstream.
         </p>
-      </div>
+      </header>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>API Key Management</CardTitle>
-          <CardDescription>
-            Store your API keys securely. Keys are encrypted and stored per user.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="elevenlabs-key">ElevenLabs API Key</Label>
-                {getStatusBadge(elevenLabsStatus)}
-              </div>
-              <Input
-                id="elevenlabs-key"
-                type="password"
-                value={elevenLabsKey}
-                onChange={(e) => setElevenLabsKey(e.target.value)}
-                placeholder="Enter your ElevenLabs API key"
-              />
-              {elevenLabsStatus.message && (
-                <p className="text-sm text-muted-foreground">{elevenLabsStatus.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="openrouter-key">OpenRouter API Key</Label>
-                {getStatusBadge(openRouterStatus)}
-              </div>
-              <Input
-                id="openrouter-key"
-                type="password"
-                value={openRouterKey}
-                onChange={(e) => setOpenRouterKey(e.target.value)}
-                placeholder="Enter your OpenRouter API key"
-              />
-              {openRouterStatus.message && (
-                <p className="text-sm text-muted-foreground">{openRouterStatus.message}</p>
-              )}
-            </div>
+      <section className="relative border border-foreground/25 bg-card">
+        <div className="flex items-baseline justify-between border-b border-foreground/15 px-5 py-3">
+          <div className="flex items-baseline gap-3">
+            <span className="font-mono text-[10px] font-bold tracking-[0.18em] text-muted-foreground">
+              [ 01 ]
+            </span>
+            <h2 className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-foreground">
+              Default Models
+            </h2>
           </div>
+          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+            {isLoadingSettings ? "READING…" : "READY"}
+          </span>
+        </div>
 
-          <div className="flex items-center gap-4">
-            <Button onClick={handleSave} disabled={isSaving}>
-              {isSaving ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  Save API Keys
-                </>
-              )}
-            </Button>
-            <Button variant="outline" onClick={checkApiKeys}>
-              Refresh Status
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Default Model Configuration</CardTitle>
-          <CardDescription>
-            Configure default models for translation and script enhancement. These defaults will be used when no model is explicitly selected.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+        <div className="p-6">
           {isLoadingSettings ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin" />
+            <div className="flex items-center justify-center gap-3 py-12 font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              LOADING CONFIG
             </div>
           ) : (
-            <>
+            <div className="space-y-10">
               <ModelSelector
-                title="Default Translation Model"
-                helpText="This model will be used for translations when no model is selected on the Translation page."
+                title="// Translation Model"
+                helpText="Used on the Translation page when no model is selected."
                 value={defaultTranslationModel}
                 onChange={setDefaultTranslationModel}
                 showFreeOnly={showFreeOnlyTranslation}
                 onShowFreeOnlyChange={setShowFreeOnlyTranslation}
               />
 
-              <Separator />
+              <div className="flex items-center gap-3">
+                <span className="h-px flex-1 bg-foreground/15" />
+                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-foreground/40">
+                  ━━━━━━━━━━
+                </span>
+                <span className="h-px flex-1 bg-foreground/15" />
+              </div>
 
               <ModelSelector
-                title="Default Script Enhancement Model"
-                helpText="This model will be used for script enhancement when no model is specified."
+                title="// Script Enhancement Model"
+                helpText="Used for script enhancement when no model is specified."
                 value={defaultEnhancementModel}
                 onChange={setDefaultEnhancementModel}
                 showFreeOnly={showFreeOnlyEnhancement}
                 onShowFreeOnlyChange={setShowFreeOnlyEnhancement}
               />
 
-              <div className="flex items-center gap-4">
-                <Button onClick={handleSaveModels} disabled={isSavingModels || !defaultTranslationModel || !defaultEnhancementModel}>
+              <div className="flex flex-wrap items-center gap-3 border-t border-foreground/15 pt-6">
+                <Button
+                  onClick={handleSaveModels}
+                  disabled={isSavingModels || !defaultTranslationModel || !defaultEnhancementModel}
+                  size="lg"
+                >
                   {isSavingModels ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
+                      <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> WRITING…
                     </>
                   ) : (
                     <>
-                      <Save className="mr-2 h-4 w-4" />
-                      Save Default Models
+                      <Save className="mr-2 h-3.5 w-3.5" /> COMMIT
                     </>
                   )}
                 </Button>
+                {savedFlash && (
+                  <span className="flex items-center gap-2 border border-primary bg-primary/10 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
+                    <Check className="h-3.5 w-3.5" /> WRITTEN
+                  </span>
+                )}
+                {error && (
+                  <span className="border border-destructive/40 bg-destructive/10 px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-destructive">
+                    {error}
+                  </span>
+                )}
               </div>
-            </>
+            </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
+
+      <aside className="border border-foreground/20 bg-card">
+        <div className="grid grid-cols-12">
+          <div className="col-span-1 hazard-band" aria-hidden="true" />
+          <div className="col-span-11 px-6 py-4 font-mono text-xs text-muted-foreground">
+            <span className="font-bold uppercase tracking-[0.16em] text-foreground">// NOTE.</span>{" "}
+            Settings persist locally in <span className="text-foreground">data/eleventools.db</span>.
+            No remote sync.
+          </div>
+        </div>
+      </aside>
     </div>
   )
 }

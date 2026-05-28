@@ -35,7 +35,10 @@ export function ModelSelector({
   }, [])
 
   useEffect(() => {
-    filterModels()
+    let filtered = models
+    if (showFreeOnly) filtered = filterFreeModels(filtered)
+    if (searchQuery.trim()) filtered = searchModelsFuzzy(filtered, searchQuery.trim())
+    setFilteredModels(filtered)
   }, [models, searchQuery, showFreeOnly])
 
   const fetchModels = async () => {
@@ -43,9 +46,7 @@ export function ModelSelector({
       setIsLoading(true)
       const response = await fetch("/api/openrouter/models")
       const data = await response.json()
-      if (data.models) {
-        setModels(data.models)
-      }
+      if (data.models) setModels(data.models)
     } catch (error) {
       console.error("Error fetching models:", error)
     } finally {
@@ -53,35 +54,13 @@ export function ModelSelector({
     }
   }
 
-  const filterModels = () => {
-    let filtered = models
-
-    if (showFreeOnly) {
-      filtered = filterFreeModels(filtered)
-    }
-
-    if (searchQuery.trim()) {
-      filtered = searchModelsFuzzy(filtered, searchQuery.trim())
-    }
-
-    setFilteredModels(filtered)
-  }
-
   const isModelFree = (model: OpenRouterModel) => {
     const modelId = model.id || ""
     if (modelId.endsWith(":free")) return true
-
-    const pricing = model.pricing || {}
-    const promptPrice = pricing.prompt
-    const completionPrice = pricing.completion
-
-    return (
-      (promptPrice === 0 && completionPrice === 0) ||
-      (typeof promptPrice === "string" &&
-        typeof completionPrice === "string" &&
-        parseFloat(promptPrice) === 0 &&
-        parseFloat(completionPrice) === 0)
-    )
+    const pricing: { prompt?: number | string; completion?: number | string } = model.pricing || {}
+    const p = pricing.prompt
+    const c = pricing.completion
+    return (p === 0 && c === 0) || (typeof p === "string" && typeof c === "string" && parseFloat(p) === 0 && parseFloat(c) === 0)
   }
 
   const selectedModel = models.find((m) => m.id === value)
@@ -89,34 +68,36 @@ export function ModelSelector({
   return (
     <div className="space-y-4">
       <div>
-        <Label className="text-base font-semibold">{title}</Label>
-        {helpText && <p className="text-sm text-muted-foreground mt-1">{helpText}</p>}
+        <div className="font-mono text-sm font-bold uppercase tracking-[0.14em] text-foreground">
+          {title}
+        </div>
+        {helpText && (
+          <p className="mt-1 font-mono text-xs text-muted-foreground">{helpText}</p>
+        )}
       </div>
 
       {onShowFreeOnlyChange && (
-        <div className="flex items-center space-x-2">
+        <label className="flex cursor-pointer items-center gap-3">
           <input
             type="checkbox"
-            id={`free-only-${title}`}
             checked={showFreeOnly}
             onChange={(e) => onShowFreeOnlyChange(e.target.checked)}
-            className="rounded"
           />
-          <Label htmlFor={`free-only-${title}`} className="text-sm font-normal cursor-pointer">
-            Show only free models
-          </Label>
-        </div>
+          <span className="font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-foreground">
+            FREE TIER ONLY
+          </span>
+        </label>
       )}
 
       <div className="space-y-2">
-        <Label htmlFor={`search-${title}`}>Search Models</Label>
+        <Label htmlFor={`search-${title}`}>Search</Label>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-foreground/40" />
           <Input
             id={`search-${title}`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search models..."
+            placeholder="filter models…"
             className="pl-9"
           />
         </div>
@@ -126,17 +107,17 @@ export function ModelSelector({
         <Label>Select Model</Label>
         <Select value={value} onValueChange={onChange} disabled={isLoading}>
           <SelectTrigger>
-            <SelectValue placeholder={isLoading ? "Loading models..." : "Choose a model"} />
+            <SelectValue placeholder={isLoading ? "loading models…" : "choose model"} />
           </SelectTrigger>
           <SelectContent>
             {filteredModels.map((model) => (
               <SelectItem key={model.id} value={model.id}>
-                <div className="flex items-center gap-2">
-                  <span>{model.name || model.id}</span>
+                <div className="flex w-full items-center gap-2">
+                  <span className="flex-1">{model.name || model.id}</span>
                   {isModelFree(model) && (
-                    <Badge variant="secondary" className="text-xs">
-                      Free
-                    </Badge>
+                    <span className="border border-primary px-1 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-primary">
+                      FREE
+                    </span>
                   )}
                 </div>
               </SelectItem>
@@ -146,21 +127,20 @@ export function ModelSelector({
       </div>
 
       {selectedModel && (
-        <div className="p-3 bg-muted rounded-lg">
-          <div className="flex items-center justify-between">
+        <div className="border-l-2 border-primary bg-background p-3">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
             <div>
-              <p className="text-sm font-medium">Selected: {selectedModel.id}</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                ACTIVE
+              </p>
+              <p className="mt-1 font-mono text-xs font-bold text-foreground">{selectedModel.id}</p>
               {selectedModel.pricing && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  Prompt: ${selectedModel.pricing.prompt}, Completion: ${selectedModel.pricing.completion}
+                <p className="mt-1 font-mono text-[10px] text-muted-foreground">
+                  PROMPT ${selectedModel.pricing.prompt} · COMPLETION ${selectedModel.pricing.completion}
                 </p>
               )}
             </div>
-            {isModelFree(selectedModel) && (
-              <Badge variant="default" className="bg-green-600">
-                Free
-              </Badge>
-            )}
+            {isModelFree(selectedModel) && <Badge>FREE</Badge>}
           </div>
         </div>
       )}

@@ -56,6 +56,28 @@ export async function fetchVoices(apiKey: string): Promise<ElevenLabsVoice[]> {
   return data.voices || []
 }
 
+export async function fetchVoiceById(apiKey: string, voiceId: string): Promise<ElevenLabsVoice | null> {
+  try {
+    const response = await fetch(`${ELEVENLABS_API_BASE}/voices/${voiceId}`, {
+      headers: {
+        'xi-api-key': apiKey,
+      },
+    })
+
+    if (!response.ok) {
+      return null
+    }
+
+    const data = await response.json()
+    return {
+      voice_id: data.voice_id || voiceId,
+      name: data.name || 'Unknown Voice',
+    }
+  } catch (error) {
+    return null
+  }
+}
+
 export async function generateAudio({
   apiKey,
   voiceId,

@@ -1,0 +1,187 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e5]:
+      - generic [ref=e7]: ELEVEN/TOOLS
+      - generic [ref=e10]: CONSOLE v2.0 // LOCAL
+    - paragraph [ref=e12]: // MODULES
+    - navigation [ref=e13]:
+      - link "00 Overview ●" [ref=e14] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=e15]: "00"
+        - img [ref=e16]
+        - generic [ref=e21]: Overview
+        - generic [ref=e22]: ●
+      - link "01 Bulk ●" [ref=e23] [cursor=pointer]:
+        - /url: /dashboard/bulk
+        - generic [ref=e24]: "01"
+        - img [ref=e25]
+        - generic [ref=e28]: Bulk
+        - generic [ref=e29]: ●
+      - link "02 Translate" [ref=e30] [cursor=pointer]:
+        - /url: /dashboard/translate
+        - generic [ref=e31]: "02"
+        - img [ref=e32]
+        - generic [ref=e36]: Translate
+      - link "03 History" [ref=e37] [cursor=pointer]:
+        - /url: /dashboard/history
+        - generic [ref=e38]: "03"
+        - img [ref=e39]
+        - generic [ref=e43]: History
+      - link "04 Settings" [ref=e44] [cursor=pointer]:
+        - /url: /dashboard/settings
+        - generic [ref=e45]: "04"
+        - img [ref=e46]
+        - generic [ref=e49]: Settings
+    - generic [ref=e51]:
+      - generic [ref=e52]:
+        - generic [ref=e53]: STACK
+        - generic [ref=e54]: LOCAL · SQLITE
+      - generic [ref=e55]:
+        - generic [ref=e56]: AUTH
+        - generic [ref=e57]: NONE
+      - generic [ref=e58]:
+        - generic [ref=e59]: STATUS
+        - generic [ref=e60]: ONLINE
+  - generic [ref=e62]:
+    - banner [ref=e63]:
+      - generic [ref=e64]:
+        - generic [ref=e65]: ┌
+        - generic [ref=e66]: SESSION
+        - generic [ref=e67]: ET-EF032X
+        - generic [ref=e68]: ·
+        - generic [ref=e69]: MODE
+        - generic [ref=e70]: LOCAL
+      - generic [ref=e72]:
+        - generic [ref=e73]:
+          - generic [ref=e74]: ▸
+          - text: ELEVENTOOLS // CONSOLE v2.0
+        - generic [ref=e75]:
+          - generic [ref=e76]: ▸
+          - text: LOCAL STACK · SQLITE · FILESYSTEM
+        - generic [ref=e77]:
+          - generic [ref=e78]: ▸
+          - text: ZERO TELEMETRY
+        - generic [ref=e79]:
+          - generic [ref=e80]: ▸
+          - text: BULK TTS · TRANSLATION · HISTORY
+        - generic [ref=e81]:
+          - generic [ref=e82]: ▸
+          - text: DEVELOPER-GRADE AUDIO SYNTHESIS
+        - generic [ref=e83]:
+          - generic [ref=e84]: ▸
+          - text: ELEVENTOOLS // CONSOLE v2.0
+        - generic [ref=e85]:
+          - generic [ref=e86]: ▸
+          - text: LOCAL STACK · SQLITE · FILESYSTEM
+        - generic [ref=e87]:
+          - generic [ref=e88]: ▸
+          - text: ZERO TELEMETRY
+        - generic [ref=e89]:
+          - generic [ref=e90]: ▸
+          - text: BULK TTS · TRANSLATION · HISTORY
+        - generic [ref=e91]:
+          - generic [ref=e92]: ▸
+          - text: DEVELOPER-GRADE AUDIO SYNTHESIS
+      - generic [ref=e93]:
+        - generic [ref=e94]: 2026-05-28
+        - generic [ref=e95]: ┐
+    - main [ref=e96]:
+      - generic [ref=e98]:
+        - generic [ref=e99]:
+          - generic [ref=e100]: "[ 01 ] // BULK GENERATION"
+          - generic [ref=e101]:
+            - heading "BULK SYNTHESIS" [level=1] [ref=e102]:
+              - text: BULK
+              - text: SYNTHESIS
+            - generic [ref=e104]:
+              - generic [ref=e105]: BATCH ID
+              - generic [ref=e106]: batch-1779979013377
+          - paragraph [ref=e107]: "Drop a CSV. Pick a voice. Hit transmit. Variables in {braces} are replaced per row before dispatch to ElevenLabs."
+        - generic [ref=e108]:
+          - generic [ref=e109]:
+            - generic [ref=e110]:
+              - generic [ref=e111]:
+                - generic [ref=e112]:
+                  - generic [ref=e113]: "[01]"
+                  - heading "CSV Input" [level=2] [ref=e114]
+                - button "Interpolation guide" [ref=e115] [cursor=pointer]:
+                  - img [ref=e116]
+                  - text: GUIDE
+              - generic [ref=e118]:
+                - generic [ref=e119]:
+                  - text: Upload CSV
+                  - button "Upload CSV" [ref=e121]
+                - generic [ref=e124]: OR PASTE
+                - generic [ref=e126]:
+                  - text: Paste CSV
+                  - textbox "Paste CSV" [ref=e127]:
+                    - /placeholder: "text,filename\nHello {name},audio_{name}.mp3\nWelcome {user},welcome_{user}.mp3"
+            - generic [ref=e128]:
+              - generic [ref=e129]:
+                - generic [ref=e130]:
+                  - generic [ref=e131]: "[02]"
+                  - heading "Voice Parameters" [level=2] [ref=e132]
+                - generic [ref=e133]: AWAITING MODEL
+              - generic [ref=e135]:
+                - generic [ref=e136]:
+                  - text: Model
+                  - combobox [disabled] [ref=e137]:
+                    - generic: loading models…
+                    - img [ref=e138]
+                  - combobox [disabled] [ref=e140]
+                - generic [ref=e141]:
+                  - generic [ref=e142]:
+                    - generic [ref=e143]: Voice
+                    - generic [ref=e144] [cursor=pointer]:
+                      - checkbox "MANUAL ID" [ref=e145]
+                      - text: MANUAL ID
+                  - combobox [disabled] [ref=e146]:
+                    - generic: loading voices…
+                    - img [ref=e147]
+                  - combobox [disabled] [ref=e149]
+                - generic [ref=e152]: ANALOG CONTROLS
+                - generic [ref=e154]:
+                  - generic [ref=e155]:
+                    - generic [ref=e156]: Stability
+                    - generic [ref=e157]: "0.5"
+                  - slider [ref=e158] [cursor=pointer]: "0.5"
+                - generic [ref=e159]:
+                  - generic [ref=e160]:
+                    - generic [ref=e161]: Similarity Boost
+                    - generic [ref=e162]: "0.5"
+                  - slider [ref=e163] [cursor=pointer]: "0.5"
+                - generic [ref=e164]:
+                  - generic [ref=e165]:
+                    - generic [ref=e166]: Style
+                    - generic [ref=e167]: "0.0"
+                  - slider [ref=e168] [cursor=pointer]: "0"
+                - generic [ref=e169] [cursor=pointer]:
+                  - checkbox "SPEAKER BOOST" [ref=e170]
+                  - generic [ref=e171]: SPEAKER BOOST
+            - generic [ref=e172]:
+              - generic [ref=e173]:
+                - generic [ref=e174]: "[ 03 ] // TRANSMIT"
+                - generic [ref=e175]: 0 ROWS QUEUED
+              - button "EXECUTE BATCH" [disabled]:
+                - img
+                - text: EXECUTE BATCH
+          - generic [ref=e177]:
+            - generic [ref=e178]:
+              - generic [ref=e179]:
+                - generic [ref=e180]: "[04]"
+                - heading "Dispatch Log" [level=2] [ref=e181]
+              - generic [ref=e182]: EMPTY
+            - generic [ref=e184]:
+              - generic [ref=e185]: ▢
+              - paragraph [ref=e186]: NO OUTPUT
+              - paragraph [ref=e187]: Generated audio appears here after transmission.
+    - contentinfo [ref=e188]:
+      - generic [ref=e189]:
+        - generic [ref=e190]: READY
+        - generic [ref=e192]: "|"
+        - generic [ref=e193]: BUF 0 KB
+        - generic [ref=e194]: "|"
+        - generic [ref=e195]: QUEUE EMPTY
+      - generic [ref=e196]:
+        - generic [ref=e197]: └ END OF FRAME
+        - generic [ref=e198]: ┘

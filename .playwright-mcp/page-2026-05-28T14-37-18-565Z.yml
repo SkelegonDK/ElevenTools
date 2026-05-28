@@ -1,0 +1,155 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e5]:
+      - generic [ref=e7]: ELEVEN/TOOLS
+      - generic [ref=e10]: CONSOLE v2.0 // LOCAL
+    - paragraph [ref=e12]: // MODULES
+    - navigation [ref=e13]:
+      - link "00 Overview" [ref=e14] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=e15]: "00"
+        - img [ref=e16]
+        - generic [ref=e21]: Overview
+      - link "01 Bulk" [ref=e22] [cursor=pointer]:
+        - /url: /dashboard/bulk
+        - generic [ref=e23]: "01"
+        - img [ref=e24]
+        - generic [ref=e27]: Bulk
+      - link "02 Translate ●" [ref=e28] [cursor=pointer]:
+        - /url: /dashboard/translate
+        - generic [ref=e29]: "02"
+        - img [ref=e30]
+        - generic [ref=e34]: Translate
+        - generic [ref=e35]: ●
+      - link "03 History" [ref=e36] [cursor=pointer]:
+        - /url: /dashboard/history
+        - generic [ref=e37]: "03"
+        - img [ref=e38]
+        - generic [ref=e42]: History
+      - link "04 Settings" [ref=e43] [cursor=pointer]:
+        - /url: /dashboard/settings
+        - generic [ref=e44]: "04"
+        - img [ref=e45]
+        - generic [ref=e48]: Settings
+    - generic [ref=e50]:
+      - generic [ref=e51]:
+        - generic [ref=e52]: STACK
+        - generic [ref=e53]: LOCAL · SQLITE
+      - generic [ref=e54]:
+        - generic [ref=e55]: AUTH
+        - generic [ref=e56]: NONE
+      - generic [ref=e57]:
+        - generic [ref=e58]: STATUS
+        - generic [ref=e59]: ONLINE
+  - generic [ref=e61]:
+    - banner [ref=e62]:
+      - generic [ref=e63]:
+        - generic [ref=e64]: ┌
+        - generic [ref=e65]: SESSION
+        - generic [ref=e66]: ET-FZXQBE
+        - generic [ref=e67]: ·
+        - generic [ref=e68]: MODE
+        - generic [ref=e69]: LOCAL
+      - generic [ref=e71]:
+        - generic [ref=e72]:
+          - generic [ref=e73]: ▸
+          - text: ELEVENTOOLS // CONSOLE v2.0
+        - generic [ref=e74]:
+          - generic [ref=e75]: ▸
+          - text: LOCAL STACK · SQLITE · FILESYSTEM
+        - generic [ref=e76]:
+          - generic [ref=e77]: ▸
+          - text: ZERO TELEMETRY
+        - generic [ref=e78]:
+          - generic [ref=e79]: ▸
+          - text: BULK TTS · TRANSLATION · HISTORY
+        - generic [ref=e80]:
+          - generic [ref=e81]: ▸
+          - text: DEVELOPER-GRADE AUDIO SYNTHESIS
+        - generic [ref=e82]:
+          - generic [ref=e83]: ▸
+          - text: ELEVENTOOLS // CONSOLE v2.0
+        - generic [ref=e84]:
+          - generic [ref=e85]: ▸
+          - text: LOCAL STACK · SQLITE · FILESYSTEM
+        - generic [ref=e86]:
+          - generic [ref=e87]: ▸
+          - text: ZERO TELEMETRY
+        - generic [ref=e88]:
+          - generic [ref=e89]: ▸
+          - text: BULK TTS · TRANSLATION · HISTORY
+        - generic [ref=e90]:
+          - generic [ref=e91]: ▸
+          - text: DEVELOPER-GRADE AUDIO SYNTHESIS
+      - generic [ref=e92]:
+        - generic [ref=e93]: 2026-05-28
+        - generic [ref=e94]: ┐
+    - main [ref=e95]:
+      - generic [ref=e97]:
+        - generic [ref=e98]:
+          - generic [ref=e99]: "[ 02 ] // TRANSLATION"
+          - generic [ref=e100]:
+            - heading "TRANS·LATE" [level=1] [ref=e101]
+            - generic [ref=e103]:
+              - generic [ref=e104]: ENGINE
+              - generic [ref=e105]: OPENROUTER
+          - paragraph [ref=e106]: Route text through any OpenRouter model before voice synthesis. Bring your own model — free tiers labelled.
+        - generic [ref=e107]:
+          - generic [ref=e108]:
+            - generic [ref=e109]:
+              - generic [ref=e110]:
+                - generic [ref=e111]: "[01]"
+                - heading "Source" [level=2] [ref=e112]
+              - generic [ref=e113]: 0 CHAR
+            - generic [ref=e115]:
+              - generic [ref=e116]:
+                - text: Text
+                - textbox "Text" [ref=e117]:
+                  - /placeholder: paste source text…
+              - generic [ref=e118]:
+                - text: Target Language
+                - textbox "Target Language" [ref=e119]:
+                  - /placeholder: spanish · french · japanese …
+          - generic [ref=e120]:
+            - generic [ref=e121]:
+              - generic [ref=e122]:
+                - generic [ref=e123]: "[02]"
+                - heading "Model" [level=2] [ref=e124]
+              - generic [ref=e125]: 0 AVAILABLE
+            - generic [ref=e127]:
+              - generic [ref=e128] [cursor=pointer]:
+                - checkbox "FREE TIER ONLY" [ref=e129]
+                - generic [ref=e130]: FREE TIER ONLY
+              - generic [ref=e131]:
+                - text: Search
+                - generic [ref=e132]:
+                  - img [ref=e133]
+                  - textbox "Search" [ref=e136]:
+                    - /placeholder: filter models…
+              - generic [ref=e137]:
+                - text: Select Model
+                - combobox [ref=e138] [cursor=pointer]:
+                  - generic: choose model
+                  - img [ref=e139]
+                - combobox [ref=e141]
+              - generic [ref=e142]:
+                - button "EXECUTE TRANSLATION" [disabled]:
+                  - img
+                  - text: EXECUTE TRANSLATION
+        - generic [ref=e143]:
+          - generic [ref=e145]:
+            - generic [ref=e146]: "[ 03 ]"
+            - heading "Output" [level=2] [ref=e147]
+          - generic [ref=e149]:
+            - generic [ref=e150]: ▢
+            - paragraph [ref=e151]: AWAITING TRANSMISSION
+    - contentinfo [ref=e152]:
+      - generic [ref=e153]:
+        - generic [ref=e154]: READY
+        - generic [ref=e156]: "|"
+        - generic [ref=e157]: BUF 0 KB
+        - generic [ref=e158]: "|"
+        - generic [ref=e159]: QUEUE EMPTY
+      - generic [ref=e160]:
+        - generic [ref=e161]: └ END OF FRAME
+        - generic [ref=e162]: ┘

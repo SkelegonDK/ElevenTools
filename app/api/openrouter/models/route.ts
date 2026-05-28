@@ -1,23 +1,12 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
-import { getApiKey } from '@/lib/supabase/api-keys'
 import { fetchModels, filterFreeModels, searchModelsFuzzy } from '@/lib/openrouter/api'
-
-export const runtime = 'edge'
 
 export async function GET(request: Request) {
   try {
-    const { userId } = await auth()
-
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const apiKey = await getApiKey(userId, 'openrouter')
-
+    const apiKey = process.env.OPENROUTER_API_KEY?.trim()
     if (!apiKey) {
       return NextResponse.json(
-        { error: 'OpenRouter API key not configured' },
+        { error: 'OPENROUTER_API_KEY not set in .env.local' },
         { status: 400 }
       )
     }
@@ -27,15 +16,8 @@ export async function GET(request: Request) {
     const searchQuery = searchParams.get('search') || ''
 
     let models = await fetchModels(apiKey)
-
-    // Apply filters
-    if (freeOnly) {
-      models = filterFreeModels(models)
-    }
-
-    if (searchQuery) {
-      models = searchModelsFuzzy(models, searchQuery)
-    }
+    if (freeOnly) models = filterFreeModels(models)
+    if (searchQuery) models = searchModelsFuzzy(models, searchQuery)
 
     return NextResponse.json({ models })
   } catch (error) {

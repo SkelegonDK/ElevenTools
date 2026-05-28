@@ -1,23 +1,12 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
-import { getApiKey } from '@/lib/supabase/api-keys'
 import { translate } from '@/lib/openrouter/api'
-
-export const runtime = 'edge'
 
 export async function POST(request: Request) {
   try {
-    const { userId } = await auth()
-
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const apiKey = await getApiKey(userId, 'openrouter')
-
+    const apiKey = process.env.OPENROUTER_API_KEY?.trim()
     if (!apiKey) {
       return NextResponse.json(
-        { error: 'OpenRouter API key not configured' },
+        { error: 'OPENROUTER_API_KEY not set in .env.local' },
         { status: 400 }
       )
     }
@@ -36,13 +25,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const translatedText = await translate({
-      apiKey,
-      text,
-      targetLanguage,
-      model,
-    })
-
+    const translatedText = await translate({ apiKey, text, targetLanguage, model })
     return NextResponse.json({ translatedText })
   } catch (error) {
     console.error('Error translating text:', error)

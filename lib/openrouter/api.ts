@@ -42,7 +42,7 @@ export function filterFreeModels(models: OpenRouterModel[]): OpenRouterModel[] {
     }
 
     // Check if both prices are 0
-    const pricing = model.pricing || {}
+    const pricing: { prompt?: number | string; completion?: number | string } = model.pricing || {}
     const promptPrice = pricing.prompt
     const completionPrice = pricing.completion
 

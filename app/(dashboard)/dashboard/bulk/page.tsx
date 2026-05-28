@@ -1,26 +1,17 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Progress } from "@/components/ui/progress"
 import { CSVUpload } from "@/components/bulk-generator/csv-upload"
 import { type CSVRow } from "@/lib/utils/csv"
-import { replaceVariables } from "@/lib/utils/csv"
-import { Volume2, Download, Loader2 } from "lucide-react"
+import { Volume2, Download, Loader2, AlertCircle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-
-interface ElevenLabsModel {
-  model_id: string
-  name: string
-}
-
-interface ElevenLabsVoice {
-  voice_id: string
-  name: string
-}
+import { getModelCapabilities } from "@/lib/utils/model-capabilities"
+import type { ElevenLabsModel, ElevenLabsVoice } from "@/lib/elevenlabs/api"
 
 interface GenerationResult {
   index: number
@@ -29,35 +20,185 @@ interface GenerationResult {
   text: string
 }
 
+// Small wrapper used throughout this page — replaces the soft shadcn Card
+function Panel({
+  code,
+  title,
+  hint,
+  children,
+  className = "",
+}: {
+  code: string
+  title: string
+  hint?: string
+  children: React.ReactNode
+  className?: string
+}) {
+  return (
+    <section className={`relative border border-foreground/25 bg-card ${className}`}>
+      <div className="flex items-baseline justify-between border-b border-foreground/15 px-5 py-3">
+        <div className="flex items-baseline gap-3">
+          <span className="font-mono text-[10px] font-bold tracking-[0.18em] text-muted-foreground">
+            [{code}]
+          </span>
+          <h2 className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-foreground">
+            {title}
+          </h2>
+        </div>
+        {hint && (
+          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+            {hint}
+          </span>
+        )}
+      </div>
+      <div className="p-5">{children}</div>
+    </section>
+  )
+}
+
+function SliderRow({
+  label,
+  value,
+  fmt = (v: number) => v.toFixed(1),
+  ...rest
+}: {
+  label: string
+  value: number
+  fmt?: (v: number) => string
+} & Omit<React.InputHTMLAttributes<HTMLInputElement>, "value">) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-baseline justify-between">
+        <Label>{label}</Label>
+        <span className="font-mono text-xs font-bold tabular-nums text-primary">
+          {fmt(value)}
+        </span>
+      </div>
+      <input type="range" value={value} {...rest} />
+    </div>
+  )
+}
+
 export default function BulkGenerationPage() {
   const [models, setModels] = useState<ElevenLabsModel[]>([])
   const [voices, setVoices] = useState<ElevenLabsVoice[]>([])
   const [selectedModelId, setSelectedModelId] = useState<string>("")
   const [selectedVoiceId, setSelectedVoiceId] = useState<string>("")
   const [csvData, setCsvData] = useState<CSVRow[]>([])
-  const [detectedVariables, setDetectedVariables] = useState<string[]>([])
+  const [, setDetectedVariables] = useState<string[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
   const [progress, setProgress] = useState(0)
   const [results, setResults] = useState<GenerationResult[]>([])
   const [batchId] = useState(() => `batch-${Date.now()}`)
 
-  // Voice settings
+  const [isLoadingModels, setIsLoadingModels] = useState(true)
+  const [isLoadingVoices, setIsLoadingVoices] = useState(true)
+  const [modelsError, setModelsError] = useState<string | null>(null)
+  const [voicesError, setVoicesError] = useState<string | null>(null)
+
+  const [useManualVoiceId, setUseManualVoiceId] = useState(false)
+  const [manualVoiceId, setManualVoiceId] = useState("")
+  const [manualVoiceName, setManualVoiceName] = useState<string | null>(null)
+  const [isValidatingVoiceId, setIsValidatingVoiceId] = useState(false)
+  const [voiceIdError, setVoiceIdError] = useState<string | null>(null)
+
   const [stability, setStability] = useState(0.5)
   const [similarityBoost, setSimilarityBoost] = useState(0.5)
   const [style, setStyle] = useState(0.0)
   const [useSpeakerBoost, setUseSpeakerBoost] = useState(false)
   const [speed, setSpeed] = useState<number | undefined>(undefined)
 
+  const modelCapabilities = selectedModelId ? getModelCapabilities(selectedModelId) : null
+
   useEffect(() => {
-    // Fetch models and voices
+    setIsLoadingModels(true)
+    setIsLoadingVoices(true)
+    setModelsError(null)
+    setVoicesError(null)
+
     Promise.all([
-      fetch("/api/elevenlabs/models").then((r) => r.json()),
-      fetch("/api/elevenlabs/voices").then((r) => r.json()),
-    ]).then(([modelsData, voicesData]) => {
-      if (modelsData.models) setModels(modelsData.models)
-      if (voicesData.voices) setVoices(voicesData.voices)
-    })
+      fetch("/api/elevenlabs/models")
+        .then(async (r) => {
+          if (!r.ok) {
+            const error = await r.json().catch(() => ({ error: r.statusText }))
+            throw new Error(error.error || "Failed to fetch models")
+          }
+          return r.json()
+        })
+        .then((data) => {
+          if (data.models) setModels(data.models)
+          else throw new Error("Invalid response format")
+        })
+        .catch((error) => setModelsError(error.message || "Failed to load models"))
+        .finally(() => setIsLoadingModels(false)),
+      fetch("/api/elevenlabs/voices")
+        .then(async (r) => {
+          if (!r.ok) {
+            const error = await r.json().catch(() => ({ error: r.statusText }))
+            throw new Error(error.error || "Failed to fetch voices")
+          }
+          return r.json()
+        })
+        .then((data) => {
+          if (data.voices) setVoices(data.voices)
+          else throw new Error("Invalid response format")
+        })
+        .catch((error) => setVoicesError(error.message || "Failed to load voices"))
+        .finally(() => setIsLoadingVoices(false)),
+    ])
   }, [])
+
+  useEffect(() => {
+    if (!selectedModelId) return
+    const capabilities = getModelCapabilities(selectedModelId)
+    if (!capabilities.speed) setSpeed(undefined)
+    if (!capabilities.style) setStyle(0.0)
+    if (!capabilities.speakerBoost) setUseSpeakerBoost(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedModelId])
+
+  const validateVoiceId = async (voiceId: string) => {
+    if (!voiceId.trim()) {
+      setManualVoiceName(null)
+      setVoiceIdError(null)
+      return
+    }
+    if (!/^[a-zA-Z0-9_-]+$/.test(voiceId.trim())) {
+      setVoiceIdError("Invalid voice ID format")
+      setManualVoiceName(null)
+      return
+    }
+    setIsValidatingVoiceId(true)
+    setVoiceIdError(null)
+    try {
+      const response = await fetch(`/api/elevenlabs/voices/${voiceId.trim()}`)
+      const data = await response.json()
+      if (response.ok && data.voice) {
+        setManualVoiceName(data.voice.name)
+        setVoiceIdError(null)
+      } else {
+        setVoiceIdError(data.error || "Voice not found")
+        setManualVoiceName(null)
+      }
+    } catch {
+      setVoiceIdError("Failed to validate voice ID")
+      setManualVoiceName(null)
+    } finally {
+      setIsValidatingVoiceId(false)
+    }
+  }
+
+  useEffect(() => {
+    if (useManualVoiceId && manualVoiceId) {
+      const timeoutId = setTimeout(() => validateVoiceId(manualVoiceId), 500)
+      return () => clearTimeout(timeoutId)
+    } else {
+      setManualVoiceName(null)
+      setVoiceIdError(null)
+    }
+  }, [manualVoiceId, useManualVoiceId])
+
+  const getCurrentVoiceId = (): string => (useManualVoiceId ? manualVoiceId.trim() : selectedVoiceId)
 
   const handleDataLoaded = (data: CSVRow[], variables: string[]) => {
     setCsvData(data)
@@ -66,9 +207,9 @@ export default function BulkGenerationPage() {
   }
 
   const handleGenerate = async () => {
-    if (!csvData.length || !selectedModelId || !selectedVoiceId) {
-      return
-    }
+    const voiceId = getCurrentVoiceId()
+    if (!csvData.length || !selectedModelId || !voiceId) return
+    if (useManualVoiceId && voiceIdError) return
 
     setIsGenerating(true)
     setProgress(0)
@@ -80,7 +221,7 @@ export default function BulkGenerationPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           rows: csvData,
-          voiceId: selectedVoiceId,
+          voiceId,
           modelId: selectedModelId,
           voiceSettings: {
             stability,
@@ -94,12 +235,9 @@ export default function BulkGenerationPage() {
       })
 
       const data = await response.json()
-
       if (response.ok) {
         setResults(data.results || [])
         setProgress(100)
-      } else {
-        console.error("Generation error:", data.error)
       }
     } catch (error) {
       console.error("Error generating audio:", error)
@@ -109,29 +247,52 @@ export default function BulkGenerationPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Bulk Generation</h1>
-        <p className="text-muted-foreground mt-2">
-          Generate multiple audio files from CSV with variable personalization
+    <div className="space-y-8">
+      {/* PAGE HEADER */}
+      <header className="border-b border-foreground/20 pb-6">
+        <div className="label-section mb-3">[ 01 ] // BULK GENERATION</div>
+        <div className="flex items-end justify-between gap-6">
+          <h1 className="heading-display text-[clamp(2.5rem,6vw,5rem)] text-foreground">
+            BULK<br />
+            <span className="text-primary">SYNTHESIS</span>
+          </h1>
+          <div className="hidden md:block">
+            <div className="border border-foreground/25 px-4 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+              <div>BATCH ID</div>
+              <div className="mt-1 font-bold text-foreground">{batchId}</div>
+            </div>
+          </div>
+        </div>
+        <p className="mt-4 max-w-2xl font-mono text-sm text-muted-foreground">
+          Drop a CSV. Pick a voice. Hit transmit. Variables in {"{"}braces{"}"} are replaced per row before
+          dispatch to ElevenLabs.
         </p>
-      </div>
+      </header>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="space-y-6">
+      <div className="grid gap-8 lg:grid-cols-5">
+        {/* LEFT COLUMN — input + settings + transmit */}
+        <div className="space-y-6 lg:col-span-3">
           <CSVUpload onDataLoaded={handleDataLoaded} />
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Voice Settings</CardTitle>
-              <CardDescription>Configure voice parameters for generation</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          {/* VOICE SETTINGS */}
+          <Panel
+            code="02"
+            title="Voice Parameters"
+            hint={selectedModelId ? "ARMED" : "AWAITING MODEL"}
+          >
+            <div className="space-y-5">
+              {/* Model select */}
               <div className="space-y-2">
                 <Label>Model</Label>
-                <Select value={selectedModelId} onValueChange={setSelectedModelId}>
+                <Select
+                  value={selectedModelId}
+                  onValueChange={setSelectedModelId}
+                  disabled={isLoadingModels}
+                >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a model" />
+                    <SelectValue
+                      placeholder={isLoadingModels ? "loading models…" : "select model"}
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {models.map((model) => (
@@ -141,137 +302,266 @@ export default function BulkGenerationPage() {
                     ))}
                   </SelectContent>
                 </Select>
+                {modelsError && (
+                  <div className="flex items-center gap-2 border border-destructive/40 bg-destructive/10 px-3 py-2 font-mono text-xs text-destructive">
+                    <AlertCircle className="h-3.5 w-3.5" />
+                    {modelsError}
+                  </div>
+                )}
               </div>
 
+              {/* Voice select / manual */}
               <div className="space-y-2">
-                <Label>Voice</Label>
-                <Select value={selectedVoiceId} onValueChange={setSelectedVoiceId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a voice" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {voices.map((voice) => (
-                      <SelectItem key={voice.voice_id} value={voice.voice_id}>
-                        {voice.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex items-center justify-between">
+                  <Label>Voice</Label>
+                  <label className="flex cursor-pointer items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                    <input
+                      type="checkbox"
+                      checked={useManualVoiceId}
+                      onChange={(e) => {
+                        setUseManualVoiceId(e.target.checked)
+                        if (!e.target.checked) {
+                          setManualVoiceId("")
+                          setManualVoiceName(null)
+                          setVoiceIdError(null)
+                        }
+                      }}
+                    />
+                    MANUAL ID
+                  </label>
+                </div>
+
+                {useManualVoiceId ? (
+                  <div className="space-y-2">
+                    <Input
+                      placeholder="21m00Tcm4TlvDq8ikWAM"
+                      value={manualVoiceId}
+                      onChange={(e) => setManualVoiceId(e.target.value)}
+                      disabled={isValidatingVoiceId}
+                      className={voiceIdError ? "border-destructive" : ""}
+                    />
+                    {isValidatingVoiceId && (
+                      <div className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
+                        <Loader2 className="h-3 w-3 animate-spin" /> VALIDATING…
+                      </div>
+                    )}
+                    {manualVoiceName && !voiceIdError && (
+                      <div className="font-mono text-xs text-primary">
+                        ▸ {manualVoiceName}
+                      </div>
+                    )}
+                    {voiceIdError && (
+                      <div className="flex items-center gap-2 border border-destructive/40 bg-destructive/10 px-3 py-2 font-mono text-xs text-destructive">
+                        <AlertCircle className="h-3.5 w-3.5" /> {voiceIdError}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <Select
+                      value={selectedVoiceId}
+                      onValueChange={setSelectedVoiceId}
+                      disabled={isLoadingVoices}
+                    >
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={isLoadingVoices ? "loading voices…" : "select voice"}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {voices.map((voice) => (
+                          <SelectItem key={voice.voice_id} value={voice.voice_id}>
+                            {voice.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {voicesError && (
+                      <div className="flex items-center gap-2 border border-destructive/40 bg-destructive/10 px-3 py-2 font-mono text-xs text-destructive">
+                        <AlertCircle className="h-3.5 w-3.5" /> {voicesError}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
 
-              <div className="space-y-2">
-                <Label>Stability: {stability.toFixed(1)}</Label>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.1"
-                  value={stability}
-                  onChange={(e) => setStability(parseFloat(e.target.value))}
-                  className="w-full"
-                />
+              {/* Divider */}
+              <div className="flex items-center gap-2 pt-2">
+                <span className="h-px flex-1 bg-foreground/15" />
+                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  ANALOG CONTROLS
+                </span>
+                <span className="h-px flex-1 bg-foreground/15" />
               </div>
 
-              <div className="space-y-2">
-                <Label>Similarity Boost: {similarityBoost.toFixed(1)}</Label>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.1"
-                  value={similarityBoost}
-                  onChange={(e) => setSimilarityBoost(parseFloat(e.target.value))}
-                  className="w-full"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Style: {style.toFixed(1)}</Label>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.1"
+              {/* Sliders */}
+              <SliderRow
+                label="Stability"
+                value={stability}
+                min={0}
+                max={1}
+                step={0.05}
+                onChange={(e) => setStability(parseFloat(e.target.value))}
+              />
+              <SliderRow
+                label="Similarity Boost"
+                value={similarityBoost}
+                min={0}
+                max={1}
+                step={0.05}
+                onChange={(e) => setSimilarityBoost(parseFloat(e.target.value))}
+              />
+              {modelCapabilities?.style !== false && (
+                <SliderRow
+                  label="Style"
                   value={style}
+                  min={0}
+                  max={1}
+                  step={0.05}
                   onChange={(e) => setStyle(parseFloat(e.target.value))}
-                  className="w-full"
                 />
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="speaker-boost"
-                  checked={useSpeakerBoost}
-                  onChange={(e) => setUseSpeakerBoost(e.target.checked)}
+              )}
+              {modelCapabilities?.speakerBoost !== false && (
+                <label className="flex cursor-pointer items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={useSpeakerBoost}
+                    onChange={(e) => setUseSpeakerBoost(e.target.checked)}
+                  />
+                  <span className="font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-foreground">
+                    SPEAKER BOOST
+                  </span>
+                </label>
+              )}
+              {modelCapabilities?.speed && (
+                <SliderRow
+                  label="Speed"
+                  value={speed ?? 1.0}
+                  min={0.25}
+                  max={4.0}
+                  step={0.05}
+                  fmt={(v) => `${v.toFixed(2)}×`}
+                  onChange={(e) => {
+                    const v = parseFloat(e.target.value)
+                    setSpeed(v === 1.0 ? undefined : v)
+                  }}
                 />
-                <Label htmlFor="speaker-boost">Use Speaker Boost</Label>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Button
-            onClick={handleGenerate}
-            disabled={!csvData.length || !selectedModelId || !selectedVoiceId || isGenerating}
-            className="w-full"
-            size="lg"
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Volume2 className="mr-2 h-4 w-4" />
-                Generate Audio
-              </>
-            )}
-          </Button>
-
-          {isGenerating && (
-            <div className="space-y-2">
-              <Label>Progress</Label>
-              <Progress value={progress} />
+              )}
             </div>
-          )}
+          </Panel>
+
+          {/* TRANSMIT */}
+          <div className="border border-foreground/25 bg-card p-5">
+            <div className="flex items-baseline justify-between">
+              <div className="label-section">[ 03 ] // TRANSMIT</div>
+              <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                {csvData.length} ROW{csvData.length === 1 ? "" : "S"} QUEUED
+              </span>
+            </div>
+            <Button
+              onClick={handleGenerate}
+              disabled={
+                !csvData.length ||
+                !selectedModelId ||
+                !getCurrentVoiceId() ||
+                isGenerating ||
+                (useManualVoiceId && (!!voiceIdError || isValidatingVoiceId))
+              }
+              size="lg"
+              className="mt-4 w-full"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                  TRANSMITTING…
+                </>
+              ) : (
+                <>
+                  <Volume2 className="mr-2 h-3.5 w-3.5" />
+                  EXECUTE BATCH
+                </>
+              )}
+            </Button>
+
+            {(isGenerating || progress > 0) && (
+              <div className="mt-4 space-y-2">
+                <div className="flex items-baseline justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  <span>PROGRESS</span>
+                  <span className="text-foreground tabular-nums">{progress}%</span>
+                </div>
+                <Progress value={progress} />
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="space-y-6">
-          {results.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Generated Audio ({results.length} files)</CardTitle>
-                <CardDescription>Download individual files or all as ZIP</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {results.map((result) => (
-                    <div
-                      key={result.index}
-                      className="flex items-center justify-between p-3 border rounded-lg"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{result.filename}</p>
-                        <p className="text-xs text-muted-foreground truncate">{result.text}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <audio controls className="h-8">
-                          <source src={result.url} type="audio/mpeg" />
-                        </audio>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => window.open(result.url, "_blank")}
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </div>
+        {/* RIGHT COLUMN — output / results */}
+        <div className="lg:col-span-2">
+          <Panel
+            code="04"
+            title="Dispatch Log"
+            hint={results.length ? `${results.length} FILES` : "EMPTY"}
+            className="sticky top-4"
+          >
+            {results.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                <div className="font-display text-5xl text-foreground/15">▢</div>
+                <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                  NO OUTPUT
+                </p>
+                <p className="max-w-[20ch] font-mono text-[11px] text-foreground/40">
+                  Generated audio appears here after transmission.
+                </p>
+              </div>
+            ) : (
+              <ul className="divide-y divide-foreground/15">
+                {results.map((result) => (
+                  <li
+                    key={result.index}
+                    className="group flex flex-col gap-2 py-3 first:pt-0 last:pb-0"
+                  >
+                    <div className="flex items-baseline justify-between gap-3">
+                      <span className="font-mono text-[10px] font-bold tabular-nums text-primary">
+                        #{String(result.index + 1).padStart(3, "0")}
+                      </span>
+                      <span className="flex-1 truncate font-mono text-xs font-bold text-foreground">
+                        {result.filename}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(result.url, "_blank")}
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    <p className="line-clamp-2 font-mono text-[11px] text-muted-foreground">
+                      {result.text}
+                    </p>
+                    <audio controls src={result.url} className="w-full" />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Panel>
+
+          {/* Voice tag preview when set */}
+          {(selectedVoiceId || manualVoiceName) && (
+            <div className="mt-4 border border-foreground/20 bg-card p-4">
+              <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                ACTIVE VOICE
+              </div>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <Badge>
+                  {manualVoiceName ??
+                    voices.find((v) => v.voice_id === selectedVoiceId)?.name ??
+                    "—"}
+                </Badge>
+                <Badge variant="secondary">
+                  {(useManualVoiceId ? manualVoiceId : selectedVoiceId) || "—"}
+                </Badge>
+              </div>
+            </div>
           )}
         </div>
       </div>

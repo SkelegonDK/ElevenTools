@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react"
 import * as ProgressPrimitive from "@radix-ui/react-progress"
 
@@ -10,14 +12,18 @@ const Progress = React.forwardRef<
   <ProgressPrimitive.Root
     ref={ref}
     className={cn(
-      "relative h-2 w-full overflow-hidden rounded-full bg-primary/20",
+      "relative h-4 w-full overflow-hidden border border-foreground/30 bg-background",
       className
     )}
     {...props}
   >
     <ProgressPrimitive.Indicator
-      className="h-full w-full flex-1 bg-primary transition-all"
-      style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
+      className="h-full bg-primary transition-[width] duration-150 ease-linear"
+      style={{
+        width: `${value || 0}%`,
+        backgroundImage:
+          "repeating-linear-gradient(90deg, hsl(var(--primary-foreground) / 0.18) 0 1px, transparent 1px 6px)",
+      }}
     />
   </ProgressPrimitive.Root>
 ))

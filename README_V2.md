@@ -34,20 +34,47 @@ cp .env.local.example .env.local
 
 ### Environment Variables
 
-See `.env.local.example` for required environment variables:
+Create a `.env.local` file in the root directory with the following variables:
 
+**Authentication (Clerk):**
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Clerk publishable key
 - `CLERK_SECRET_KEY` - Clerk secret key
-- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anon key
-- `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role key
 - `WEBHOOK_SECRET` - Clerk webhook secret (for user sync)
+
+**Database (Supabase):**
+- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` - Supabase publishable key
+- `SUPABASE_SECRET_KEY` - Supabase secret key (service role key)
+
+**Service API Keys (configured by deployment operator):**
+- `ELEVENLABS_API_KEY` - ElevenLabs API key (shared by all users)
+- `OPENROUTER_API_KEY` - OpenRouter API key (shared by all users)
+
+**Rate Limiting (Upstash Redis):**
+- `UPSTASH_REDIS_REST_URL` - Upstash Redis REST API URL
+- `UPSTASH_REDIS_REST_TOKEN` - Upstash Redis REST API token
+
+> **Note:** This is an open-source service. API keys are configured server-side via `.env.local` (local development) or environment variables (production). Users do not manage their own API keys - they are shared by all users of the deployed instance.
+>
+> **Rate Limiting Setup:** Create a free Upstash Redis database at https://upstash.com and add the REST URL and token to your environment variables. Rate limiting is disabled if these variables are not set (for development only).
 
 ### Database Setup
 
 1. Create a new Supabase project
 2. Run the SQL schema from `supabase/schema.sql` in the Supabase SQL editor
-3. Configure Row Level Security (RLS) policies as defined in the schema
+3. Note: RLS policies are defined in the schema but are not actively used. The application enforces authorization at the application level using explicit user_id filtering in all database queries.
+
+### Rate Limiting Setup
+
+1. Create a free Upstash Redis database at https://upstash.com
+2. Copy the REST URL and token from the Upstash dashboard
+3. Add `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` to your `.env.local` file
+4. Rate limits are configured per endpoint:
+   - Bulk generation: 5 requests/minute
+   - Translation: 20 requests/minute
+   - Models/Voices: 30 requests/minute
+   - History: 30 requests/minute
+   - Settings: 10 requests/minute
 
 ### Clerk Setup
 
@@ -84,9 +111,8 @@ bun start
 - Language detection
 
 ### Settings
-- Secure API key storage (encrypted in Supabase)
-- Per-user configuration
-- API key validation
+- User preferences and default model configuration
+- Per-user settings (default translation model, default enhancement model)
 
 ### History
 - Generation history with audio playback
@@ -113,13 +139,33 @@ bun start
 
 ## Deployment
 
-### Vercel (Recommended)
+### Architecture
+
+ElevenTools is designed as an **open-source service** where:
+- **Deployment operator** configures API keys via environment variables
+- **All users** share the same API keys (server-side)
+- **Users** don't manage API keys - they simply use the service
+- **Fork → Deploy → Configure → Use** model
+
+### Local Development
+
+1. Copy `.env.local.example` to `.env.local` (or create it manually)
+2. Fill in all required environment variables
+3. Run `bun dev` to start the development server
+
+### Production Deployment (Vercel)
 
 1. Connect your repository to Vercel
-2. Configure environment variables in Vercel dashboard
+2. Configure all environment variables in Vercel dashboard:
+   - Clerk authentication keys
+   - Supabase connection details
+   - **ELEVENLABS_API_KEY** (required)
+   - **OPENROUTER_API_KEY** (required)
 3. Deploy
 
 The app uses Edge Runtime for optimal performance.
+
+> **Important:** Ensure `ELEVENLABS_API_KEY` and `OPENROUTER_API_KEY` are set in your deployment environment. These keys are shared by all users of your deployed instance.
 
 ## Roadmap
 

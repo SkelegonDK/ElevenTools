@@ -1,13 +1,24 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import { ClerkProvider } from '@clerk/nextjs'
+import { JetBrains_Mono, Archivo_Black } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+});
+
+const display = Archivo_Black({
+  subsets: ["latin"],
+  variable: "--font-display",
+  weight: ["400"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: "ElevenTools v2",
-  description: "Developer-focused bulk text-to-speech generation with personalization and translation",
+  title: "ELEVENTOOLS // CONSOLE",
+  description: "Bulk text-to-speech generation console — developer-grade audio synthesis.",
 };
 
 export default function RootLayout({
@@ -16,10 +27,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en" className="dark">
-        <body className={inter.className}>{children}</body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" className={`dark ${mono.variable} ${display.variable}`}>
+      <body className="antialiased">{children}</body>
+    </html>
   );
 }
