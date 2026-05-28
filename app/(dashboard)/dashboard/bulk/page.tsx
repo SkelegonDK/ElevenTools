@@ -10,8 +10,32 @@ import { CSVUpload } from "@/components/bulk-generator/csv-upload"
 import { type CSVRow } from "@/lib/utils/csv"
 import { Volume2, Download, Loader2, AlertCircle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { getModelCapabilities } from "@/lib/utils/model-capabilities"
-import type { ElevenLabsModel, ElevenLabsVoice } from "@/lib/elevenlabs/api"
+import {
+  getModelCapabilities,
+  STABILITY_PRESETS,
+  type StabilityMode,
+} from "@/lib/utils/model-capabilities"
+import {
+  DEFAULT_OUTPUT_FORMAT,
+  type ElevenLabsModel,
+  type ElevenLabsVoice,
+  type OutputFormat,
+  type TextNormalization,
+} from "@/lib/elevenlabs/types"
+
+const OUTPUT_FORMAT_OPTIONS: Array<{ value: OutputFormat; label: string; hint?: string }> = [
+  { value: "mp3_44100_128", label: "MP3 · 44.1kHz · 128 kbps", hint: "default" },
+  { value: "mp3_44100_192", label: "MP3 · 44.1kHz · 192 kbps", hint: "creator+" },
+  { value: "mp3_44100_96", label: "MP3 · 44.1kHz · 96 kbps" },
+  { value: "mp3_44100_64", label: "MP3 · 44.1kHz · 64 kbps" },
+  { value: "mp3_22050_32", label: "MP3 · 22.05kHz · 32 kbps" },
+  { value: "pcm_24000", label: "PCM · 24kHz" },
+  { value: "pcm_44100", label: "PCM · 44.1kHz", hint: "pro+" },
+  { value: "pcm_48000", label: "PCM · 48kHz", hint: "pro+" },
+  { value: "ulaw_8000", label: "µ-law · 8kHz", hint: "telephony" },
+]
+
+const NORMALIZATION_OPTIONS: TextNormalization[] = ["auto", "on", "off"]
 
 interface GenerationResult {
   index: number
@@ -89,7 +113,10 @@ export default function BulkGenerationPage() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [progress, setProgress] = useState(0)
   const [results, setResults] = useState<GenerationResult[]>([])
-  const [batchId] = useState(() => `batch-${Date.now()}`)
+  const [batchId, setBatchId] = useState("batch-pending")
+  useEffect(() => {
+    setBatchId(`batch-${Date.now()}`)
+  }, [])
 
   const [isLoadingModels, setIsLoadingModels] = useState(true)
   const [isLoadingVoices, setIsLoadingVoices] = useState(true)
@@ -107,8 +134,16 @@ export default function BulkGenerationPage() {
   const [style, setStyle] = useState(0.0)
   const [useSpeakerBoost, setUseSpeakerBoost] = useState(false)
   const [speed, setSpeed] = useState<number | undefined>(undefined)
+  const [outputFormat, setOutputFormat] = useState<OutputFormat>(DEFAULT_OUTPUT_FORMAT)
+  const [seedInput, setSeedInput] = useState("")
+  const [normalization, setNormalization] = useState<TextNormalization>("auto")
 
   const modelCapabilities = selectedModelId ? getModelCapabilities(selectedModelId) : null
+  const stabilityMode: StabilityMode | null = modelCapabilities?.stabilityPresets
+    ? Object.entries(STABILITY_PRESETS).find(
+        ([, v]) => Math.abs(v - stability) < 0.025
+      )?.[0] as StabilityMode | undefined ?? null
+    : null
 
   useEffect(() => {
     setIsLoadingModels(true)
@@ -216,6 +251,7 @@ export default function BulkGenerationPage() {
     setResults([])
 
     try {
+      const seedNum = seedInput.trim() === "" ? undefined : Number(seedInput.trim())
       const response = await fetch("/api/bulk/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -231,6 +267,9 @@ export default function BulkGenerationPage() {
             speed,
           },
           batchId,
+          outputFormat,
+          ...(seedNum !== undefined && Number.isFinite(seedNum) ? { seed: seedNum } : {}),
+          applyTextNormalization: normalization,
         }),
       })
 
@@ -272,7 +311,10 @@ export default function BulkGenerationPage() {
       <div className="grid gap-8 lg:grid-cols-5">
         {/* LEFT COLUMN — input + settings + transmit */}
         <div className="space-y-6 lg:col-span-3">
-          <CSVUpload onDataLoaded={handleDataLoaded} />
+          <CSVUpload
+            onDataLoaded={handleDataLoaded}
+            audioTagsEnabled={!!modelCapabilities?.audioTags}
+          />
 
           {/* VOICE SETTINGS */}
           <Panel
@@ -385,6 +427,34 @@ export default function BulkGenerationPage() {
                 )}
               </div>
 
+              {/* Output format */}
+              <div className="space-y-2">
+                <Label>Output Format</Label>
+                <Select
+                  value={outputFormat}
+                  onValueChange={(v) => setOutputFormat(v as OutputFormat)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {OUTPUT_FORMAT_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                        {opt.hint ? ` · ${opt.hint}` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {modelCapabilities?.deprecated && (
+                <div className="flex items-center gap-2 border border-yellow-500/40 bg-yellow-500/10 px-3 py-2 font-mono text-xs text-yellow-600">
+                  <AlertCircle className="h-3.5 w-3.5" />
+                  DEPRECATED · use Flash v2.5 instead
+                </div>
+              )}
+
               {/* Divider */}
               <div className="flex items-center gap-2 pt-2">
                 <span className="h-px flex-1 bg-foreground/15" />
@@ -393,6 +463,40 @@ export default function BulkGenerationPage() {
                 </span>
                 <span className="h-px flex-1 bg-foreground/15" />
               </div>
+
+              {/* v3 stability presets */}
+              {modelCapabilities?.stabilityPresets && (
+                <div className="space-y-2">
+                  <div className="flex items-baseline justify-between">
+                    <Label>Stability Mode (v3)</Label>
+                    {stabilityMode && (
+                      <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary">
+                        {stabilityMode.toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    {(Object.keys(STABILITY_PRESETS) as StabilityMode[]).map((mode) => {
+                      const v = STABILITY_PRESETS[mode]
+                      const active = stabilityMode === mode
+                      return (
+                        <button
+                          key={mode}
+                          type="button"
+                          onClick={() => setStability(v)}
+                          className={`flex-1 border px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.14em] transition-colors ${
+                            active
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-foreground/30 bg-background text-foreground hover:border-primary"
+                          }`}
+                        >
+                          {mode} · {v.toFixed(2)}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Sliders */}
               <SliderRow
@@ -447,6 +551,48 @@ export default function BulkGenerationPage() {
                   }}
                 />
               )}
+
+              {/* Seed */}
+              <div className="space-y-2">
+                <div className="flex items-baseline justify-between">
+                  <Label htmlFor="seed">Seed</Label>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                    OPTIONAL · 0–4294967295
+                  </span>
+                </div>
+                <Input
+                  id="seed"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder="blank = random"
+                  value={seedInput}
+                  onChange={(e) => setSeedInput(e.target.value.replace(/[^0-9]/g, ""))}
+                />
+              </div>
+
+              {/* Text normalization */}
+              <div className="space-y-2">
+                <Label>Text Normalization</Label>
+                <div className="flex gap-2">
+                  {NORMALIZATION_OPTIONS.map((mode) => {
+                    const active = normalization === mode
+                    return (
+                      <button
+                        key={mode}
+                        type="button"
+                        onClick={() => setNormalization(mode)}
+                        className={`flex-1 border px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.14em] transition-colors ${
+                          active
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-foreground/30 bg-background text-foreground hover:border-primary"
+                        }`}
+                      >
+                        {mode}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
             </div>
           </Panel>
 

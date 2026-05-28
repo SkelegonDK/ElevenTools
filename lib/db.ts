@@ -35,6 +35,21 @@ db.exec(`
   INSERT OR IGNORE INTO settings (id) VALUES (1);
 `)
 
+// Idempotent column additions for the generations table.
+// SQLite has no ADD COLUMN IF NOT EXISTS, so probe pragma first.
+const existingColumns = new Set<string>(
+  (db.pragma('table_info(generations)') as Array<{ name: string }>).map((c) => c.name)
+)
+const COLUMN_MIGRATIONS: Array<{ name: string; ddl: string }> = [
+  { name: 'request_id', ddl: 'ALTER TABLE generations ADD COLUMN request_id TEXT' },
+  { name: 'seed', ddl: 'ALTER TABLE generations ADD COLUMN seed INTEGER' },
+  { name: 'output_format', ddl: 'ALTER TABLE generations ADD COLUMN output_format TEXT' },
+  { name: 'kind', ddl: "ALTER TABLE generations ADD COLUMN kind TEXT NOT NULL DEFAULT 'tts'" },
+]
+for (const m of COLUMN_MIGRATIONS) {
+  if (!existingColumns.has(m.name)) db.exec(m.ddl)
+}
+
 export interface Generation {
   id: string
   batch_id: string | null
@@ -44,6 +59,10 @@ export interface Generation {
   audio_path: string
   filename: string | null
   created_at: number
+  request_id: string | null
+  seed: number | null
+  output_format: string | null
+  kind: string
 }
 
 export interface Settings {
@@ -52,21 +71,28 @@ export interface Settings {
 }
 
 const selectGenerations = db.prepare<[], Generation>(
-  `SELECT id, batch_id, text, voice_id, model_id, audio_path, filename, created_at
+  `SELECT id, batch_id, text, voice_id, model_id, audio_path, filename, created_at,
+          request_id, seed, output_format, kind
    FROM generations
    ORDER BY created_at DESC
    LIMIT 100`
 )
 
 const selectGenerationById = db.prepare<[string], Generation>(
-  `SELECT id, batch_id, text, voice_id, model_id, audio_path, filename, created_at
+  `SELECT id, batch_id, text, voice_id, model_id, audio_path, filename, created_at,
+          request_id, seed, output_format, kind
    FROM generations
    WHERE id = ?`
 )
 
 const insertGenerationStmt = db.prepare(
-  `INSERT INTO generations (id, batch_id, text, voice_id, model_id, audio_path, filename, created_at)
-   VALUES (@id, @batch_id, @text, @voice_id, @model_id, @audio_path, @filename, @created_at)`
+  `INSERT INTO generations (
+     id, batch_id, text, voice_id, model_id, audio_path, filename, created_at,
+     request_id, seed, output_format, kind
+   ) VALUES (
+     @id, @batch_id, @text, @voice_id, @model_id, @audio_path, @filename, @created_at,
+     @request_id, @seed, @output_format, @kind
+   )`
 )
 
 const deleteGenerationStmt = db.prepare(`DELETE FROM generations WHERE id = ?`)
@@ -90,7 +116,22 @@ export function getGeneration(id: string): Generation | undefined {
   return selectGenerationById.get(id)
 }
 
-export function insertGeneration(row: Omit<Generation, 'created_at'> & { created_at?: number }): void {
+export interface InsertGenerationInput {
+  id: string
+  batch_id?: string | null
+  text: string
+  voice_id: string
+  model_id: string
+  audio_path: string
+  filename?: string | null
+  created_at?: number
+  request_id?: string | null
+  seed?: number | null
+  output_format?: string | null
+  kind?: 'tts' | 'dialogue'
+}
+
+export function insertGeneration(row: InsertGenerationInput): void {
   insertGenerationStmt.run({
     id: row.id,
     batch_id: row.batch_id ?? null,
@@ -100,6 +141,10 @@ export function insertGeneration(row: Omit<Generation, 'created_at'> & { created
     audio_path: row.audio_path,
     filename: row.filename ?? null,
     created_at: row.created_at ?? Date.now(),
+    request_id: row.request_id ?? null,
+    seed: row.seed ?? null,
+    output_format: row.output_format ?? null,
+    kind: row.kind ?? 'tts',
   })
 }
 

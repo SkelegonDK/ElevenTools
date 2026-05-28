@@ -9,6 +9,7 @@ import {
   Languages,
   History,
   Settings,
+  Users,
 } from "lucide-react"
 
 const navigation = [
@@ -17,6 +18,7 @@ const navigation = [
   { code: "02", name: "Translate", href: "/dashboard/translate", icon: Languages },
   { code: "03", name: "History", href: "/dashboard/history", icon: History },
   { code: "04", name: "Settings", href: "/dashboard/settings", icon: Settings },
+  { code: "05", name: "Dialogue", href: "/dashboard/dialogue", icon: Users },
 ]
 
 export function Sidebar() {

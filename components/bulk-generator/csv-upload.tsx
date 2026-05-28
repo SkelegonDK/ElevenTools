@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { parseCSV, detectVariables, type CSVRow } from "@/lib/utils/csv"
 import { FileText, X, Info, Download } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { AudioTagPicker } from "@/components/bulk-generator/audio-tag-picker"
 import {
   Dialog,
   DialogContent,
@@ -20,13 +21,15 @@ import {
 
 interface CSVUploadProps {
   onDataLoaded: (data: CSVRow[], variables: string[]) => void
+  audioTagsEnabled?: boolean
 }
 
-export function CSVUpload({ onDataLoaded }: CSVUploadProps) {
+export function CSVUpload({ onDataLoaded, audioTagsEnabled = false }: CSVUploadProps) {
   const [file, setFile] = useState<File | null>(null)
   const [csvText, setCsvText] = useState("")
   const [preview, setPreview] = useState<CSVRow[]>([])
   const [detectedVariables, setDetectedVariables] = useState<string[]>([])
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
   const processCSV = useCallback(
     (text: string) => {
@@ -93,6 +96,31 @@ export function CSVUpload({ onDataLoaded }: CSVUploadProps) {
     setDetectedVariables([])
     onDataLoaded([], [])
   }, [onDataLoaded])
+
+  const insertAtCursor = useCallback(
+    (snippet: string) => {
+      const el = textareaRef.current
+      if (!el) {
+        const next = (csvText || "") + snippet
+        setCsvText(next)
+        if (next.trim()) processCSV(next)
+        return
+      }
+      const start = el.selectionStart ?? csvText.length
+      const end = el.selectionEnd ?? csvText.length
+      const next = csvText.slice(0, start) + snippet + csvText.slice(end)
+      setCsvText(next)
+      if (next.trim()) processCSV(next)
+      // Restore caret right after inserted text
+      queueMicrotask(() => {
+        if (!textareaRef.current) return
+        const pos = start + snippet.length
+        textareaRef.current.focus()
+        textareaRef.current.setSelectionRange(pos, pos)
+      })
+    },
+    [csvText, processCSV]
+  )
 
   return (
     <section className="relative border border-foreground/25 bg-card">
@@ -191,6 +219,7 @@ Hi {firstName} {lastName},John,hi_{firstName}.mp3`}
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Body */}
@@ -230,12 +259,19 @@ Hi {firstName} {lastName},John,hi_{firstName}.mp3`}
           <Label htmlFor="csv-text">Paste CSV</Label>
           <Textarea
             id="csv-text"
+            ref={textareaRef}
             value={csvText}
             onChange={handleTextChange}
             placeholder={`text,filename\nHello {name},audio_{name}.mp3\nWelcome {user},welcome_{user}.mp3`}
             className="min-h-[140px]"
           />
         </div>
+
+        {audioTagsEnabled && (
+          <div className="border-t border-foreground/15 pt-4">
+            <AudioTagPicker onInsert={insertAtCursor} />
+          </div>
+        )}
 
         {preview.length > 0 && (
           <div className="space-y-2">

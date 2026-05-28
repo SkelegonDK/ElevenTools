@@ -1,20 +1,27 @@
-export interface ElevenLabsModel {
-  model_id: string
-  name: string
-}
+import 'server-only'
+import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js'
+import {
+  DEFAULT_OUTPUT_FORMAT,
+  type DialogueInput,
+  type ElevenLabsModel,
+  type ElevenLabsVoice,
+  type OutputFormat,
+  type TextNormalization,
+  type VoiceSettings,
+} from './types'
 
-export interface ElevenLabsVoice {
-  voice_id: string
-  name: string
-}
-
-export interface VoiceSettings {
-  stability: number
-  similarity_boost: number
-  style: number
-  use_speaker_boost: boolean
-  speed?: number
-}
+export {
+  DEFAULT_OUTPUT_FORMAT,
+  extensionForOutputFormat,
+} from './types'
+export type {
+  DialogueInput,
+  ElevenLabsModel,
+  ElevenLabsVoice,
+  OutputFormat,
+  TextNormalization,
+  VoiceSettings,
+} from './types'
 
 export interface GenerateAudioParams {
   apiKey: string
@@ -23,101 +30,161 @@ export interface GenerateAudioParams {
   text: string
   voiceSettings: VoiceSettings
   languageCode?: string
+  outputFormat?: OutputFormat
+  seed?: number
+  applyTextNormalization?: TextNormalization
+  previousText?: string
+  nextText?: string
+  previousRequestIds?: string[]
+  nextRequestIds?: string[]
 }
 
-const ELEVENLABS_API_BASE = 'https://api.elevenlabs.io/v1'
+export interface GenerateAudioResult {
+  audio: ArrayBuffer
+  requestId: string | null
+  outputFormat: OutputFormat
+}
+
+export interface GenerateDialogueParams {
+  apiKey: string
+  modelId: string
+  inputs: DialogueInput[]
+  stability?: number
+  seed?: number
+  outputFormat?: OutputFormat
+  applyTextNormalization?: TextNormalization
+  languageCode?: string
+}
+
+function client(apiKey: string): ElevenLabsClient {
+  return new ElevenLabsClient({ apiKey })
+}
+
+async function streamToArrayBuffer(stream: ReadableStream<Uint8Array>): Promise<ArrayBuffer> {
+  const reader = stream.getReader()
+  const chunks: Uint8Array[] = []
+  let total = 0
+  while (true) {
+    const { value, done } = await reader.read()
+    if (done) break
+    if (value) {
+      chunks.push(value)
+      total += value.length
+    }
+  }
+  const out = new Uint8Array(total)
+  let offset = 0
+  for (const c of chunks) {
+    out.set(c, offset)
+    offset += c.length
+  }
+  return out.buffer
+}
 
 export async function fetchModels(apiKey: string): Promise<ElevenLabsModel[]> {
-  const response = await fetch(`${ELEVENLABS_API_BASE}/models`, {
-    headers: {
-      'xi-api-key': apiKey,
-    },
-  })
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch models: ${response.statusText}`)
-  }
-
-  return response.json()
+  const models = await client(apiKey).models.list()
+  return models
+    .filter((m) => m.canDoTextToSpeech !== false)
+    .map((m) => ({ model_id: m.modelId, name: m.name ?? m.modelId }))
 }
 
 export async function fetchVoices(apiKey: string): Promise<ElevenLabsVoice[]> {
-  const response = await fetch(`${ELEVENLABS_API_BASE}/voices`, {
-    headers: {
-      'xi-api-key': apiKey,
-    },
-  })
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch voices: ${response.statusText}`)
-  }
-
-  const data = await response.json()
-  return data.voices || []
+  const result = await client(apiKey).voices.search()
+  const list = result.voices ?? []
+  return list.map((v) => ({ voice_id: v.voiceId, name: v.name ?? 'Unnamed voice' }))
 }
 
-export async function fetchVoiceById(apiKey: string, voiceId: string): Promise<ElevenLabsVoice | null> {
+export async function fetchVoiceById(
+  apiKey: string,
+  voiceId: string
+): Promise<ElevenLabsVoice | null> {
   try {
-    const response = await fetch(`${ELEVENLABS_API_BASE}/voices/${voiceId}`, {
-      headers: {
-        'xi-api-key': apiKey,
-      },
-    })
-
-    if (!response.ok) {
-      return null
-    }
-
-    const data = await response.json()
-    return {
-      voice_id: data.voice_id || voiceId,
-      name: data.name || 'Unknown Voice',
-    }
-  } catch (error) {
+    const voice = await client(apiKey).voices.get(voiceId)
+    return { voice_id: voice.voiceId ?? voiceId, name: voice.name ?? 'Unknown Voice' }
+  } catch {
     return null
   }
 }
 
-export async function generateAudio({
-  apiKey,
-  voiceId,
-  modelId,
-  text,
-  voiceSettings,
-  languageCode,
-}: GenerateAudioParams): Promise<ArrayBuffer> {
-  const payload: any = {
+export async function generateAudio(params: GenerateAudioParams): Promise<GenerateAudioResult> {
+  const {
+    apiKey,
+    voiceId,
+    modelId,
     text,
-    model_id: modelId,
-    voice_settings: {
-      stability: voiceSettings.stability,
-      similarity_boost: voiceSettings.similarity_boost,
-      style: voiceSettings.style,
-      use_speaker_boost: voiceSettings.use_speaker_boost,
-    },
-  }
+    voiceSettings,
+    languageCode,
+    outputFormat = DEFAULT_OUTPUT_FORMAT,
+    seed,
+    applyTextNormalization,
+    previousText,
+    nextText,
+    previousRequestIds,
+    nextRequestIds,
+  } = params
 
-  if (voiceSettings.speed !== undefined) {
-    payload.voice_settings.speed = voiceSettings.speed
-  }
+  const c = client(apiKey)
+  const { data: stream, rawResponse } = await c.textToSpeech
+    .convert(voiceId, {
+      text,
+      modelId,
+      outputFormat,
+      voiceSettings: {
+        stability: voiceSettings.stability,
+        similarityBoost: voiceSettings.similarity_boost,
+        style: voiceSettings.style,
+        useSpeakerBoost: voiceSettings.use_speaker_boost,
+        ...(voiceSettings.speed !== undefined ? { speed: voiceSettings.speed } : {}),
+      },
+      ...(languageCode ? { languageCode } : {}),
+      ...(seed !== undefined ? { seed } : {}),
+      ...(applyTextNormalization ? { applyTextNormalization } : {}),
+      ...(previousText ? { previousText } : {}),
+      ...(nextText ? { nextText } : {}),
+      ...(previousRequestIds && previousRequestIds.length
+        ? { previousRequestIds: previousRequestIds.slice(-3) }
+        : {}),
+      ...(nextRequestIds && nextRequestIds.length
+        ? { nextRequestIds: nextRequestIds.slice(0, 3) }
+        : {}),
+    })
+    .withRawResponse()
 
-  if (languageCode) {
-    payload.language_code = languageCode
-  }
+  const audio = await streamToArrayBuffer(stream)
+  const requestId =
+    rawResponse.headers?.get?.('request-id') ?? rawResponse.headers?.get?.('Request-Id') ?? null
+  return { audio, requestId, outputFormat }
+}
 
-  const response = await fetch(`${ELEVENLABS_API_BASE}/text-to-speech/${voiceId}`, {
-    method: 'POST',
-    headers: {
-      'xi-api-key': apiKey,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  })
+export async function generateDialogue(
+  params: GenerateDialogueParams
+): Promise<GenerateAudioResult> {
+  const {
+    apiKey,
+    modelId,
+    inputs,
+    stability,
+    seed,
+    outputFormat = DEFAULT_OUTPUT_FORMAT,
+    applyTextNormalization,
+    languageCode,
+  } = params
 
-  if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`Failed to generate audio: ${error}`)
-  }
+  const c = client(apiKey)
+  const { data: stream, rawResponse } = await c.textToDialogue
+    .convert({
+      modelId,
+      outputFormat,
+      inputs: inputs.map((i) => ({ voiceId: i.voiceId, text: i.text })),
+      ...(stability !== undefined ? { settings: { stability } } : {}),
+      ...(seed !== undefined ? { seed } : {}),
+      ...(applyTextNormalization ? { applyTextNormalization } : {}),
+      ...(languageCode ? { languageCode } : {}),
+    })
+    .withRawResponse()
 
-  return response.arrayBuffer()
+  const audio = await streamToArrayBuffer(stream)
+  const requestId =
+    rawResponse.headers?.get?.('request-id') ?? rawResponse.headers?.get?.('Request-Id') ?? null
+  return { audio, requestId, outputFormat }
 }
