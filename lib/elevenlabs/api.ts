@@ -1,5 +1,6 @@
 import 'server-only'
 import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js'
+import { revalidateTag, unstable_cache } from 'next/cache'
 import {
   DEFAULT_OUTPUT_FORMAT,
   type DialogueInput,
@@ -9,6 +10,9 @@ import {
   type TextNormalization,
   type VoiceSettings,
 } from './types'
+
+export const VOICES_CACHE_TAG = 'elevenlabs:voices'
+export const MODELS_CACHE_TAG = 'elevenlabs:models'
 
 export {
   DEFAULT_OUTPUT_FORMAT,
@@ -104,6 +108,64 @@ export async function fetchVoiceById(
   } catch {
     return null
   }
+}
+
+function requireApiKey(): string {
+  const k = process.env.ELEVENLABS_API_KEY?.trim()
+  if (!k) throw new Error('ELEVENLABS_API_KEY not set in .env.local')
+  return k
+}
+
+/**
+ * How fresh a catalogue resource has to be, declared once.
+ *
+ * `browserMaxAge` is how long a client may reuse its copy without asking;
+ * `serverRevalidate` is how long the server cache holds one, and it doubles as
+ * the `stale-while-revalidate` budget — the browser may serve a stale copy for
+ * exactly as long as the server would still be sitting on one.
+ */
+interface Freshness {
+  browserMaxAge: number
+  serverRevalidate: number
+}
+
+const VOICES_FRESHNESS: Freshness = { browserMaxAge: 600, serverRevalidate: 1800 }
+const MODELS_FRESHNESS: Freshness = { browserMaxAge: 600, serverRevalidate: 3600 }
+
+export function cacheControl(freshness: Freshness): string {
+  return `private, max-age=${freshness.browserMaxAge}, stale-while-revalidate=${freshness.serverRevalidate}`
+}
+
+export const VOICES_CACHE_CONTROL = cacheControl(VOICES_FRESHNESS)
+export const MODELS_CACHE_CONTROL = cacheControl(MODELS_FRESHNESS)
+
+// Cached env-aware wrappers used by route handlers and Server Components.
+// The unstable_cache layer keys on the static key parts only — the apiKey is
+// read from env at execution time and is never embedded in the cache key.
+export const getVoices = unstable_cache(
+  async (): Promise<ElevenLabsVoice[]> => fetchVoices(requireApiKey()),
+  ['elevenlabs', 'voices', 'v1'],
+  { revalidate: VOICES_FRESHNESS.serverRevalidate, tags: [VOICES_CACHE_TAG] }
+)
+
+export const getModels = unstable_cache(
+  async (): Promise<ElevenLabsModel[]> => fetchModels(requireApiKey()),
+  ['elevenlabs', 'models', 'v1'],
+  { revalidate: MODELS_FRESHNESS.serverRevalidate, tags: [MODELS_CACHE_TAG] }
+)
+
+/**
+ * A single voice is not held in the server cache, so it only advertises the
+ * browser window — no `stale-while-revalidate` promise the server cannot keep.
+ */
+export const VOICE_DETAIL_CACHE_CONTROL = `private, max-age=${VOICES_FRESHNESS.browserMaxAge}`
+
+export function revalidateVoices(): void {
+  revalidateTag(VOICES_CACHE_TAG)
+}
+
+export function revalidateModels(): void {
+  revalidateTag(MODELS_CACHE_TAG)
 }
 
 export async function generateAudio(params: GenerateAudioParams): Promise<GenerateAudioResult> {

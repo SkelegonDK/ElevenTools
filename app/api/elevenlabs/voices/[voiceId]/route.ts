@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { fetchVoiceById } from '@/lib/elevenlabs/api'
+import { fetchVoiceById, VOICE_DETAIL_CACHE_CONTROL } from '@/lib/elevenlabs/api'
 
 export async function GET(
   _request: Request,
@@ -24,7 +24,10 @@ export async function GET(
       return NextResponse.json({ error: 'Voice not found' }, { status: 404 })
     }
 
-    return NextResponse.json({ voice })
+    return NextResponse.json(
+      { voice },
+      { headers: { 'Cache-Control': VOICE_DETAIL_CACHE_CONTROL } }
+    )
   } catch (error) {
     console.error('Error fetching voice:', error)
     return NextResponse.json(

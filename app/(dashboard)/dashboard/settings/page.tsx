@@ -79,8 +79,8 @@ export default function SettingsPage() {
           </div>
         </div>
         <p className="mt-4 max-w-2xl font-mono text-sm text-muted-foreground">
-          Wire defaults for translation and script enhancement. Used when no model is explicitly selected
-          downstream.
+          Wire the default translation model. The Translation page seeds its picker from it on load;
+          an explicit selection there always wins.
         </p>
       </header>
 
@@ -109,7 +109,7 @@ export default function SettingsPage() {
             <div className="space-y-10">
               <ModelSelector
                 title="// Translation Model"
-                helpText="Used on the Translation page when no model is selected."
+                helpText="Seeds the Translation page picker on load."
                 value={defaultTranslationModel}
                 onChange={setDefaultTranslationModel}
                 showFreeOnly={showFreeOnlyTranslation}
@@ -126,7 +126,7 @@ export default function SettingsPage() {
 
               <ModelSelector
                 title="// Script Enhancement Model"
-                helpText="Used for script enhancement when no model is specified."
+                helpText="Reserved — no script-enhancement feature ships yet. Stored, not read."
                 value={defaultEnhancementModel}
                 onChange={setDefaultEnhancementModel}
                 showFreeOnly={showFreeOnlyEnhancement}
@@ -136,7 +136,7 @@ export default function SettingsPage() {
               <div className="flex flex-wrap items-center gap-3 border-t border-foreground/15 pt-6">
                 <Button
                   onClick={handleSaveModels}
-                  disabled={isSavingModels || !defaultTranslationModel || !defaultEnhancementModel}
+                  disabled={isSavingModels || !defaultTranslationModel}
                   size="lg"
                 >
                   {isSavingModels ? (

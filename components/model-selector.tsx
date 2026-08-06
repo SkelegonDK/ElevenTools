@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Search } from "lucide-react"
-import { OpenRouterModel, filterFreeModels, searchModelsFuzzy } from "@/lib/openrouter/api"
+import { OpenRouterModel, filterFreeModels, isFreeModel, searchModelsFuzzy } from "@/lib/openrouter/api"
 
 interface ModelSelectorProps {
   title: string
@@ -52,15 +52,6 @@ export function ModelSelector({
     } finally {
       setIsLoading(false)
     }
-  }
-
-  const isModelFree = (model: OpenRouterModel) => {
-    const modelId = model.id || ""
-    if (modelId.endsWith(":free")) return true
-    const pricing: { prompt?: number | string; completion?: number | string } = model.pricing || {}
-    const p = pricing.prompt
-    const c = pricing.completion
-    return (p === 0 && c === 0) || (typeof p === "string" && typeof c === "string" && parseFloat(p) === 0 && parseFloat(c) === 0)
   }
 
   const selectedModel = models.find((m) => m.id === value)
@@ -114,7 +105,7 @@ export function ModelSelector({
               <SelectItem key={model.id} value={model.id}>
                 <div className="flex w-full items-center gap-2">
                   <span className="flex-1">{model.name || model.id}</span>
-                  {isModelFree(model) && (
+                  {isFreeModel(model) && (
                     <span className="border border-primary px-1 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-primary">
                       FREE
                     </span>
@@ -140,7 +131,7 @@ export function ModelSelector({
                 </p>
               )}
             </div>
-            {isModelFree(selectedModel) && <Badge>FREE</Badge>}
+            {isFreeModel(selectedModel) && <Badge>FREE</Badge>}
           </div>
         </div>
       )}

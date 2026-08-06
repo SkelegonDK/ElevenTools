@@ -32,36 +32,32 @@ export async function fetchModels(apiKey: string): Promise<OpenRouterModel[]> {
   return data.data || []
 }
 
+/**
+ * The single definition of "this model is free".
+ *
+ * A model counts as free if its id carries the `:free` suffix, or if both
+ * prompt and completion prices are zero — OpenRouter reports those either as
+ * numbers or as decimal strings, so both forms are handled here.
+ */
+export function isFreeModel(model: OpenRouterModel): boolean {
+  if ((model.id || '').endsWith(':free')) return true
+
+  const pricing: { prompt?: number | string; completion?: number | string } = model.pricing || {}
+  const promptPrice = pricing.prompt
+  const completionPrice = pricing.completion
+
+  if (promptPrice === 0 && completionPrice === 0) return true
+
+  return (
+    typeof promptPrice === 'string' &&
+    typeof completionPrice === 'string' &&
+    parseFloat(promptPrice) === 0 &&
+    parseFloat(completionPrice) === 0
+  )
+}
+
 export function filterFreeModels(models: OpenRouterModel[]): OpenRouterModel[] {
-  return models.filter((model) => {
-    const modelId = model.id || ''
-    
-    // Check if model ID ends with ":free"
-    if (modelId.endsWith(':free')) {
-      return true
-    }
-
-    // Check if both prices are 0
-    const pricing: { prompt?: number | string; completion?: number | string } = model.pricing || {}
-    const promptPrice = pricing.prompt
-    const completionPrice = pricing.completion
-
-    if (promptPrice === 0 && completionPrice === 0) {
-      return true
-    }
-
-    // Handle string prices
-    if (
-      typeof promptPrice === 'string' &&
-      typeof completionPrice === 'string' &&
-      parseFloat(promptPrice) === 0 &&
-      parseFloat(completionPrice) === 0
-    ) {
-      return true
-    }
-
-    return false
-  })
+  return models.filter(isFreeModel)
 }
 
 export function searchModelsFuzzy(

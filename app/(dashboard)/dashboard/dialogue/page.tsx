@@ -22,60 +22,26 @@ import {
   Volume2,
 } from "lucide-react"
 import {
-  DEFAULT_OUTPUT_FORMAT,
   type ElevenLabsModel,
   type ElevenLabsVoice,
   type OutputFormat,
 } from "@/lib/elevenlabs/types"
 import { supportsDialogue } from "@/lib/utils/model-capabilities"
+import {
+  DEFAULT_STABILITY,
+  DIALOGUE_LIMITS,
+  OUTPUT_FORMAT_OPTIONS,
+  SEED_MAX,
+  VOICE_SETTING_RANGES,
+  parseSeed,
+} from "@/lib/generation/request"
+import { Panel } from "@/components/ui/panel"
 
-const MAX_UNIQUE_VOICES = 10
-const MAX_TOTAL_CHARS = 2000
-
-const OUTPUT_FORMAT_OPTIONS: Array<{ value: OutputFormat; label: string }> = [
-  { value: "mp3_44100_128", label: "MP3 · 44.1kHz · 128 kbps" },
-  { value: "mp3_44100_192", label: "MP3 · 44.1kHz · 192 kbps" },
-  { value: "mp3_44100_96", label: "MP3 · 44.1kHz · 96 kbps" },
-  { value: "pcm_24000", label: "PCM · 24kHz" },
-  { value: "ulaw_8000", label: "µ-law · 8kHz" },
-]
+const { maxUniqueVoices: MAX_UNIQUE_VOICES, maxTotalChars: MAX_TOTAL_CHARS } = DIALOGUE_LIMITS
 
 interface Line {
   voiceId: string
   text: string
-}
-
-function Panel({
-  code,
-  title,
-  hint,
-  children,
-}: {
-  code: string
-  title: string
-  hint?: string
-  children: React.ReactNode
-}) {
-  return (
-    <section className="relative border border-foreground/25 bg-card">
-      <div className="flex items-baseline justify-between border-b border-foreground/15 px-5 py-3">
-        <div className="flex items-baseline gap-3">
-          <span className="font-mono text-[10px] font-bold tracking-[0.18em] text-muted-foreground">
-            [{code}]
-          </span>
-          <h2 className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-foreground">
-            {title}
-          </h2>
-        </div>
-        {hint && (
-          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-            {hint}
-          </span>
-        )}
-      </div>
-      <div className="p-5">{children}</div>
-    </section>
-  )
 }
 
 export default function DialoguePage() {
@@ -86,9 +52,10 @@ export default function DialoguePage() {
     { voiceId: "", text: "" },
     { voiceId: "", text: "" },
   ])
-  const [stability, setStability] = useState(0.5)
+  const [stability, setStability] = useState(DEFAULT_STABILITY)
   const [seedInput, setSeedInput] = useState("")
-  const [outputFormat, setOutputFormat] = useState<OutputFormat>(DEFAULT_OUTPUT_FORMAT)
+  const [outputFormat, setOutputFormat] = useState<OutputFormat>(OUTPUT_FORMAT_OPTIONS[0].value)
+  const seed = parseSeed(seedInput)
 
   const [isGenerating, setIsGenerating] = useState(false)
   const [result, setResult] = useState<{ url: string; filename: string } | null>(null)
@@ -125,6 +92,7 @@ export default function DialoguePage() {
     modelSupportsDialogue &&
     !charsOver &&
     !voicesOver &&
+    seed.ok &&
     lines.every((l) => l.voiceId && l.text.trim().length > 0)
 
   const insertTagAt = (idx: number) => (tag: string) => {
@@ -152,7 +120,7 @@ export default function DialoguePage() {
   }
 
   const addLine = () => {
-    if (lines.length >= 20) return
+    if (lines.length >= DIALOGUE_LIMITS.maxLines) return
     setLines((prev) => [...prev, { voiceId: prev[prev.length - 1]?.voiceId ?? "", text: "" }])
   }
 
@@ -166,7 +134,6 @@ export default function DialoguePage() {
     setResult(null)
     setIsGenerating(true)
     try {
-      const seedNum = seedInput.trim() === "" ? undefined : Number(seedInput.trim())
       const response = await fetch("/api/elevenlabs/dialogue", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -175,7 +142,7 @@ export default function DialoguePage() {
           inputs: lines.map((l) => ({ voiceId: l.voiceId, text: l.text })),
           stability,
           outputFormat,
-          ...(seedNum !== undefined && Number.isFinite(seedNum) ? { seed: seedNum } : {}),
+          ...(seed.ok && seed.value !== undefined ? { seed: seed.value } : {}),
         }),
       })
       const data = await response.json()
@@ -264,9 +231,7 @@ export default function DialoguePage() {
                 <input
                   type="range"
                   value={stability}
-                  min={0}
-                  max={1}
-                  step={0.05}
+                  {...VOICE_SETTING_RANGES.stability}
                   onChange={(e) => setStability(parseFloat(e.target.value))}
                 />
               </div>
@@ -294,7 +259,7 @@ export default function DialoguePage() {
                 <div className="flex items-baseline justify-between">
                   <Label htmlFor="seed-d">Seed</Label>
                   <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                    OPTIONAL
+                    OPTIONAL · 0–{SEED_MAX}
                   </span>
                 </div>
                 <Input
@@ -303,7 +268,13 @@ export default function DialoguePage() {
                   placeholder="blank = random"
                   value={seedInput}
                   onChange={(e) => setSeedInput(e.target.value.replace(/[^0-9]/g, ""))}
+                  className={!seed.ok ? "border-destructive" : ""}
                 />
+                {!seed.ok && (
+                  <div className="flex items-center gap-2 border border-destructive/40 bg-destructive/10 px-3 py-2 font-mono text-xs text-destructive">
+                    <AlertCircle className="h-3.5 w-3.5" /> {seed.error}
+                  </div>
+                )}
               </div>
             </div>
           </Panel>

@@ -8,48 +8,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Languages, Loader2, Search, Copy, Check } from "lucide-react"
-
-interface OpenRouterModel {
-  id: string
-  name: string
-  pricing?: {
-    prompt: number | string
-    completion: number | string
-  }
-}
-
-function Panel({
-  code,
-  title,
-  hint,
-  children,
-}: {
-  code: string
-  title: string
-  hint?: string
-  children: React.ReactNode
-}) {
-  return (
-    <section className="relative border border-foreground/25 bg-card">
-      <div className="flex items-baseline justify-between border-b border-foreground/15 px-5 py-3">
-        <div className="flex items-baseline gap-3">
-          <span className="font-mono text-[10px] font-bold tracking-[0.18em] text-muted-foreground">
-            [{code}]
-          </span>
-          <h2 className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-foreground">
-            {title}
-          </h2>
-        </div>
-        {hint && (
-          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-            {hint}
-          </span>
-        )}
-      </div>
-      <div className="p-5">{children}</div>
-    </section>
-  )
-}
+import {
+  type OpenRouterModel,
+  filterFreeModels,
+  isFreeModel,
+  searchModelsFuzzy,
+} from "@/lib/openrouter/api"
+import { Panel } from "@/components/ui/panel"
 
 export default function TranslationPage() {
   const [models, setModels] = useState<OpenRouterModel[]>([])
@@ -65,6 +30,8 @@ export default function TranslationPage() {
 
   useEffect(() => {
     fetchModels()
+    loadDefaultModel()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -85,26 +52,25 @@ export default function TranslationPage() {
     }
   }
 
+  // Seed the picker from the operator's stored default so the setting on the
+  // Settings page actually reaches this page. An explicit pick always wins.
+  const loadDefaultModel = async () => {
+    try {
+      const response = await fetch("/api/settings/defaults")
+      if (!response.ok) return
+      const data = await response.json()
+      if (data.default_translation_model) {
+        setSelectedModel((current) => current || data.default_translation_model)
+      }
+    } catch (error) {
+      console.error("Error loading default translation model:", error)
+    }
+  }
+
   const filterModels = () => {
     let filtered = models
-    if (showFreeOnly) {
-      filtered = filtered.filter((model) => {
-        const modelId = model.id || ""
-        if (modelId.endsWith(":free")) return true
-        const pricing: { prompt?: number | string; completion?: number | string } = model.pricing || {}
-        const p = pricing.prompt
-        const c = pricing.completion
-        if (p === 0 && c === 0) return true
-        if (typeof p === "string" && typeof c === "string" && parseFloat(p) === 0 && parseFloat(c) === 0) {
-          return true
-        }
-        return false
-      })
-    }
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim()
-      filtered = filtered.filter((m) => (m.id || "").toLowerCase().includes(q) || (m.name || "").toLowerCase().includes(q))
-    }
+    if (showFreeOnly) filtered = filterFreeModels(filtered)
+    if (searchQuery.trim()) filtered = searchModelsFuzzy(filtered, searchQuery)
     setFilteredModels(filtered)
   }
 
@@ -124,15 +90,6 @@ export default function TranslationPage() {
     } finally {
       setIsTranslating(false)
     }
-  }
-
-  const isModelFree = (model: OpenRouterModel) => {
-    const modelId = model.id || ""
-    if (modelId.endsWith(":free")) return true
-    const pricing: { prompt?: number | string; completion?: number | string } = model.pricing || {}
-    const p = pricing.prompt
-    const c = pricing.completion
-    return (p === 0 && c === 0) || (typeof p === "string" && typeof c === "string" && parseFloat(p) === 0 && parseFloat(c) === 0)
   }
 
   const copy = () => {
@@ -226,7 +183,7 @@ export default function TranslationPage() {
                     <SelectItem key={model.id} value={model.id}>
                       <div className="flex w-full items-center gap-2">
                         <span className="flex-1">{model.name || model.id}</span>
-                        {isModelFree(model) && (
+                        {isFreeModel(model) && (
                           <span className="border border-primary px-1 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-primary">
                             FREE
                           </span>

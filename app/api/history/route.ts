@@ -13,6 +13,10 @@ export async function GET() {
       filename: g.filename,
       created_at: new Date(g.created_at).toISOString(),
       batch_id: g.batch_id,
+      kind: g.kind,
+      seed: g.seed,
+      output_format: g.output_format,
+      request_id: g.request_id,
     }))
     return NextResponse.json({ generations })
   } catch (error) {

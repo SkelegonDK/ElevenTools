@@ -16,26 +16,20 @@ import {
   type StabilityMode,
 } from "@/lib/utils/model-capabilities"
 import {
-  DEFAULT_OUTPUT_FORMAT,
   type ElevenLabsModel,
   type ElevenLabsVoice,
   type OutputFormat,
   type TextNormalization,
 } from "@/lib/elevenlabs/types"
-
-const OUTPUT_FORMAT_OPTIONS: Array<{ value: OutputFormat; label: string; hint?: string }> = [
-  { value: "mp3_44100_128", label: "MP3 · 44.1kHz · 128 kbps", hint: "default" },
-  { value: "mp3_44100_192", label: "MP3 · 44.1kHz · 192 kbps", hint: "creator+" },
-  { value: "mp3_44100_96", label: "MP3 · 44.1kHz · 96 kbps" },
-  { value: "mp3_44100_64", label: "MP3 · 44.1kHz · 64 kbps" },
-  { value: "mp3_22050_32", label: "MP3 · 22.05kHz · 32 kbps" },
-  { value: "pcm_24000", label: "PCM · 24kHz" },
-  { value: "pcm_44100", label: "PCM · 44.1kHz", hint: "pro+" },
-  { value: "pcm_48000", label: "PCM · 48kHz", hint: "pro+" },
-  { value: "ulaw_8000", label: "µ-law · 8kHz", hint: "telephony" },
-]
-
-const NORMALIZATION_OPTIONS: TextNormalization[] = ["auto", "on", "off"]
+import {
+  DEFAULT_VOICE_SETTINGS,
+  NORMALIZATION_OPTIONS,
+  OUTPUT_FORMAT_OPTIONS,
+  SEED_MAX,
+  VOICE_SETTING_RANGES,
+  parseSeed,
+} from "@/lib/generation/request"
+import { Panel } from "@/components/ui/panel"
 
 interface GenerationResult {
   index: number
@@ -44,40 +38,9 @@ interface GenerationResult {
   text: string
 }
 
-// Small wrapper used throughout this page — replaces the soft shadcn Card
-function Panel({
-  code,
-  title,
-  hint,
-  children,
-  className = "",
-}: {
-  code: string
-  title: string
-  hint?: string
-  children: React.ReactNode
-  className?: string
-}) {
-  return (
-    <section className={`relative border border-foreground/25 bg-card ${className}`}>
-      <div className="flex items-baseline justify-between border-b border-foreground/15 px-5 py-3">
-        <div className="flex items-baseline gap-3">
-          <span className="font-mono text-[10px] font-bold tracking-[0.18em] text-muted-foreground">
-            [{code}]
-          </span>
-          <h2 className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-foreground">
-            {title}
-          </h2>
-        </div>
-        {hint && (
-          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-            {hint}
-          </span>
-        )}
-      </div>
-      <div className="p-5">{children}</div>
-    </section>
-  )
+interface GenerationError {
+  index: number
+  error: string
 }
 
 function SliderRow({
@@ -113,10 +76,11 @@ export default function BulkGenerationPage() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [progress, setProgress] = useState(0)
   const [results, setResults] = useState<GenerationResult[]>([])
-  const [batchId, setBatchId] = useState("batch-pending")
-  useEffect(() => {
-    setBatchId(`batch-${Date.now()}`)
-  }, [])
+  const [rowErrors, setRowErrors] = useState<GenerationError[]>([])
+  const [batchError, setBatchError] = useState<string | null>(null)
+  // The server mints the batch id — it is the thing that owns the directory
+  // name — and hands it back on the response.
+  const [batchId, setBatchId] = useState<string | null>(null)
 
   const [isLoadingModels, setIsLoadingModels] = useState(true)
   const [isLoadingVoices, setIsLoadingVoices] = useState(true)
@@ -129,14 +93,18 @@ export default function BulkGenerationPage() {
   const [isValidatingVoiceId, setIsValidatingVoiceId] = useState(false)
   const [voiceIdError, setVoiceIdError] = useState<string | null>(null)
 
-  const [stability, setStability] = useState(0.5)
-  const [similarityBoost, setSimilarityBoost] = useState(0.5)
-  const [style, setStyle] = useState(0.0)
-  const [useSpeakerBoost, setUseSpeakerBoost] = useState(false)
+  const [stability, setStability] = useState(DEFAULT_VOICE_SETTINGS.stability)
+  const [similarityBoost, setSimilarityBoost] = useState(DEFAULT_VOICE_SETTINGS.similarity_boost)
+  const [style, setStyle] = useState(DEFAULT_VOICE_SETTINGS.style)
+  const [useSpeakerBoost, setUseSpeakerBoost] = useState(DEFAULT_VOICE_SETTINGS.use_speaker_boost)
   const [speed, setSpeed] = useState<number | undefined>(undefined)
-  const [outputFormat, setOutputFormat] = useState<OutputFormat>(DEFAULT_OUTPUT_FORMAT)
+  const [outputFormat, setOutputFormat] = useState<OutputFormat>(
+    OUTPUT_FORMAT_OPTIONS[0].value
+  )
   const [seedInput, setSeedInput] = useState("")
   const [normalization, setNormalization] = useState<TextNormalization>("auto")
+
+  const seed = parseSeed(seedInput)
 
   const modelCapabilities = selectedModelId ? getModelCapabilities(selectedModelId) : null
   const stabilityMode: StabilityMode | null = modelCapabilities?.stabilityPresets
@@ -187,8 +155,8 @@ export default function BulkGenerationPage() {
     if (!selectedModelId) return
     const capabilities = getModelCapabilities(selectedModelId)
     if (!capabilities.speed) setSpeed(undefined)
-    if (!capabilities.style) setStyle(0.0)
-    if (!capabilities.speakerBoost) setUseSpeakerBoost(false)
+    if (!capabilities.style) setStyle(DEFAULT_VOICE_SETTINGS.style)
+    if (!capabilities.speakerBoost) setUseSpeakerBoost(DEFAULT_VOICE_SETTINGS.use_speaker_boost)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedModelId])
 
@@ -239,19 +207,23 @@ export default function BulkGenerationPage() {
     setCsvData(data)
     setDetectedVariables(variables)
     setResults([])
+    setRowErrors([])
+    setBatchError(null)
   }
 
   const handleGenerate = async () => {
     const voiceId = getCurrentVoiceId()
     if (!csvData.length || !selectedModelId || !voiceId) return
     if (useManualVoiceId && voiceIdError) return
+    if (!seed.ok) return
 
     setIsGenerating(true)
     setProgress(0)
     setResults([])
+    setRowErrors([])
+    setBatchError(null)
 
     try {
-      const seedNum = seedInput.trim() === "" ? undefined : Number(seedInput.trim())
       const response = await fetch("/api/bulk/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -266,20 +238,25 @@ export default function BulkGenerationPage() {
             use_speaker_boost: useSpeakerBoost,
             speed,
           },
-          batchId,
           outputFormat,
-          ...(seedNum !== undefined && Number.isFinite(seedNum) ? { seed: seedNum } : {}),
+          ...(seed.value !== undefined ? { seed: seed.value } : {}),
           applyTextNormalization: normalization,
         }),
       })
 
       const data = await response.json()
-      if (response.ok) {
-        setResults(data.results || [])
-        setProgress(100)
+      if (!response.ok) {
+        setBatchError(data.error || `Request failed (${response.status})`)
+        return
       }
+
+      setResults(data.results || [])
+      setRowErrors(data.errors || [])
+      setBatchId(data.batchId ?? null)
+      setProgress(100)
     } catch (error) {
       console.error("Error generating audio:", error)
+      setBatchError(error instanceof Error ? error.message : "Failed to reach the server")
     } finally {
       setIsGenerating(false)
     }
@@ -298,7 +275,7 @@ export default function BulkGenerationPage() {
           <div className="hidden md:block">
             <div className="border border-foreground/25 px-4 py-3 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
               <div>BATCH ID</div>
-              <div className="mt-1 font-bold text-foreground">{batchId}</div>
+              <div className="mt-1 font-bold text-foreground">{batchId ?? "—"}</div>
             </div>
           </div>
         </div>
@@ -502,26 +479,20 @@ export default function BulkGenerationPage() {
               <SliderRow
                 label="Stability"
                 value={stability}
-                min={0}
-                max={1}
-                step={0.05}
+                {...VOICE_SETTING_RANGES.stability}
                 onChange={(e) => setStability(parseFloat(e.target.value))}
               />
               <SliderRow
                 label="Similarity Boost"
                 value={similarityBoost}
-                min={0}
-                max={1}
-                step={0.05}
+                {...VOICE_SETTING_RANGES.similarity_boost}
                 onChange={(e) => setSimilarityBoost(parseFloat(e.target.value))}
               />
               {modelCapabilities?.style !== false && (
                 <SliderRow
                   label="Style"
                   value={style}
-                  min={0}
-                  max={1}
-                  step={0.05}
+                  {...VOICE_SETTING_RANGES.style}
                   onChange={(e) => setStyle(parseFloat(e.target.value))}
                 />
               )}
@@ -541,9 +512,7 @@ export default function BulkGenerationPage() {
                 <SliderRow
                   label="Speed"
                   value={speed ?? 1.0}
-                  min={0.25}
-                  max={4.0}
-                  step={0.05}
+                  {...VOICE_SETTING_RANGES.speed}
                   fmt={(v) => `${v.toFixed(2)}×`}
                   onChange={(e) => {
                     const v = parseFloat(e.target.value)
@@ -557,7 +526,7 @@ export default function BulkGenerationPage() {
                 <div className="flex items-baseline justify-between">
                   <Label htmlFor="seed">Seed</Label>
                   <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                    OPTIONAL · 0–4294967295
+                    OPTIONAL · 0–{SEED_MAX}
                   </span>
                 </div>
                 <Input
@@ -567,7 +536,13 @@ export default function BulkGenerationPage() {
                   placeholder="blank = random"
                   value={seedInput}
                   onChange={(e) => setSeedInput(e.target.value.replace(/[^0-9]/g, ""))}
+                  className={!seed.ok ? "border-destructive" : ""}
                 />
+                {!seed.ok && (
+                  <div className="flex items-center gap-2 border border-destructive/40 bg-destructive/10 px-3 py-2 font-mono text-xs text-destructive">
+                    <AlertCircle className="h-3.5 w-3.5" /> {seed.error}
+                  </div>
+                )}
               </div>
 
               {/* Text normalization */}
@@ -611,6 +586,7 @@ export default function BulkGenerationPage() {
                 !selectedModelId ||
                 !getCurrentVoiceId() ||
                 isGenerating ||
+                !seed.ok ||
                 (useManualVoiceId && (!!voiceIdError || isValidatingVoiceId))
               }
               size="lg"
@@ -638,6 +614,13 @@ export default function BulkGenerationPage() {
                 <Progress value={progress} />
               </div>
             )}
+
+            {batchError && (
+              <div className="mt-4 flex items-start gap-2 border border-destructive/40 bg-destructive/10 px-3 py-2 font-mono text-xs text-destructive">
+                <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                <span>{batchError}</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -646,10 +629,32 @@ export default function BulkGenerationPage() {
           <Panel
             code="04"
             title="Dispatch Log"
-            hint={results.length ? `${results.length} FILES` : "EMPTY"}
+            hint={
+              rowErrors.length
+                ? `${results.length} OK · ${rowErrors.length} FAILED`
+                : results.length
+                  ? `${results.length} FILES`
+                  : "EMPTY"
+            }
             className="sticky top-4"
           >
-            {results.length === 0 ? (
+            {rowErrors.length > 0 && (
+              <ul className="mb-4 space-y-2 border border-destructive/40 bg-destructive/10 p-3">
+                {rowErrors.map((rowError) => (
+                  <li
+                    key={rowError.index}
+                    className="flex items-start gap-2 font-mono text-[11px] text-destructive"
+                  >
+                    <span className="font-bold tabular-nums">
+                      #{String(rowError.index + 1).padStart(3, "0")}
+                    </span>
+                    <span className="flex-1">{rowError.error}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {results.length === 0 && rowErrors.length === 0 ? (
               <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
                 <div className="font-display text-5xl text-foreground/15">▢</div>
                 <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">

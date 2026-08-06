@@ -262,7 +262,7 @@ Hi {firstName} {lastName},John,hi_{firstName}.mp3`}
             ref={textareaRef}
             value={csvText}
             onChange={handleTextChange}
-            placeholder={`text,filename\nHello {name},audio_{name}.mp3\nWelcome {user},welcome_{user}.mp3`}
+            placeholder={`text,filename,name,user\nHello {name},audio_{name}.mp3\nWelcome {user},welcome_{user}.mp3`}
             className="min-h-[140px]"
           />
         </div>

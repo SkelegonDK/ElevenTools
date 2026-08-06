@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createReadStream, statSync } from 'node:fs'
-import { join, resolve, sep } from 'node:path'
-import { AUDIO_ROOT } from '@/lib/storage'
-
-const ROOT = resolve(AUDIO_ROOT)
+import { getAudioStore } from '@/lib/storage'
 
 export async function GET(
   _request: Request,
@@ -11,18 +8,11 @@ export async function GET(
 ) {
   const { path: segments } = await params
 
-  if (!segments || segments.length === 0) {
+  // The store owns path safety for reads as well as writes, so this route and
+  // `put` cannot drift into two different notions of "inside the audio root".
+  const filePath = getAudioStore().resolveForRead((segments ?? []).map(decodeURIComponent))
+  if (!filePath) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  }
-
-  const decoded = segments.map(decodeURIComponent)
-  if (decoded.some((s) => s.includes('..') || s.includes('/') || s.includes('\\'))) {
-    return NextResponse.json({ error: 'Invalid path' }, { status: 400 })
-  }
-
-  const filePath = resolve(join(ROOT, ...decoded))
-  if (filePath !== ROOT && !filePath.startsWith(ROOT + sep)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
   let stat
