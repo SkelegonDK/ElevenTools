@@ -61,3 +61,5 @@ build/
 *~
 Untitled
 .coverage
+/.serena
+/.claude
