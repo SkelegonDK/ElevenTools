@@ -1,0 +1,726 @@
+[     414ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[ 1371932ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[ 1371995ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3001/_next/static/webpack/50ac19e1e22cfef6.webpack.hot-update.json:0
+[ 1372429ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[ 1376504ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[ 1376549ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3001/_next/static/webpack/50ac19e1e22cfef6.webpack.hot-update.json:0
+[ 1376990ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[ 1384693ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[ 1384739ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3001/_next/static/webpack/50ac19e1e22cfef6.webpack.hot-update.json:0
+[ 1385151ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[ 1540388ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[ 1540723ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3001/_next/static/webpack/bf2afb2014f549a2.webpack.hot-update.json:0
+[ 1541385ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[ 1590387ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[ 1590503ms] [LOG] [Fast Refresh] done in 116ms @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/report-hmr-latency.js:13
+[ 1597571ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[ 1597652ms] [LOG] [Fast Refresh] done in 82ms @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/report-hmr-latency.js:13
+[ 1618800ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[ 1618878ms] [LOG] [Fast Refresh] done in 78ms @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/report-hmr-latency.js:13
+[ 1619003ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[ 1619056ms] [LOG] [Fast Refresh] done in 54ms @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/report-hmr-latency.js:13
+[ 1629516ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[ 1629613ms] [LOG] [Fast Refresh] done in 98ms @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/report-hmr-latency.js:13
+[ 1645284ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[ 1645400ms] [LOG] [Fast Refresh] done in 116ms @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/report-hmr-latency.js:13
+[ 1650913ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[ 1651022ms] [LOG] [Fast Refresh] done in 108ms @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/report-hmr-latency.js:13
+[ 1655379ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[ 1655511ms] [LOG] [Fast Refresh] done in 133ms @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/report-hmr-latency.js:13
+[ 1673409ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[ 1673560ms] [LOG] [Fast Refresh] done in 152ms @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/report-hmr-latency.js:13
+[ 1679471ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[ 1683690ms] [ERROR] node:child_process
+Module build failed: UnhandledSchemeError: Reading from "node:child_process" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:child_process
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/play.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1683691ms] [ERROR] node:crypto
+Module build failed: UnhandledSchemeError: Reading from "node:crypto" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:crypto
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/SpeechEngineResource.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1683691ms] [ERROR] node:events
+Module build failed: UnhandledSchemeError: Reading from "node:events" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:events
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/realtime/connection.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/realtime/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1683691ms] [ERROR] node:http
+Module build failed: UnhandledSchemeError: Reading from "node:http" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:http
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/SpeechEngineServer.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1683691ms] [ERROR] node:stream
+Module build failed: UnhandledSchemeError: Reading from "node:stream" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:stream
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/play.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1683698ms] [LOG] {file: Object} @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/next-devtools/index.js:1630
+[ 1684528ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[ 1689585ms] [ERROR] node:child_process
+Module build failed: UnhandledSchemeError: Reading from "node:child_process" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:child_process
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/play.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1689585ms] [ERROR] node:crypto
+Module build failed: UnhandledSchemeError: Reading from "node:crypto" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:crypto
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/SpeechEngineResource.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1689585ms] [ERROR] node:events
+Module build failed: UnhandledSchemeError: Reading from "node:events" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:events
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/realtime/connection.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/realtime/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1689585ms] [ERROR] node:http
+Module build failed: UnhandledSchemeError: Reading from "node:http" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:http
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/SpeechEngineServer.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1689585ms] [ERROR] node:stream
+Module build failed: UnhandledSchemeError: Reading from "node:stream" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:stream
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/play.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1699655ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[ 1699951ms] [ERROR] node:child_process
+Module build failed: UnhandledSchemeError: Reading from "node:child_process" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:child_process
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/stream.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1699951ms] [ERROR] node:crypto
+Module build failed: UnhandledSchemeError: Reading from "node:crypto" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:crypto
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/SpeechEngineResource.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1699951ms] [ERROR] node:events
+Module build failed: UnhandledSchemeError: Reading from "node:events" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:events
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/realtime/connection.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/realtime/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1699952ms] [ERROR] node:http
+Module build failed: UnhandledSchemeError: Reading from "node:http" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:http
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/SpeechEngineServer.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1699952ms] [ERROR] node:stream
+Module build failed: UnhandledSchemeError: Reading from "node:stream" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:stream
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/stream.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1699953ms] [LOG] {file: Object} @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/next-devtools/index.js:1630
+[ 1708713ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[ 1709060ms] [ERROR] node:child_process
+Module build failed: UnhandledSchemeError: Reading from "node:child_process" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:child_process
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/play.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1709060ms] [ERROR] node:crypto
+Module build failed: UnhandledSchemeError: Reading from "node:crypto" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:crypto
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/SpeechEngineResource.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1709060ms] [ERROR] node:events
+Module build failed: UnhandledSchemeError: Reading from "node:events" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:events
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/realtime/connection.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/realtime/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1709060ms] [ERROR] node:http
+Module build failed: UnhandledSchemeError: Reading from "node:http" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:http
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/SpeechEngineServer.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1709060ms] [ERROR] node:stream
+Module build failed: UnhandledSchemeError: Reading from "node:stream" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:stream
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/play.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1709061ms] [LOG] {file: Object} @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/next-devtools/index.js:1630
+[ 1717410ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[ 1717908ms] [ERROR] node:child_process
+Module build failed: UnhandledSchemeError: Reading from "node:child_process" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:child_process
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/play.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1717908ms] [ERROR] node:crypto
+Module build failed: UnhandledSchemeError: Reading from "node:crypto" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:crypto
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/SpeechEngineResource.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1717908ms] [ERROR] node:events
+Module build failed: UnhandledSchemeError: Reading from "node:events" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:events
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/realtime/connection.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/realtime/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1717908ms] [ERROR] node:http
+Module build failed: UnhandledSchemeError: Reading from "node:http" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:http
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/SpeechEngineServer.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1717908ms] [ERROR] node:stream
+Module build failed: UnhandledSchemeError: Reading from "node:stream" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:stream
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/play.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1781531ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[ 1781827ms] [ERROR] node:child_process
+Module build failed: UnhandledSchemeError: Reading from "node:child_process" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:child_process
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/stream.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1781828ms] [ERROR] node:crypto
+Module build failed: UnhandledSchemeError: Reading from "node:crypto" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:crypto
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/SpeechEngineResource.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1781828ms] [ERROR] node:events
+Module build failed: UnhandledSchemeError: Reading from "node:events" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:events
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/realtime/connection.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/realtime/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1781828ms] [ERROR] node:http
+Module build failed: UnhandledSchemeError: Reading from "node:http" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:http
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/SpeechEngineServer.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1781828ms] [ERROR] node:stream
+Module build failed: UnhandledSchemeError: Reading from "node:stream" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:stream
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/stream.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1781829ms] [LOG] {file: Object} @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/next-devtools/index.js:1630
+[ 1781840ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[ 1783134ms] [ERROR] node:child_process
+Module build failed: UnhandledSchemeError: Reading from "node:child_process" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:child_process
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/play.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1783134ms] [ERROR] node:crypto
+Module build failed: UnhandledSchemeError: Reading from "node:crypto" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:crypto
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/SpeechEngineResource.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1783134ms] [ERROR] node:events
+Module build failed: UnhandledSchemeError: Reading from "node:events" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:events
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/SpeechEngineSession.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1783134ms] [ERROR] node:http
+Module build failed: UnhandledSchemeError: Reading from "node:http" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:http
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/SpeechEngineServer.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1783134ms] [ERROR] node:stream
+Module build failed: UnhandledSchemeError: Reading from "node:stream" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:stream
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/play.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1783135ms] [LOG] {file: Object} @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/next-devtools/index.js:1630
+[ 1783382ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[ 1784302ms] [ERROR] node:child_process
+Module build failed: UnhandledSchemeError: Reading from "node:child_process" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:child_process
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/play.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1784302ms] [ERROR] node:crypto
+Module build failed: UnhandledSchemeError: Reading from "node:crypto" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:crypto
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/SpeechEngineResource.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1784302ms] [ERROR] node:events
+Module build failed: UnhandledSchemeError: Reading from "node:events" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:events
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/realtime/connection.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/realtime/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1784302ms] [ERROR] node:http
+Module build failed: UnhandledSchemeError: Reading from "node:http" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:http
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/SpeechEngineServer.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1784302ms] [ERROR] node:stream
+Module build failed: UnhandledSchemeError: Reading from "node:stream" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:stream
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/play.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[ 1785183ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3001/dashboard/bulk?_rsc=m2aAUu0NOhtFC0LJ:0
+[ 1785195ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3001/dashboard/bulk?_rsc=m2aAUu0NOhtFC0LJ:0
+[ 1785205ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3001/dashboard/bulk?_rsc=m2aAUu0NOhtFC0LJ:0
+[ 1785215ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3001/dashboard/bulk?_rsc=m2aAUu0NOhtFC0LJ:0
+[ 1785286ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3001/dashboard/bulk:0
+[ 1785500ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom/cjs/react-dom-client.development.js:28004
+[ 1785564ms] ModuleBuildError: Module build failed: UnhandledSchemeError: Reading from "node:child_process" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+    at /Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:408351
+    at Hook.eval [as callAsync] (eval at create (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:14:9224), <anonymous>:6:1)
+    at Hook.CALL_ASYNC_DELEGATE [as _callAsync] (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:14:6378)
+    at Object.processResource (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:408276)
+    at processResource (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/loader-runner/LoaderRunner.js:1:5308)
+    at iteratePitchingLoaders (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/loader-runner/LoaderRunner.js:1:4667)
+    at runLoaders (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/loader-runner/LoaderRunner.js:1:8590)
+    at NormalModule._doBuild (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:408138)
+    at NormalModule.build (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:410151)
+    at /Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:82479
+    at NormalModule.needBuild (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:414135)
+    at Compilation._buildModule (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:82196)
+    at /Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:1378123
+    at Hook.eval [as callAsync] (eval at create (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:14:9224), <anonymous>:6:1)
+    at AsyncQueue._startProcessing (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:1377994)
+    at AsyncQueue._ensureProcessing (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:1377843)
+    at process.processImmediate (node:internal/timers:504:21)
+    at process.callbackTrampoline (node:internal/async_hooks:131:14)
+    at /Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:408351
+    at Hook.eval [as callAsync] (eval at create (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:14:9224), <anonymous>:6:1)
+    at Hook.CALL_ASYNC_DELEGATE [as _callAsync] (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:14:6378)
+    at Object.processResource (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:408276)
+    at processResource (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/loader-runner/LoaderRunner.js:1:5308)
+    at iteratePitchingLoaders (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/loader-runner/LoaderRunner.js:1:4667)
+    at runLoaders (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/loader-runner/LoaderRunner.js:1:8590)
+    at NormalModule._doBuild (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:408138)
+    at NormalModule.build (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:410151)
+    at /Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:82479
+    at NormalModule.needBuild (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:414135)
+    at Compilation._buildModule (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:82196)
+    at /Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:1378123
+    at Hook.eval [as callAsync] (eval at create (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:14:9224), <anonymous>:6:1)
+    at AsyncQueue._startProcessing (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:1377994)
+    at AsyncQueue._ensureProcessing (/Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:1377843)
+    at process.processImmediate (node:internal/timers:504:21)
+    at process.callbackTrampoline (node:internal/async_hooks:131:14)
+    at <unknown> (Webpack supports "data:" and "file:" URIs by default.)
+    at <unknown> (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:408351)
+    at Hook.eval [as callAsync] (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:14:9224)
+    at Hook.CALL_ASYNC_DELEGATE [as _callAsync] (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:14:6378)
+    at Object.processResource (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:408276)
+    at processResource (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/loader-runner/LoaderRunner.js:1:5308)
+    at iteratePitchingLoaders (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/loader-runner/LoaderRunner.js:1:4667)
+    at runLoaders (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/loader-runner/LoaderRunner.js:1:8590)
+    at NormalModule._doBuild (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:408138)
+    at NormalModule.build (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:410151)
+    at <unknown> (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:82479)
+    at NormalModule.needBuild (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:414135)
+    at Compilation._buildModule (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:82196)
+    at <unknown> (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:1378123)
+    at Hook.eval [as callAsync] (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:14:9224)
+    at AsyncQueue._startProcessing (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:1377994)
+    at AsyncQueue._ensureProcessing (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:1377843)
+    at process.processImmediate (node:internal/timers:504:21)
+    at process.callbackTrampoline (node:internal/async_hooks:131:14)
+    at processResult (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:407086)
+    at <unknown> (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:408881)
+    at <unknown> (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/loader-runner/LoaderRunner.js:1:8645)
+    at <unknown> (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/loader-runner/LoaderRunner.js:1:5353)
+    at <unknown> (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:408349)
+    at Hook.eval [as callAsync] (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:14:9224)
+    at Hook.CALL_ASYNC_DELEGATE [as _callAsync] (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:14:6378)
+    at Object.processResource (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:408276)
+    at processResource (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/loader-runner/LoaderRunner.js:1:5308)
+    at iteratePitchingLoaders (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/loader-runner/LoaderRunner.js:1:4667)
+    at runLoaders (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/loader-runner/LoaderRunner.js:1:8590)
+    at NormalModule._doBuild (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:408138)
+    at NormalModule.build (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:410151)
+    at <unknown> (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:82479)
+    at NormalModule.needBuild (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:414135)
+    at Compilation._buildModule (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:82196)
+    at <unknown> (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:1378123)
+    at Hook.eval [as callAsync] (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:14:9224)
+    at AsyncQueue._startProcessing (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:1377994)
+    at AsyncQueue._ensureProcessing (file:///Users/manuelthomsen/Documents/Repos/ElevenTools/node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/webpack/bundle5.js:29:1377843)
+    at process.processImmediate (node:internal/timers:504:21)
+    at process.callbackTrampoline (node:internal/async_hooks:131:14)
+[ 1785564ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:45
+[ 1785566ms] [ERROR] node:child_process
+Module build failed: UnhandledSchemeError: Reading from "node:child_process" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs. @ webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/pages/pages-dev-overlay-setup.js:76
+[ 1785566ms] [ERROR] node:crypto
+Module build failed: UnhandledSchemeError: Reading from "node:crypto" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs. @ webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/pages/pages-dev-overlay-setup.js:76
+[ 1785566ms] [ERROR] node:events
+Module build failed: UnhandledSchemeError: Reading from "node:events" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs. @ webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/pages/pages-dev-overlay-setup.js:76
+[ 1785566ms] [ERROR] node:http
+Module build failed: UnhandledSchemeError: Reading from "node:http" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs. @ webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/pages/pages-dev-overlay-setup.js:76
+[ 1785566ms] [ERROR] node:stream
+Module build failed: UnhandledSchemeError: Reading from "node:stream" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs. @ webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/pages/pages-dev-overlay-setup.js:76
+[ 1785587ms] [LOG] {file: Object} @ webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/next-devtools/index.js:1630
+[ 1792032ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:206
+[ 1792826ms] [ERROR] node:child_process
+Module build failed: UnhandledSchemeError: Reading from "node:child_process" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:child_process
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/play.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/pages/pages-dev-overlay-setup.js:76
+[ 1792826ms] [ERROR] node:crypto
+Module build failed: UnhandledSchemeError: Reading from "node:crypto" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:crypto
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/SpeechEngineResource.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/pages/pages-dev-overlay-setup.js:76
+[ 1792826ms] [ERROR] node:events
+Module build failed: UnhandledSchemeError: Reading from "node:events" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:events
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/realtime/connection.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/realtime/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/pages/pages-dev-overlay-setup.js:76
+[ 1792826ms] [ERROR] node:http
+Module build failed: UnhandledSchemeError: Reading from "node:http" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:http
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/SpeechEngineServer.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/speech-engine/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/pages/pages-dev-overlay-setup.js:76
+[ 1792826ms] [ERROR] node:stream
+Module build failed: UnhandledSchemeError: Reading from "node:stream" is not handled by plugins (Unhandled scheme).
+Webpack supports "data:" and "file:" URIs by default.
+You may need an additional plugin to handle "node:" URIs.
+Import trace for requested module:
+node:stream
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/play.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/wrapper/index.js
+./node_modules/.pnpm/@elevenlabs+elevenlabs-js@2.49.1/node_modules/@elevenlabs/elevenlabs-js/index.js
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/pages/pages-dev-overlay-setup.js:76
+[ 1792827ms] [LOG] {file: Object} @ webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/next-devtools/index.js:1630
+[ 1994684ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:206
+[ 1994796ms] [ERROR] ./lib/elevenlabs/api.ts
+Error:   x You're importing a component that needs "server-only". That only works in a Server Component which is not supported in the pages/ directory. Read more: https://nextjs.org/docs/app/building-your-application/rendering/server-components
+  |
+
+   ,-[/Users/manuelthomsen/Documents/Repos/ElevenTools/lib/elevenlabs/api.ts:1:1]
+ 1 | import 'server-only'
+   : ^^^^^^^^^^^^^^^^^^^^
+ 2 | import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js'
+ 3 | import {
+ 4 |   DEFAULT_OUTPUT_FORMAT,
+   `----
+
+Import trace for requested module:
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/pages/pages-dev-overlay-setup.js:76
+[ 1994797ms] [LOG] {file: Object} @ webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/next-devtools/index.js:1630
+[ 1995212ms] [ERROR] ./lib/elevenlabs/api.ts
+Error:   x You're importing a component that needs "server-only". That only works in a Server Component which is not supported in the pages/ directory. Read more: https://nextjs.org/docs/app/building-your-application/rendering/server-components
+  |
+
+   ,-[/Users/manuelthomsen/Documents/Repos/ElevenTools/lib/elevenlabs/api.ts:1:1]
+ 1 | import 'server-only'
+   : ^^^^^^^^^^^^^^^^^^^^
+ 2 | import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js'
+ 3 | import {
+ 4 |   DEFAULT_OUTPUT_FORMAT,
+   `----
+
+Import trace for requested module:
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/pages/pages-dev-overlay-setup.js:76
+[ 1997708ms] [ERROR] ./lib/elevenlabs/api.ts
+Error:   x You're importing a component that needs "server-only". That only works in a Server Component which is not supported in the pages/ directory. Read more: https://nextjs.org/docs/app/building-your-application/rendering/server-components
+  |
+
+   ,-[/Users/manuelthomsen/Documents/Repos/ElevenTools/lib/elevenlabs/api.ts:1:1]
+ 1 | import 'server-only'
+   : ^^^^^^^^^^^^^^^^^^^^
+ 2 | import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js'
+ 3 | import {
+ 4 |   DEFAULT_OUTPUT_FORMAT,
+   `----
+
+Import trace for requested module:
+./lib/elevenlabs/api.ts
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/pages/pages-dev-overlay-setup.js:76
+[ 1997841ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3001/_next/static/webpack/f5492f2e41766cc8.webpack.hot-update.json:0
+[ 1997842ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/pages/hot-reloader-pages.js:347
+[ 1998280ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3001/dashboard/bulk:0

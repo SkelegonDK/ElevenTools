@@ -1,0 +1,185 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e5]:
+      - generic [ref=e7]: ELEVEN/TOOLS
+      - generic [ref=e10]: CONSOLE v2.0 // LOCAL
+    - paragraph [ref=e12]: // MODULES
+    - navigation [ref=e13]:
+      - link "00 Overview ●" [ref=e14] [cursor=pointer]:
+        - /url: /dashboard
+        - generic [ref=e15]: "00"
+        - img [ref=e16]
+        - generic [ref=e21]: Overview
+        - generic [ref=e22]: ●
+      - link "01 Bulk" [ref=e23] [cursor=pointer]:
+        - /url: /dashboard/bulk
+        - generic [ref=e24]: "01"
+        - img [ref=e25]
+        - generic [ref=e28]: Bulk
+      - link "02 Translate" [ref=e29] [cursor=pointer]:
+        - /url: /dashboard/translate
+        - generic [ref=e30]: "02"
+        - img [ref=e31]
+        - generic [ref=e35]: Translate
+      - link "03 History" [ref=e36] [cursor=pointer]:
+        - /url: /dashboard/history
+        - generic [ref=e37]: "03"
+        - img [ref=e38]
+        - generic [ref=e42]: History
+      - link "04 Settings" [ref=e43] [cursor=pointer]:
+        - /url: /dashboard/settings
+        - generic [ref=e44]: "04"
+        - img [ref=e45]
+        - generic [ref=e48]: Settings
+    - generic [ref=e50]:
+      - generic [ref=e51]:
+        - generic [ref=e52]: STACK
+        - generic [ref=e53]: LOCAL · SQLITE
+      - generic [ref=e54]:
+        - generic [ref=e55]: AUTH
+        - generic [ref=e56]: NONE
+      - generic [ref=e57]:
+        - generic [ref=e58]: STATUS
+        - generic [ref=e59]: ONLINE
+  - generic [ref=e61]:
+    - banner [ref=e62]:
+      - generic [ref=e63]:
+        - generic [ref=e64]: ┌
+        - generic [ref=e65]: SESSION
+        - generic [ref=e66]: ET-LIZRF6
+        - generic [ref=e67]: ·
+        - generic [ref=e68]: MODE
+        - generic [ref=e69]: LOCAL
+      - generic [ref=e71]:
+        - generic [ref=e72]:
+          - generic [ref=e73]: ▸
+          - text: ELEVENTOOLS // CONSOLE v2.0
+        - generic [ref=e74]:
+          - generic [ref=e75]: ▸
+          - text: LOCAL STACK · SQLITE · FILESYSTEM
+        - generic [ref=e76]:
+          - generic [ref=e77]: ▸
+          - text: ZERO TELEMETRY
+        - generic [ref=e78]:
+          - generic [ref=e79]: ▸
+          - text: BULK TTS · TRANSLATION · HISTORY
+        - generic [ref=e80]:
+          - generic [ref=e81]: ▸
+          - text: DEVELOPER-GRADE AUDIO SYNTHESIS
+        - generic [ref=e82]:
+          - generic [ref=e83]: ▸
+          - text: ELEVENTOOLS // CONSOLE v2.0
+        - generic [ref=e84]:
+          - generic [ref=e85]: ▸
+          - text: LOCAL STACK · SQLITE · FILESYSTEM
+        - generic [ref=e86]:
+          - generic [ref=e87]: ▸
+          - text: ZERO TELEMETRY
+        - generic [ref=e88]:
+          - generic [ref=e89]: ▸
+          - text: BULK TTS · TRANSLATION · HISTORY
+        - generic [ref=e90]:
+          - generic [ref=e91]: ▸
+          - text: DEVELOPER-GRADE AUDIO SYNTHESIS
+      - generic [ref=e92]:
+        - generic [ref=e93]: 2026-05-28
+        - generic [ref=e94]: ┐
+    - main [ref=e95]:
+      - generic [ref=e97]:
+        - generic [ref=e99]:
+          - generic [ref=e100]:
+            - generic [ref=e101]: "[ 00 ] // OVERVIEW"
+            - heading "ELEVEN /TOOLS_" [level=1] [ref=e102]:
+              - text: ELEVEN
+              - text: /TOOLS_
+            - paragraph [ref=e103]: A developer-grade console for bulk text-to-speech synthesis, translation, and audio dispatch. No tracking. No accounts. Files on disk. State in SQLite.
+            - generic [ref=e104]:
+              - generic [ref=e105]:
+                - term [ref=e106]: Stack
+                - definition [ref=e107]: Local
+              - generic [ref=e108]:
+                - term [ref=e109]: Engine
+                - definition [ref=e110]: ElevenLabs
+              - generic [ref=e111]:
+                - term [ref=e112]: Storage
+                - definition [ref=e113]: SQLite + FS
+              - generic [ref=e114]:
+                - term [ref=e115]: Auth
+                - definition [ref=e116]: "Off"
+          - generic [ref=e117]:
+            - generic [ref=e118]:
+              - generic [ref=e119]: // MANIFEST
+              - list [ref=e120]:
+                - listitem [ref=e121]:
+                  - generic [ref=e122]: ▸
+                  - text: Bulk synthesis over CSV input
+                - listitem [ref=e123]:
+                  - generic [ref=e124]: ▸
+                  - text: Variable interpolation per row
+                - listitem [ref=e125]:
+                  - generic [ref=e126]: ▸
+                  - text: Local-only storage & playback
+                - listitem [ref=e127]:
+                  - generic [ref=e128]: ▸
+                  - text: Translation hand-off to OpenRouter
+            - generic [ref=e130]: Build · 2026.05 · NO-AUTH-EDITION
+        - generic [ref=e131]:
+          - generic [ref=e132]:
+            - heading "[ ▼ ] // MODULES — SELECT ENTRYPOINT" [level=2] [ref=e133]
+            - generic [ref=e134]: 4 TOTAL
+          - generic [ref=e135]:
+            - 'link "[01] Bulk Generation CSV-driven batch synthesis with {variable} personalization. ENTER" [ref=e136] [cursor=pointer]':
+              - /url: /dashboard/bulk
+              - generic [ref=e138]:
+                - generic [ref=e139]:
+                  - generic [ref=e140]: "[01]"
+                  - img [ref=e141]
+                - heading "Bulk Generation" [level=3] [ref=e144]
+                - paragraph [ref=e145]: "CSV-driven batch synthesis with {variable} personalization."
+              - generic [ref=e146]:
+                - text: ENTER
+                - img [ref=e147]
+            - link "[02] Translation Pre-flight text translation via OpenRouter LLMs. ENTER" [ref=e150] [cursor=pointer]:
+              - /url: /dashboard/translate
+              - generic [ref=e151]:
+                - generic [ref=e152]:
+                  - generic [ref=e153]: "[02]"
+                  - img [ref=e154]
+                - heading "Translation" [level=3] [ref=e158]
+                - paragraph [ref=e159]: Pre-flight text translation via OpenRouter LLMs.
+              - generic [ref=e160]:
+                - text: ENTER
+                - img [ref=e161]
+            - link "[03] History Recall, audition, and purge prior generations. ENTER" [ref=e164] [cursor=pointer]:
+              - /url: /dashboard/history
+              - generic [ref=e165]:
+                - generic [ref=e166]:
+                  - generic [ref=e167]: "[03]"
+                  - img [ref=e168]
+                - heading "History" [level=3] [ref=e172]
+                - paragraph [ref=e173]: Recall, audition, and purge prior generations.
+              - generic [ref=e174]:
+                - text: ENTER
+                - img [ref=e175]
+            - link "[04] Settings Default model wiring & operator preferences. ENTER" [ref=e178] [cursor=pointer]:
+              - /url: /dashboard/settings
+              - generic [ref=e179]:
+                - generic [ref=e180]:
+                  - generic [ref=e181]: "[04]"
+                  - img [ref=e182]
+                - heading "Settings" [level=3] [ref=e185]
+                - paragraph [ref=e186]: Default model wiring & operator preferences.
+              - generic [ref=e187]:
+                - text: ENTER
+                - img [ref=e188]
+        - paragraph [ref=e195]: // OPERATOR NOTE. Tool requires ELEVENLABS_API_KEY and OPENROUTER_API_KEY in .env.local. Generated audio lives in /data/audio/. Database in /data/eleventools.db.
+    - contentinfo [ref=e196]:
+      - generic [ref=e197]:
+        - generic [ref=e198]: READY
+        - generic [ref=e200]: "|"
+        - generic [ref=e201]: BUF 0 KB
+        - generic [ref=e202]: "|"
+        - generic [ref=e203]: QUEUE EMPTY
+      - generic [ref=e204]:
+        - generic [ref=e205]: └ END OF FRAME
+        - generic [ref=e206]: ┘

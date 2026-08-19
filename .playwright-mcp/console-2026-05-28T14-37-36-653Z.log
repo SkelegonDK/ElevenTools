@@ -1,0 +1,91 @@
+[     741ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.development.js:25630
+[    1099ms] [LOG] [Fast Refresh] done in 1779979057751ms @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/report-hmr-latency.js:13
+[  607194ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[  607454ms] [LOG] [Fast Refresh] done in 259ms @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/report-hmr-latency.js:13
+[  612354ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/hot-reloader/app/hot-reloader-app.js:196
+[  612455ms] [ERROR] ./components/bulk-generator/csv-upload.tsx
+Error:   x Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+     ,-[/Users/manuelthomsen/Documents/Repos/ElevenTools/components/bulk-generator/csv-upload.tsx:294:1]
+ 291 |       </div>
+ 292 |     </section>
+ 293 |   )
+ 294 | }
+     : ^
+     `----
+  x Expected '</', got 'jsx text (
+  |   )
+  | }
+  | )'
+     ,-[/Users/manuelthomsen/Documents/Repos/ElevenTools/components/bulk-generator/csv-upload.tsx:292:1]
+ 289 |               </div>
+ 290 |             )}
+ 291 |           </div>
+ 292 | ,->     </section>
+ 293 | |     )
+ 294 | `-> }
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/bulk-generator/csv-upload.tsx
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[  612462ms] [LOG] {file: Object} @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/compiled/next-devtools/index.js:1630
+[  612797ms] [ERROR] ./components/bulk-generator/csv-upload.tsx
+Error:   x Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+     ,-[/Users/manuelthomsen/Documents/Repos/ElevenTools/components/bulk-generator/csv-upload.tsx:294:1]
+ 291 |       </div>
+ 292 |     </section>
+ 293 |   )
+ 294 | }
+     : ^
+     `----
+  x Expected '</', got 'jsx text (
+  |   )
+  | }
+  | )'
+     ,-[/Users/manuelthomsen/Documents/Repos/ElevenTools/components/bulk-generator/csv-upload.tsx:292:1]
+ 289 |               </div>
+ 290 |             )}
+ 291 |           </div>
+ 292 | ,->     </section>
+ 293 | |     )
+ 294 | `-> }
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/bulk-generator/csv-upload.tsx
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[  638392ms] [ERROR] ./components/bulk-generator/csv-upload.tsx
+Error:   x Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+     ,-[/Users/manuelthomsen/Documents/Repos/ElevenTools/components/bulk-generator/csv-upload.tsx:294:1]
+ 291 |       </div>
+ 292 |     </section>
+ 293 |   )
+ 294 | }
+     : ^
+     `----
+  x Expected '</', got 'jsx text (
+  |   )
+  | }
+  | )'
+     ,-[/Users/manuelthomsen/Documents/Repos/ElevenTools/components/bulk-generator/csv-upload.tsx:292:1]
+ 289 |               </div>
+ 290 |             )}
+ 291 |           </div>
+ 292 | ,->     </section>
+ 293 | |     )
+ 294 | `-> }
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/bulk-generator/csv-upload.tsx
+./app/(dashboard)/dashboard/bulk/page.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:56
+[  638648ms] [LOG] [Fast Refresh] done in 26294ms @ webpack-internal:///(app-pages-browser)/./node_modules/.pnpm/next@15.5.18_@opentelemetry+api@1.9.1_react-dom@19.2.6_react@19.2.6__react@19.2.6/node_modules/next/dist/client/dev/report-hmr-latency.js:13
