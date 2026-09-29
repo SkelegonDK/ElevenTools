@@ -1,6 +1,7 @@
 import 'server-only'
 import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js'
 import { revalidateTag, unstable_cache } from 'next/cache'
+import { getModelCapabilities, isV4Model, V4_TEXT_LIMIT } from '@/lib/utils/model-capabilities'
 import {
   DEFAULT_OUTPUT_FORMAT,
   type DialogueInput,
@@ -150,7 +151,7 @@ export const getVoices = unstable_cache(
 
 export const getModels = unstable_cache(
   async (): Promise<ElevenLabsModel[]> => fetchModels(requireApiKey()),
-  ['elevenlabs', 'models', 'v1'],
+  ['elevenlabs', 'models', 'v2'],
   { revalidate: MODELS_FRESHNESS.serverRevalidate, tags: [MODELS_CACHE_TAG] }
 )
 
@@ -185,6 +186,11 @@ export async function generateAudio(params: GenerateAudioParams): Promise<Genera
     nextRequestIds,
   } = params
 
+  // Validate the final text here, after batch template variables are expanded.
+  if (isV4Model(modelId) && Array.from(text).length > V4_TEXT_LIMIT) {
+    throw new Error(`Model ${modelId} supports at most ${V4_TEXT_LIMIT} characters per speech request`)
+  }
+  const capabilities = getModelCapabilities(modelId)
   const c = client(apiKey)
   const { data: stream, rawResponse } = await c.textToSpeech
     .convert(voiceId, {
@@ -194,9 +200,11 @@ export async function generateAudio(params: GenerateAudioParams): Promise<Genera
       voiceSettings: {
         stability: voiceSettings.stability,
         similarityBoost: voiceSettings.similarity_boost,
-        style: voiceSettings.style,
-        useSpeakerBoost: voiceSettings.use_speaker_boost,
-        ...(voiceSettings.speed !== undefined ? { speed: voiceSettings.speed } : {}),
+        ...(capabilities.style ? { style: voiceSettings.style } : {}),
+        ...(capabilities.speakerBoost ? { useSpeakerBoost: voiceSettings.use_speaker_boost } : {}),
+        ...(capabilities.speed && voiceSettings.speed !== undefined
+          ? { speed: voiceSettings.speed }
+          : {}),
       },
       ...(languageCode ? { languageCode } : {}),
       ...(seed !== undefined ? { seed } : {}),

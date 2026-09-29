@@ -177,7 +177,7 @@ export default function DialoguePage() {
           </div>
         </div>
         <p className="mt-4 max-w-2xl font-mono text-sm text-muted-foreground">
-          Compose multi-speaker dialogue. v3 model only. Drop in audio tags like{" "}
+          Compose multi-speaker dialogue. Eleven v3 or v4. Drop in audio tags like{" "}
           <span className="text-primary">[whispers]</span> and{" "}
           <span className="text-primary">[laughs]</span> for delivery hints.
         </p>
@@ -189,7 +189,7 @@ export default function DialoguePage() {
           <Panel
             code="01"
             title="Cast & Settings"
-            hint={modelSupportsDialogue ? "READY" : "v3 REQUIRED"}
+            hint={modelSupportsDialogue ? "READY" : "v3 / v4 REQUIRED"}
           >
             <div className="space-y-5">
               <div className="space-y-2">

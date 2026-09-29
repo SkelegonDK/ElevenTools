@@ -12,6 +12,13 @@ import {
 } from '@/lib/utils/model-capabilities'
 
 describe('model capabilities', () => {
+  it.each(['eleven_v4', 'eleven_v4_turbo'])('%s exposes only supported controls', (modelId) => {
+    expect(getModelCapabilities(modelId)).toEqual({
+      speed: false, audioTags: true, speakerBoost: false, style: false,
+      stabilityPresets: false, dialogue: modelId === 'eleven_v4', deprecated: false,
+    })
+  })
+
   it('flash v2.5 supports speed but not audio tags', () => {
     expect(supportsSpeed('eleven_flash_v2_5')).toBe(true)
     expect(supportsAudioTags('eleven_flash_v2_5')).toBe(false)

@@ -8,6 +8,13 @@
  * returns them.
  */
 
+// Keep v4 explicit: Turbo supports single-speaker speech, not multi-speaker dialogue.
+export function isV4Model(modelId: string): boolean {
+  return modelId === 'eleven_v4' || modelId === 'eleven_v4_turbo'
+}
+
+export const V4_TEXT_LIMIT = 10_000
+
 // Allow-list of model IDs that explicitly support speed control
 const SPEED_SUPPORTED_MODELS = new Set([
   'eleven_multilingual_v2',
@@ -36,6 +43,7 @@ export function supportsSpeed(modelId: string): boolean {
 
 export function supportsAudioTags(modelId: string): boolean {
   if (!modelId) return false
+  if (isV4Model(modelId)) return true
   if (AUDIO_TAGS_SUPPORTED_MODELS.has(modelId)) return true
   const lower = modelId.toLowerCase()
   return AUDIO_TAGS_SUPPORT_PATTERNS.some((p) => lower.includes(p))
@@ -45,11 +53,13 @@ const NO_SPEAKER_BOOST_MODELS = new Set(['eleven_monolingual_v1', 'eleven_multil
 const NO_STYLE_MODELS = new Set(['eleven_monolingual_v1', 'eleven_multilingual_v1'])
 
 export function supportsSpeakerBoost(modelId: string): boolean {
+  if (isV4Model(modelId)) return false
   if (!modelId) return true
   return !NO_SPEAKER_BOOST_MODELS.has(modelId)
 }
 
 export function supportsStyle(modelId: string): boolean {
+  if (isV4Model(modelId)) return false
   if (!modelId) return true
   return !NO_STYLE_MODELS.has(modelId)
 }
@@ -69,13 +79,14 @@ export const STABILITY_PRESETS: Record<StabilityMode, number> = {
 }
 
 export function supportsStabilityPresets(modelId: string): boolean {
-  return supportsAudioTags(modelId)
+  return !isV4Model(modelId) && supportsAudioTags(modelId)
 }
 
 /**
- * Text-to-Dialogue (multi-speaker) is currently v3-only.
+ * Multi-speaker dialogue supports standard v4 and the existing v3 models.
  */
 export function supportsDialogue(modelId: string): boolean {
+  if (isV4Model(modelId)) return modelId === 'eleven_v4'
   return supportsAudioTags(modelId)
 }
 

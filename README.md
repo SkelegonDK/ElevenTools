@@ -2,7 +2,7 @@
 
 # ElevenTools
 
-**A local-first command console for ElevenLabs — bulk TTS, multi-speaker v3 dialogue, and translation, all running on your own machine.**
+**A local-first command console for ElevenLabs — bulk TTS, multi-speaker v3/v4 dialogue, and translation, all running on your own machine.**
 
 [![Next.js 15](https://img.shields.io/badge/Next.js-15-000000?logo=nextdotjs)](https://nextjs.org)
 [![React 19](https://img.shields.io/badge/React-19-149ECA?logo=react)](https://react.dev)
@@ -27,6 +27,10 @@ ElevenTools is an opinionated **operator's console** for those jobs. It runs ent
 ## Features
 
 ### Bulk generation
+- **Eleven v4 and v4 Turbo** support through the existing speech endpoint; models appear when returned by ElevenLabs for your account
+- V4 sends only **Stability and Similarity** voice settings, preserves audio tags and request stitching, and checks the **10,000-character** limit after CSV variable substitution
+- Standard v4 also supports multi-speaker dialogue; Turbo is available for single-speaker speech. Existing dialogue limits remain unchanged.
+- V4 controls follow the [ElevenLabs v4 documentation](https://elevenlabs.io/docs/overview/capabilities/text-to-speech/eleven-v4); existing model selections and defaults are preserved
 - Drag-drop or paste **CSV** with auto-detected `{variable}` placeholders
 - Per-row filename overrides, voice-settings panel (stability / similarity / style / speed / seed)
 - **Ten output formats** (mp3 at four bitrates, pcm at five sample rates, μ-law 8kHz)
@@ -34,7 +38,7 @@ ElevenTools is an opinionated **operator's console** for those jobs. It runs ent
 - Streaming dispatch log with inline audio players and per-row success/failure tracking
 - Downloadable `bulk_template.csv` baked into the upload UI
 
-### Multi-speaker dialogue (ElevenLabs v3)
+### Multi-speaker dialogue (ElevenLabs v3 / v4)
 - Compose up to **20 lines × 10 unique voices × 2,000 characters**
 - Per-line voice assignment with live character/voice budget
 - **Audio tag picker** for v3 expressive cues: `[whispers] [laughs] [sighs] [excited] [curious] [sarcastic] [interrupting] [hesitates] [footsteps] [applause]`

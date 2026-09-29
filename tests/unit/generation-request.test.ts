@@ -238,3 +238,21 @@ describe('parseDialogueRequest', () => {
     expect(request.languageCode).toBe('en')
   })
 })
+
+describe('v4 requests', () => {
+  it.each(['eleven_v4', 'eleven_v4_turbo'])('normalizes %s settings', (modelId) => {
+    const request = expectOk(parseBatchRequest(batchBody({
+      modelId,
+      voiceSettings: { stability: 0.4, similarity_boost: 0.8, style: 1, speed: 2, use_speaker_boost: true },
+    })))
+    expect(request.modelId).toBe(modelId)
+    expect(request.voiceSettings).toEqual({
+      stability: 0.4, similarity_boost: 0.8, style: 0, use_speaker_boost: false,
+    })
+  })
+
+  it('accepts standard v4 dialogue and rejects Turbo for multi-speaker dialogue', () => {
+    expect(expectOk(parseDialogueRequest(dialogueBody({ modelId: 'eleven_v4' }))).modelId).toBe('eleven_v4')
+    expect(expectError(parseDialogueRequest(dialogueBody({ modelId: 'eleven_v4_turbo' })))).toMatch(/does not support/)
+  })
+})

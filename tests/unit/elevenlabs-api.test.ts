@@ -70,6 +70,37 @@ beforeEach(() => {
 })
 
 describe('generateAudio', () => {
+  it.each(['eleven_v4', 'eleven_v4_turbo'])('sends only v4 voice settings for %s', async (modelId) => {
+    const { generateAudio } = await import('@/lib/elevenlabs/api')
+    const result = await generateAudio({
+      apiKey: 'sk-test', voiceId: 'voice-1', modelId, text: '[whispering] hello',
+      voiceSettings: { stability: 0.4, similarity_boost: 0.8, style: 1, speed: 2, use_speaker_boost: true },
+      outputFormat: 'pcm_24000', seed: 0, languageCode: 'da',
+      applyTextNormalization: 'off', previousText: 'Before', nextText: 'After',
+      previousRequestIds: ['req-before'], nextRequestIds: ['req-after'],
+    })
+    expect(ttsConvertCalls[0]).toEqual({ voiceId: 'voice-1', body: {
+      text: '[whispering] hello', modelId, voiceSettings: { stability: 0.4, similarityBoost: 0.8 },
+      outputFormat: 'pcm_24000', seed: 0, languageCode: 'da', applyTextNormalization: 'off',
+      previousText: 'Before', nextText: 'After', previousRequestIds: ['req-before'], nextRequestIds: ['req-after'],
+    } })
+    expect(new TextDecoder().decode(result.audio)).toBe('AUDIO')
+    expect(result.requestId).toBe('req-123')
+    expect(result.outputFormat).toBe('pcm_24000')
+  })
+
+  it.each(['eleven_v4', 'eleven_v4_turbo'])('enforces the %s text limit before calling ElevenLabs', async (modelId) => {
+    const { generateAudio } = await import('@/lib/elevenlabs/api')
+    const params = {
+      apiKey: 'sk-test', voiceId: 'voice-1', modelId,
+      voiceSettings: { stability: 0.5, similarity_boost: 0.5, style: 0, use_speaker_boost: false },
+    }
+    await expect(generateAudio({ ...params, text: 'x'.repeat(10_001) })).rejects.toThrow(/10000 characters/)
+    expect(ttsConvertCalls).toHaveLength(0)
+    await generateAudio({ ...params, text: '😀'.repeat(10_000) })
+    expect(ttsConvertCalls).toHaveLength(1)
+  })
+
   it('passes a fully-formed TTS request and returns audio + requestId', async () => {
     const { generateAudio } = await import('@/lib/elevenlabs/api')
     const result = await generateAudio({
@@ -141,11 +172,11 @@ describe('generateAudio', () => {
 })
 
 describe('generateDialogue', () => {
-  it('forwards inputs[] verbatim and wraps stability under settings', async () => {
+  it.each(['eleven_v3', 'eleven_v4'])('forwards %s inputs and wraps stability under settings', async (modelId) => {
     const { generateDialogue } = await import('@/lib/elevenlabs/api')
     const result = await generateDialogue({
       apiKey: 'sk-test',
-      modelId: 'eleven_v3',
+      modelId,
       inputs: [
         { voiceId: 'v1', text: '[whispers] hi' },
         { voiceId: 'v2', text: '[curious] who?' },
@@ -157,7 +188,7 @@ describe('generateDialogue', () => {
 
     expect(dialogueConvertCalls).toHaveLength(1)
     const { body } = dialogueConvertCalls[0]
-    expect(body.modelId).toBe('eleven_v3')
+    expect(body.modelId).toBe(modelId)
     expect(body.outputFormat).toBe('mp3_44100_192')
     expect(body.seed).toBe(7)
     expect(body.settings).toEqual({ stability: 0.5 })
@@ -173,6 +204,8 @@ describe('fetchModels / fetchVoices', () => {
   it('filters out non-TTS models and maps to snake_case', async () => {
     modelsListMock.mockResolvedValueOnce([
       { modelId: 'eleven_v3', name: 'Eleven v3', canDoTextToSpeech: true },
+      { modelId: 'eleven_v4', name: 'Eleven v4', canDoTextToSpeech: true },
+      { modelId: 'eleven_v4_turbo', name: 'Eleven v4 Turbo', canDoTextToSpeech: true },
       { modelId: 'sts_only', name: 'STS only', canDoTextToSpeech: false },
       { modelId: 'no_flag', name: 'Implicit TTS' }, // canDoTextToSpeech undefined
     ])
@@ -180,6 +213,8 @@ describe('fetchModels / fetchVoices', () => {
     const models = await fetchModels('sk-test')
     expect(models).toEqual([
       { model_id: 'eleven_v3', name: 'Eleven v3' },
+      { model_id: 'eleven_v4', name: 'Eleven v4' },
+      { model_id: 'eleven_v4_turbo', name: 'Eleven v4 Turbo' },
       { model_id: 'no_flag', name: 'Implicit TTS' },
     ])
   })
