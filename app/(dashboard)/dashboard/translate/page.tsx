@@ -1,11 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Languages, Loader2, Search, Copy, Check } from "lucide-react"
 import {
@@ -19,7 +18,8 @@ import { Panel } from "@/components/ui/panel"
 export default function TranslationPage() {
   const [models, setModels] = useState<OpenRouterModel[]>([])
   const [filteredModels, setFilteredModels] = useState<OpenRouterModel[]>([])
-  const [selectedModel, setSelectedModel] = useState<string>("")
+  const [selectedModel, setSelectedModel] = useState<string>("openai/gpt-6-luna")
+  const hasPickedModel = useRef(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [showFreeOnly, setShowFreeOnly] = useState(false)
   const [sourceText, setSourceText] = useState("")
@@ -60,7 +60,7 @@ export default function TranslationPage() {
       if (!response.ok) return
       const data = await response.json()
       if (data.default_translation_model) {
-        setSelectedModel((current) => current || data.default_translation_model)
+        if (!hasPickedModel.current) setSelectedModel(data.default_translation_model)
       }
     } catch (error) {
       console.error("Error loading default translation model:", error)
@@ -166,33 +166,43 @@ export default function TranslationPage() {
                   id="search-models"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="filter models…"
+                  placeholder="search by name · typos welcome…"
                   className="pl-9"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label>Select Model</Label>
-              <Select value={selectedModel} onValueChange={setSelectedModel}>
-                <SelectTrigger>
-                  <SelectValue placeholder="choose model" />
-                </SelectTrigger>
-                <SelectContent>
-                  {filteredModels.map((model) => (
-                    <SelectItem key={model.id} value={model.id}>
-                      <div className="flex w-full items-center gap-2">
-                        <span className="flex-1">{model.name || model.id}</span>
-                        {isFreeModel(model) && (
-                          <span className="border border-primary px-1 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-primary">
-                            FREE
-                          </span>
-                        )}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="border-l-2 border-primary bg-background p-3">
+                <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Selected model</p>
+                <p className="mt-1 break-all font-mono text-xs text-foreground">{selectedModel}</p>
+              </div>
+              <p className="font-mono text-[10px] text-muted-foreground" role="status">
+                {filteredModels.length} matching models
+              </p>
+              <div className="max-h-64 overflow-y-auto border border-foreground/20" aria-label="Matching models">
+                {filteredModels.length ? filteredModels.map((model) => (
+                  <button
+                    key={model.id}
+                    type="button"
+                    aria-pressed={selectedModel === model.id}
+                    onClick={() => {
+                      hasPickedModel.current = true
+                      setSelectedModel(model.id)
+                    }}
+                    className={`flex w-full items-center gap-3 border-b border-foreground/10 px-3 py-3 text-left font-mono text-xs transition-colors last:border-b-0 hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary ${selectedModel === model.id ? "bg-primary/10 text-primary" : "text-foreground"}`}
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="block break-words">{model.name || model.id}</span>
+                      <span className="mt-1 block break-all text-[10px] text-muted-foreground">{model.id}</span>
+                    </span>
+                    {isFreeModel(model) && <Badge>FREE</Badge>}
+                    {selectedModel === model.id && <Check className="h-4 w-4 shrink-0" aria-hidden="true" />}
+                  </button>
+                )) : (
+                  <p className="p-4 font-mono text-xs text-muted-foreground">No matching models. Try a different search or turn off Free Tier Only.</p>
+                )}
+              </div>
             </div>
 
             <div className="pt-2">

@@ -68,17 +68,36 @@ export function searchModelsFuzzy(
     return models
   }
 
-  const normalizedQuery = query.toLowerCase().trim()
-  
-  return models.filter((model) => {
-    const modelId = (model.id || '').toLowerCase()
-    const modelName = (model.name || '').toLowerCase()
-    
-    return (
-      modelId.includes(normalizedQuery) ||
-      modelName.includes(normalizedQuery)
-    )
-  })
+  const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+  const tokens = normalize(query).split(/\s+/).filter(Boolean)
+  if (!tokens.length) return models
+
+  // Token matching ignores punctuation and word order; edit distance allows typos.
+  const distance = (a: string, b: string) => {
+    let row = Array.from({ length: b.length + 1 }, (_, i) => i)
+    for (let i = 1; i <= a.length; i++) {
+      const next = [i]
+      for (let j = 1; j <= b.length; j++) {
+        next[j] = Math.min(next[j - 1] + 1, row[j] + 1, row[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1))
+      }
+      row = next
+    }
+    return row[b.length]
+  }
+
+  return models.map((model) => {
+    const words = normalize(`${model.id} ${model.name || ''}`).split(/\s+/)
+    const scores = tokens.map((token) => Math.min(...words.map((word) => {
+      if (word === token) return 0
+      if (word.startsWith(token)) return 1
+      if (word.includes(token)) return 2
+      const edits = distance(token, word)
+      return token.length >= 3 && edits <= (token.length >= 6 ? 2 : 1) ? 3 + edits : Infinity
+    })))
+    return { model, score: scores.reduce((sum, score) => sum + score, 0) }
+  }).filter(({ score }) => Number.isFinite(score))
+    .sort((a, b) => a.score - b.score)
+    .map(({ model }) => model)
 }
 
 export interface TranslateParams {
@@ -92,7 +111,7 @@ export async function translate({
   apiKey,
   text,
   targetLanguage,
-  model = 'openrouter/auto',
+  model = 'openai/gpt-6-luna',
 }: TranslateParams): Promise<string> {
   const prompt = `Translate the following text to ${targetLanguage}:\n\n${text}`
 

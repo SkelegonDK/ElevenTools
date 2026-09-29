@@ -2,7 +2,7 @@ import Database from 'better-sqlite3'
 import { mkdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
-const DEFAULT_TRANSLATION_MODEL = 'minimax/minimax-m2:free'
+const DEFAULT_TRANSLATION_MODEL = 'openai/gpt-6-luna'
 const DEFAULT_ENHANCEMENT_MODEL = 'minimax/minimax-m2:free'
 
 export interface Generation {
