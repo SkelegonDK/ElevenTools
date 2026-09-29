@@ -7,17 +7,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { parseCSV, detectVariables, type CSVRow } from "@/lib/utils/csv"
-import { FileText, X, Info, Download } from "lucide-react"
+import { FileText, X, Download } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { AudioTagPicker } from "@/components/bulk-generator/audio-tag-picker"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+import { SectionHelp } from "@/components/ui/section-help"
 
 interface CSVUploadProps {
   onDataLoaded: (data: CSVRow[], variables: string[]) => void
@@ -125,7 +118,7 @@ export function CSVUpload({ onDataLoaded, audioTagsEnabled = false }: CSVUploadP
   return (
     <section className="relative border border-foreground/25 bg-card">
       {/* Header */}
-      <div className="flex items-baseline justify-between border-b border-foreground/15 px-5 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-foreground/15 px-5 py-3">
         <div className="flex items-baseline gap-3">
           <span className="font-mono text-[10px] font-bold tracking-[0.18em] text-muted-foreground">
             [01]
@@ -144,24 +137,19 @@ export function CSVUpload({ onDataLoaded, audioTagsEnabled = false }: CSVUploadP
             <Download className="h-3 w-3" />
             TEMPLATE
           </a>
-          <Dialog>
-            <DialogTrigger asChild>
-              <button
-                className="flex items-center gap-2 border border-foreground/40 px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-foreground transition-colors hover:border-primary hover:text-primary"
-                aria-label="Interpolation guide"
-              >
-                <Info className="h-3 w-3" />
-                GUIDE
-              </button>
-            </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>// Interpolation Guide</DialogTitle>
-              <DialogDescription>
-                Variable substitution in CSV-driven bulk generation
-              </DialogDescription>
-            </DialogHeader>
-
+          <SectionHelp
+            title="CSV Input"
+            description="Prepare the text for your batch. Each CSV row becomes one audio file."
+          >
+            <div className="space-y-2">
+              <h3 className="label-section">How to use it</h3>
+              <ol className="list-decimal space-y-2 pl-5">
+                <li>Download the template, then add a text column with the words to speak. Add a filename column if you want to name each file.</li>
+                <li>Upload your CSV or paste it into Paste CSV. Include the column headers as the first line. Keep commas and line breaks out of cell values; this importer splits on commas and lines.</li>
+                <li>Check the preview of the first five rows and the detected variables. The Transmit section shows the full number of queued rows.</li>
+                <li>Select a model and voice in Voice Parameters before executing the batch. With a supported model, the audio tag picker lets you insert delivery cues into your text.</li>
+              </ol>
+            </div>
             <div className="space-y-6 py-4">
               <div className="space-y-2">
                 <div className="label-section">▸ MECHANISM</div>
@@ -175,10 +163,10 @@ export function CSVUpload({ onDataLoaded, audioTagsEnabled = false }: CSVUploadP
               <div className="space-y-2">
                 <div className="label-section">▸ EXAMPLE INPUT</div>
                 <pre className="border border-foreground/20 bg-background p-3 font-mono text-[11px] text-foreground overflow-x-auto">
-{`text,name,filename
-Hello {name},Alice,greeting_{name}.mp3
-Welcome {name} to {company},Bob,welcome_{name}.mp3
-Hi {firstName} {lastName},John,hi_{firstName}.mp3`}
+{`text,name,company,filename
+Hello {name},Alice,Acme,greeting_{name}.mp3
+Welcome {name} to {company},Bob,Acme Corp,welcome_{name}.mp3
+Hi {name},John Doe,Acme,hi_John.mp3`}
                 </pre>
               </div>
 
@@ -217,8 +205,7 @@ Hi {firstName} {lastName},John,hi_{firstName}.mp3`}
                 Detected variables are listed in the panel below after upload.
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
+          </SectionHelp>
         </div>
       </div>
 

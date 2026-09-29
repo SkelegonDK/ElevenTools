@@ -30,6 +30,7 @@ import {
   parseSeed,
 } from "@/lib/generation/request"
 import { Panel } from "@/components/ui/panel"
+import { SectionHelp } from "@/components/ui/section-help"
 
 interface GenerationResult {
   index: number
@@ -297,6 +298,24 @@ export default function BulkGenerationPage() {
           <Panel
             code="02"
             title="Voice Parameters"
+            action={
+              <SectionHelp title="Voice Parameters" description="Choose how every row in this batch will sound and which audio format to create.">
+                <h3 className="label-section">How to use it</h3>
+                <ol className="list-decimal space-y-2 pl-5">
+                  <li>Select a model, then choose a voice. To use a voice by ID, enable Manual ID, paste the ID, and wait for validation.</li>
+                  <li>Choose an output format that suits your player or editing workflow. Some formats require a specific ElevenLabs subscription.</li>
+                  <li>Start with the default controls, generate a small sample batch, and adjust the delivery before processing a larger file. Available controls depend on the model.</li>
+                </ol>
+                <h3 className="label-section">Controls explained</h3>
+                <dl className="space-y-3">
+                  <div><dt className="font-bold text-foreground">Stability</dt><dd>Lower values allow more variation; higher values favor consistent delivery. For v3, use the stability mode buttons for a quick starting point.</dd></div>
+                  <div><dt className="font-bold text-foreground">Similarity Boost / Speaker Boost</dt><dd>Adjust how closely the output follows the selected voice. Speaker Boost adds further voice similarity when supported.</dd></div>
+                  <div><dt className="font-bold text-foreground">Style / Speed</dt><dd>Style controls expressive emphasis. Speed changes the speaking pace; 1× is the default.</dd></div>
+                  <div><dt className="font-bold text-foreground">Seed</dt><dd>Leave blank for random variation. Reuse a seed with the same inputs to aim for similar results; identical audio is not guaranteed.</dd></div>
+                  <div><dt className="font-bold text-foreground">Text Normalization</dt><dd>Controls conversion of numbers and symbols into spoken words. Auto lets the model decide; On requests normalization and Off disables it.</dd></div>
+                </dl>
+              </SectionHelp>
+            }
             hint={selectedModelId ? "ARMED" : "AWAITING MODEL"}
           >
             <div className="space-y-5">
@@ -573,8 +592,17 @@ export default function BulkGenerationPage() {
 
           {/* TRANSMIT */}
           <div className="border border-foreground/25 bg-card p-5">
-            <div className="flex items-baseline justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="label-section">[ 03 ] // TRANSMIT</div>
+              <SectionHelp title="Transmit" description="Send the queued CSV rows to ElevenLabs to generate audio using your selected settings.">
+                <h3 className="label-section">How to use it</h3>
+                <ol className="list-decimal space-y-2 pl-5">
+                  <li>Check the queued row count and your CSV preview. Select a model and a voice, and resolve any voice ID or seed errors to enable Execute Batch.</li>
+                  <li>Click Execute Batch once. Generation uses your ElevenLabs account credits. Keep the page open while the request runs.</li>
+                  <li>Wait for the batch response. The progress indicator reaches 100% when the response arrives; it does not show live progress for individual rows.</li>
+                  <li>Review the Dispatch Log for audio and row errors. If some rows fail, prepare a CSV containing only those rows before trying again to avoid regenerating successful files.</li>
+                </ol>
+              </SectionHelp>
               <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
                 {csvData.length} ROW{csvData.length === 1 ? "" : "S"} QUEUED
               </span>
@@ -629,6 +657,18 @@ export default function BulkGenerationPage() {
           <Panel
             code="04"
             title="Dispatch Log"
+            action={
+              <SectionHelp title="Dispatch Log" description="Review the results of your most recent batch, including generated audio and any rows that failed.">
+                <h3 className="label-section">How to use it</h3>
+                <ol className="list-decimal space-y-2 pl-5">
+                  <li>Execute a batch in Transmit. Results appear here when the request finishes.</li>
+                  <li>Match each numbered result to its CSV data row. Check the filename and resolved text, then use the audio player to listen.</li>
+                  <li>Use the download icon to open an audio file in a new tab, where you can play or save it.</li>
+                  <li>For failed rows, read the error beside the row number and correct the input or settings before submitting those rows again.</li>
+                </ol>
+                <p>Loading new CSV data or starting another batch clears this log. Save the files you need before moving on.</p>
+              </SectionHelp>
+            }
             hint={
               rowErrors.length
                 ? `${results.length} OK · ${rowErrors.length} FAILED`
